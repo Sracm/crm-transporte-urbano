@@ -70,9 +70,9 @@
         <i class="fa-solid fa-fingerprint"></i>
         <span>Ponto Eletrônico</span>
       </a>
-      <a href="http://10.11.1.100:5600" target="_blank" class="nav-item" onclick="closeSidebarOnMobile()">
+      <a href="{{ url_for('cco_view') }}" class="nav-item {% if '/cco' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-tower-broadcast"></i>
-        <span>Frota CCO (5600)</span>
+        <span>Frota CCO</span>
       </a>
       <a href="{{ url_for('portaria_view') }}" class="nav-item {% if '/portaria' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-bus"></i>
@@ -177,7 +177,7 @@
     <i class="fa-solid fa-fingerprint"></i>
     <span>Ponto</span>
   </a>
-  <a href="http://10.11.1.100:5600" target="_blank" class="nav-btn">
+  <a href="{{ url_for('cco_view') }}" class="nav-btn {% if '/cco' in request.path %}active{% endif %}">
     <i class="fa-solid fa-bus"></i>
     <span>Frota CCO</span>
   </a>

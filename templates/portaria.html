@@ -1,159 +1,252 @@
 {% extends "base.html" %}
 
-{% block title %}Portaria & Garagem - Controle de Movimentação{% endblock %}
+{% block title %}Portaria & Garagem{% endblock %}
+{% block page_breadcrumb %}Portaria & Garagem{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+<!-- HEADING DA PÁGINA -->
+<div class="page-heading">
   <div>
-    <h2 style="font-family: var(--font-brand); font-size: 1.4rem; color: #FFF; font-weight: 800;">
-      Portaria & Garagem (Controle de Frota)
-    </h2>
-    <p style="font-size: 0.8rem; color: var(--text-muted);">
-      Registro de Saídas e Entradas, Nível de Combustível, Km e Abertura Automática de OS para Oficina
-    </p>
+    <div class="eyebrow">LOGÍSTICA & CONTROLE PATRIMONIAL</div>
+    <h1>Portaria & Movimentação de Garagem</h1>
+    <p>Registro de saídas e entradas, nível de combustível, odômetro e liberação de frota pela guarita 24h.</p>
   </div>
 
-  <button class="btn btn-cyan" onclick="openModal('modalNovaMov')">
+  <button class="btn-primary" onclick="openModalMov()">
     <i class="fa-solid fa-arrow-right-arrow-left"></i> Registrar Entrada / Saída
   </button>
 </div>
 
-<!-- TABELA DE MOVIMENTAÇÕES -->
-<div class="table-container">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Data / Hora</th>
-        <th>Tipo</th>
-        <th>Prefixo</th>
-        <th>Linha</th>
-        <th>Motorista</th>
-        <th>Km Registro</th>
-        <th>Combustível</th>
-        <th>Avaria Apontada</th>
-        <th>Status Liberação</th>
-        <th>Porteiro Plantão</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for m in movimentacoes %}
-      <tr>
-        <td style="font-size: 0.75rem; color: var(--text-muted);">{{ m['data_hora'][:16] }}</td>
-        <td>
-          {% if 'Saída' in m['tipo_movimento'] %}
-          <span style="color: var(--cyan); font-weight: 700;"><i class="fa-solid fa-arrow-up-right-from-square"></i> {{ m['tipo_movimento'] }}</span>
-          {% else %}
-          <span style="color: var(--emerald); font-weight: 700;"><i class="fa-solid fa-arrow-down-left-and-up-right-to-center"></i> {{ m['tipo_movimento'] }}</span>
-          {% endif %}
-        </td>
-        <td>
-          <span style="background: rgba(56, 189, 248, 0.15); color: var(--cyan); padding: 2px 6px; border-radius: 4px; font-weight: 800;">
-            🚍 {{ m['prefixo_veiculo'] }}
-          </span>
-        </td>
-        <td style="font-size: 0.75rem; color: #E2E8F0;">{{ m['linha'] }}</td>
-        <td style="font-size: 0.78rem; color: #FFF; font-weight: 600;">{{ m['motorista_nome'] }}</td>
-        <td style="font-family: monospace; color: var(--amber);">{{ "{:,}".format(m['km_registro']).replace(',', '.') }} km</td>
-        <td>
-          <span style="color: {% if m['nivel_combustivel'] in ['100%', '85%'] %}var(--emerald){% else %}var(--amber){% endif %}; font-weight: 700;">
-            <i class="fa-solid fa-gas-pump"></i> {{ m['nivel_combustivel'] }}
-          </span>
-        </td>
-        <td>
-          {% if m['avaria_apontada'] and m['avaria_apontada'] != 'Sem avarias visuais' %}
-          <span style="color: var(--red); font-size: 0.75rem; font-weight: 600;">
-            <i class="fa-solid fa-triangle-exclamation"></i> {{ m['avaria_apontada'] }}
-          </span>
-          {% if m['os_aberta_id'] %}
-          <span style="display: block; font-size: 0.68rem; color: var(--cyan);">OS Automática Gerada</span>
-          {% endif %}
-          {% else %}
-          <span style="color: var(--text-muted); font-size: 0.75rem;">Sem avarias</span>
-          {% endif %}
-        </td>
-        <td>
-          <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">
-            {{ m['status_liberacao'] }}
-          </span>
-        </td>
-        <td style="font-size: 0.75rem; color: var(--text-muted);">{{ m['porteiro_nome'] }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<!-- LIVE BANNER -->
+<div class="demo-banner">
+  <span class="demo-label"><span></span> GUARITA 24H</span>
+  <p>Controle de portaria conectado à Manutenção: qualquer avaria assinalada abre automaticamente uma OS preventiva na Oficina.</p>
+  <a href="{{ url_for('chamados_view') }}">
+    <i class="fa-solid fa-screwdriver-wrench"></i> Ver Chamados de Oficina
+  </a>
 </div>
 
-<!-- MODAL PARA REGISTRAR ENTRADA/SAIDA -->
-<div class="modal" id="modalNovaMov">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3><i class="fa-solid fa-bus" style="color: var(--cyan);"></i> Registro de Movimentação na Portaria</h3>
-      <button class="close-modal" onclick="closeModal('modalNovaMov')">&times;</button>
+<!-- 4 KPI CARDS -->
+<div class="metrics">
+  <article class="metric">
+    <div class="metric-top">
+      <span>Movimentações Hoje</span>
+      <span class="metric-icon blue"><i class="fa-solid fa-right-left"></i></span>
     </div>
-    <form action="{{ url_for('api_portaria_registrar') }}" method="POST">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Tipo de Movimento *</label>
-          <select name="tipo_movimento" class="form-control" required>
-            <option value="Saída Garagem">Saída para Linha (Início de Jornada)</option>
-            <option value="Entrada Garagem">Entrada na Garagem (Fim de Jornada / Troca)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Prefixo do Ônibus *</label>
-          <input type="text" name="prefixo_veiculo" class="form-control" required placeholder="Ex: 5014">
-        </div>
-      </div>
+    <strong>{{ movimentacoes|length }}</strong>
+    <p>Entradas e saídas registradas na guarita</p>
+  </article>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label>Linha Operada *</label>
-          <input type="text" name="linha" class="form-control" required placeholder="Ex: Linha 801 - Central">
+  <article class="metric">
+    <div class="metric-top">
+      <span>Veículos em Linha</span>
+      <span class="metric-icon emerald"><i class="fa-solid fa-bus"></i></span>
+    </div>
+    <strong>142 Ônibus</strong>
+    <p>Liberados e cumprindo escala regular</p>
+  </article>
+
+  <article class="metric">
+    <div class="metric-top">
+      <span>Nível Médio Diesel</span>
+      <span class="metric-icon violet"><i class="fa-solid fa-gas-pump"></i></span>
+    </div>
+    <strong>82% Tanque</strong>
+    <p>Abastecimento regular no retorno à garagem</p>
+  </article>
+
+  <article class="metric">
+    <div class="metric-top">
+      <span>Avarias / Retidos</span>
+      <span class="metric-icon amber"><i class="fa-solid fa-triangle-exclamation"></i></span>
+    </div>
+    <strong>2 Ônibus</strong>
+    <p>Retidos para reparo imediato na oficina</p>
+  </article>
+</div>
+
+<!-- TABELA DE MOVIMENTAÇÕES -->
+<div class="panel">
+  <div class="panel-heading">
+    <div>
+      <h2>Histórico de Movimentações da Portaria</h2>
+      <p>Entradas e saídas com controle de combustível, odômetro e checklist.</p>
+    </div>
+    <div class="search-field" style="max-width: 250px;">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="buscaPortaria" placeholder="Buscar prefixo ou motorista..." onkeyup="filtrarPortaria()">
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table class="jobs-table" id="tabelaPortaria">
+      <thead>
+        <tr>
+          <th>DATA / HORA</th>
+          <th>TIPO</th>
+          <th>PREFIXO</th>
+          <th>LINHA</th>
+          <th>MOTORISTA</th>
+          <th>ODÔMETRO</th>
+          <th>COMBUSTÍVEL</th>
+          <th>AVARIA APONTADA</th>
+          <th>STATUS LIBERAÇÃO</th>
+          <th>PORTEIRO PLANTÃO</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in movimentacoes %}
+        <tr>
+          <td>
+            <strong style="color: #0f172a; font-size: 12.5px;">{{ m.data_hora[:16] }}</strong>
+          </td>
+          <td>
+            {% if m.tipo == 'Saída Garagem' %}
+              <span class="status-badge in_progress" style="font-weight: 700;">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Saída
+              </span>
+            {% else %}
+              <span class="status-badge closed" style="font-weight: 700;">
+                <i class="fa-solid fa-arrow-down-left-and-up-right-to-center"></i> Entrada
+              </span>
+            {% endif %}
+          </td>
+          <td>
+            <strong style="font-size: 13.5px; color: #0284c7; font-family: monospace;">
+              <i class="fa-solid fa-bus" style="font-size: 11px;"></i> {{ m.veiculo_prefixo }}
+            </strong>
+          </td>
+          <td>
+            <span style="font-weight: 600; color: #334155; font-size: 12px;">{{ m.linha or '--' }}</span>
+          </td>
+          <td>
+            <span style="font-weight: 500; color: #0f172a; font-size: 12.5px;">{{ m.motorista_nome }}</span>
+          </td>
+          <td>
+            <span style="font-family: monospace; font-weight: 600; color: #475569;">{{ m.km_registro|intformat }} km</span>
+          </td>
+          <td>
+            <span class="status-badge" style="background: #f1f5f9; color: #334155; font-weight: 600;">
+              <i class="fa-solid fa-gas-pump" style="color: var(--primary);"></i> {{ m.nivel_combustivel }}%
+            </span>
+          </td>
+          <td>
+            {% if m.avaria_apontada and m.avaria_apontada != 'Sem avarias' %}
+              <span class="status-badge open" style="color: #b45309; font-weight: 600;">
+                <i class="fa-solid fa-triangle-exclamation"></i> {{ m.avaria_apontada }}
+              </span>
+            {% else %}
+              <span style="color: #10b981; font-size: 11.5px; font-weight: 500;">
+                <i class="fa-solid fa-circle-check"></i> Sem avarias
+              </span>
+            {% endif %}
+          </td>
+          <td>
+            {% if m.status_liberacao == 'Liberado' %}
+              <span class="status-badge closed"><i class="fa-solid fa-check"></i> Liberado</span>
+            {% else %}
+              <span class="status-badge critical"><i class="fa-solid fa-ban"></i> Retido Oficina</span>
+            {% endif %}
+          </td>
+          <td>
+            <span style="font-size: 11.5px; color: #64748b;">{{ m.porteiro_nome }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL: REGISTRAR ENTRADA / SAÍDA -->
+<div class="modal-backdrop" id="modalMov">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-arrow-right-arrow-left" style="color: var(--primary);"></i> Registro de Portaria</h3>
+      <button style="font-size: 20px; color: #94a3b8;" onclick="closeModalMov()">&times;</button>
+    </div>
+    <form action="/api/portaria/registrar" method="POST">
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Tipo de Movimento</label>
+            <select name="tipo" class="form-select" required>
+              <option value="Saída Garagem">Saída Garagem (Para Linha)</option>
+              <option value="Entrada Garagem">Entrada Garagem (Retorno)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prefixo do Ônibus</label>
+            <input type="text" name="veiculo_prefixo" class="form-input" placeholder="Ex: 5045" required>
+          </div>
         </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Linha de Operação</label>
+            <input type="text" name="linha" class="form-input" placeholder="Ex: Linha 801">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nome do Motorista</label>
+            <input type="text" name="motorista_nome" class="form-input" placeholder="Ex: Carlos Eduardo" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Km do Odômetro</label>
+            <input type="number" name="km_registro" class="form-input" placeholder="Ex: 147800" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nível de Combustível (%)</label>
+            <select name="nivel_combustivel" class="form-select">
+              <option value="100">100% (Cheio)</option>
+              <option value="85">85%</option>
+              <option value="70">70%</option>
+              <option value="50">50% (Meio Tanque)</option>
+              <option value="30">30% (Reserva)</option>
+            </select>
+          </div>
+        </div>
+
         <div class="form-group">
-          <label>Porteiro Responsável *</label>
-          <select name="porteiro_nome" class="form-control" required>
+          <label class="form-label">Checklist de Avarias (Opcional)</label>
+          <input type="text" name="avaria_apontada" class="form-input" placeholder="Ex: Sem avarias ou Lanterna quebrada">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Porteiro de Plantão</label>
+          <select name="porteiro_nome" class="form-select">
             {% for p in porteiros %}
-            <option value="{{ p['nome'] }}">{{ p['nome'] }}</option>
+              <option value="{{ p.nome }}">{{ p.nome }}</option>
             {% endfor %}
+            <option value="Guarita Central Plantão">Guarita Central Plantão</option>
           </select>
         </div>
       </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Quilometragem (Hodômetro) *</label>
-          <input type="number" name="km_registro" class="form-control" required placeholder="145200">
-        </div>
-        <div class="form-group">
-          <label>Nível de Combustível *</label>
-          <select name="nivel_combustivel" class="form-control" required>
-            <option value="100%">100% (Cheio)</option>
-            <option value="85%">85%</option>
-            <option value="70%">70%</option>
-            <option value="50%">50% (Meio Tanque)</option>
-            <option value="30%">30% (Reserva)</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Apontamento de Avarias / Problemas Mecânicos</label>
-        <input type="text" name="avaria_apontada" class="form-control" placeholder="Ex: Vidro trincado, ruído de correia, barulho no freio... (ou deixe em branco se ok)">
-      </div>
-
-      <div style="background: rgba(239, 68, 68, 0.1); border: 1px dashed var(--red); padding: 12px; border-radius: 6px; margin-bottom: 16px;">
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #FFF; font-weight: 600; font-size: 0.8rem;">
-          <input type="checkbox" name="abrir_os_automatica" checked>
-          <span>Abrir Ordem de Serviço Imediata para a Oficina se houver avaria apontada</span>
-        </label>
-      </div>
-
-      <div style="display: flex; justify-content: flex-end; gap: 10px;">
-        <button type="button" class="btn" style="background: #334155; color: #FFF;" onclick="closeModal('modalNovaMov')">Cancelar</button>
-        <button type="submit" class="btn btn-cyan"><i class="fa-solid fa-check"></i> Registrar Movimentação</button>
+      <div class="modal-footer">
+        <button type="button" class="btn-mobile-badge" style="background:#fff; color:#64748b; border:1px solid #cbd5e1;" onclick="closeModalMov()">Cancelar</button>
+        <button type="submit" class="btn-primary">Salvar Registro</button>
       </div>
     </form>
   </div>
 </div>
+
+<script>
+  function openModalMov() {
+    document.getElementById('modalMov').classList.add('is-open');
+  }
+
+  function closeModalMov() {
+    document.getElementById('modalMov').classList.remove('is-open');
+  }
+
+  function filtrarPortaria() {
+    const val = document.getElementById('buscaPortaria').value.toLowerCase();
+    const rows = document.getElementById('tabelaPortaria').getElementsByTagName('tr');
+    for (let i = 1; i < rows.length; i++) {
+      rows[i].style.display = rows[i].textContent.toLowerCase().includes(val) ? '' : 'none';
+    }
+  }
+</script>
 {% endblock %}

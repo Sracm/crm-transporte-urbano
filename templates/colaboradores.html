@@ -1,65 +1,142 @@
 {% extends "base.html" %}
 
-{% block title %}Diretório de Colaboradores (60 Usuários){% endblock %}
+{% block title %}Colaboradores{% endblock %}
+{% block page_breadcrumb %}Colaboradores (60){% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+<!-- HEADING DA PÁGINA -->
+<div class="page-heading">
   <div>
-    <h2 style="font-family: var(--font-brand); font-size: 1.4rem; color: #FFF; font-weight: 800;">
-      Diretório de Colaboradores & Acessos
-    </h2>
-    <p style="font-size: 0.8rem; color: var(--text-muted);">
-      60 profissionais cadastrados nos 10 departamentos operacionais e administrativos
-    </p>
+    <div class="eyebrow">QUADRO DE PESSOAL & DEPARTAMENTOS</div>
+    <h1>Colaboradores Cadastrados (60 Usuários)</h1>
+    <p>Estrutura organizacional dividida em 10 departamentos com controle de acessos e permissões.</p>
   </div>
 
-  <div style="display: flex; align-items: center; gap: 8px;">
-    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Filtrar Setor:</span>
-    <select class="form-control" style="width: auto; padding: 6px 12px;" onchange="window.location.href='/colaboradores?dept=' + this.value">
-      <option value="Todos" {% if dept_sel == 'Todos' %}selected{% endif %}>Todos os 10 Setores</option>
-      <option value="Diretor de Operações" {% if dept_sel == 'Diretor de Operações' %}selected{% endif %}>Diretor de Operações</option>
+  <div style="display: flex; gap: 8px; align-items: center;">
+    <span style="font-size: 12px; color: #64748b; font-weight: 600;">Filtrar Setor:</span>
+    <select class="form-select" style="width: auto; padding: 7px 12px; font-size: 12.5px;" onchange="window.location.href='/colaboradores?dept=' + encodeURIComponent(this.value)">
+      <option value="Todos" {% if dept_sel == 'Todos' %}selected{% endif %}>Todos os Departamentos</option>
       <option value="Gerente Operacional" {% if dept_sel == 'Gerente Operacional' %}selected{% endif %}>Gerente Operacional</option>
       <option value="Gerente Administrativo" {% if dept_sel == 'Gerente Administrativo' %}selected{% endif %}>Gerente Administrativo</option>
-      <option value="Manutenção" {% if dept_sel == 'Manutenção' %}selected{% endif %}>Manutenção (Oficina)</option>
-      <option value="RH" {% if dept_sel == 'RH' %}selected{% endif %}>RH (Recursos Humanos)</option>
+      <option value="Diretor de Operações" {% if dept_sel == 'Diretor de Operações' %}selected{% endif %}>Diretor de Operações</option>
+      <option value="Manutenção" {% if dept_sel == 'Manutenção' %}selected{% endif %}>Manutenção</option>
+      <option value="RH" {% if dept_sel == 'RH' %}selected{% endif %}>RH</option>
       <option value="Treinamento" {% if dept_sel == 'Treinamento' %}selected{% endif %}>Treinamento</option>
       <option value="Contas a Pagar" {% if dept_sel == 'Contas a Pagar' %}selected{% endif %}>Contas a Pagar</option>
       <option value="Contas a Receber" {% if dept_sel == 'Contas a Receber' %}selected{% endif %}>Contas a Receber</option>
-      <option value="Garagem" {% if dept_sel == 'Garagem' %}selected{% endif %}>Garagem (Pátio)</option>
+      <option value="Garagem" {% if dept_sel == 'Garagem' %}selected{% endif %}>Garagem</option>
       <option value="Portaria" {% if dept_sel == 'Portaria' %}selected{% endif %}>Portaria</option>
     </select>
   </div>
 </div>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
-  {% for col in colaboradores %}
-  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between;">
-    <div>
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-        <span style="font-family: monospace; font-size: 0.75rem; color: var(--cyan); background: rgba(56, 189, 248, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: bold;">
-          {{ col['matricula'] }}
-        </span>
-        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">
-          {{ col['status'] }}
-        </span>
-      </div>
-
-      <div style="font-family: var(--font-brand); font-size: 0.95rem; font-weight: 700; color: #FFF; margin-bottom: 2px;">
-        {{ col['nome'] }}
-      </div>
-      <div style="font-size: 0.78rem; color: var(--cyan); margin-bottom: 8px;">
-        {{ col['cargo'] }}
-      </div>
-      <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 12px;">
-        <i class="fa-solid fa-building-user"></i> {{ col['departamento'] }}
-      </div>
+<!-- 4 KPI CARDS -->
+<div class="metrics">
+  <article class="metric">
+    <div class="metric-top">
+      <span>Total de Colaboradores</span>
+      <span class="metric-icon emerald"><i class="fa-solid fa-users"></i></span>
     </div>
+    <strong>60 Ativos</strong>
+    <p>Cadastrados e habilitados no sistema</p>
+  </article>
 
-    <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; font-size: 0.72rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
-      <div><i class="fa-solid fa-envelope" style="color: var(--cyan);"></i> {{ col['email'] }}</div>
-      <div><i class="fa-solid fa-phone" style="color: var(--emerald);"></i> {{ col['telefone'] }}</div>
+  <article class="metric">
+    <div class="metric-top">
+      <span>Departamentos</span>
+      <span class="metric-icon blue"><i class="fa-solid fa-sitemap"></i></span>
+    </div>
+    <strong>10 Setores</strong>
+    <p>Com hierarquia e SLA definidos</p>
+  </article>
+
+  <article class="metric">
+    <div class="metric-top">
+      <span>Operação & Tráfego</span>
+      <span class="metric-icon violet"><i class="fa-solid fa-bus"></i></span>
+    </div>
+    <strong>28 Motoristas / Fiscais</strong>
+    <p>Alocados nas linhas principais</p>
+  </article>
+
+  <article class="metric">
+    <div class="metric-top">
+      <span>Oficina & Manutenção</span>
+      <span class="metric-icon amber"><i class="fa-solid fa-wrench"></i></span>
+    </div>
+    <strong>12 Mecânicos / Eletricistas</strong>
+    <p>Atendimento preventivo e corretivo</p>
+  </article>
+</div>
+
+<!-- TABELA DE COLABORADORES -->
+<div class="panel">
+  <div class="panel-heading">
+    <div>
+      <h2>Diretório de Colaboradores</h2>
+      <p>Listagem completa com matrícula, cargo, setor e e-mail institucional.</p>
+    </div>
+    <div class="search-field" style="max-width: 250px;">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="buscaColab" placeholder="Buscar por nome ou matrícula..." onkeyup="filtrarColab()">
     </div>
   </div>
-  {% endfor %}
+
+  <div class="table-scroll">
+    <table class="jobs-table" id="tabelaColab">
+      <thead>
+        <tr>
+          <th>MATRÍCULA / NOME</th>
+          <th>DEPARTAMENTO</th>
+          <th>CARGO</th>
+          <th>E-MAIL</th>
+          <th>TELEFONE / RAMAL</th>
+          <th>STATUS</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in colaboradores %}
+        <tr>
+          <td>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="top-avatar" style="width: 30px; height: 30px; font-size: 11px;">
+                {{ c.nome[:2].upper() }}
+              </div>
+              <div>
+                <strong style="color: #0f172a; font-size: 13px; display: block;">{{ c.nome }}</strong>
+                <span style="font-size: 11px; color: #64748b; font-family: monospace;">{{ c.matricula }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span style="font-weight: 600; color: #334155; font-size: 12px;">{{ c.departamento }}</span>
+          </td>
+          <td>
+            <span style="color: #475569; font-size: 12px;">{{ c.cargo }}</span>
+          </td>
+          <td>
+            <span style="font-size: 12px; color: #0284c7; font-family: monospace;">{{ c.email }}</span>
+          </td>
+          <td>
+            <span style="font-size: 11.5px; color: #64748b;">{{ c.telefone or '--' }}</span>
+          </td>
+          <td>
+            <span class="status-badge closed"><i class="fa-solid fa-check" style="font-size: 7px;"></i> {{ c.status }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
+
+<script>
+  function filtrarColab() {
+    const val = document.getElementById('buscaColab').value.toLowerCase();
+    const rows = document.getElementById('tabelaColab').getElementsByTagName('tr');
+    for (let i = 1; i < rows.length; i++) {
+      rows[i].style.display = rows[i].textContent.toLowerCase().includes(val) ? '' : 'none';
+    }
+  }
+</script>
 {% endblock %}

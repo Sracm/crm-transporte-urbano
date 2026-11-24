@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Frota CCO & Telemetria ao Vivo{% endblock %}
+{% block page_breadcrumb %}Frota CCO{% endblock %}
+
+{% block content %}
+<!-- HEADING DA PÁGINA -->
+<div class="page-heading">
+  <div>
+    <div class="eyebrow">CENTRO DE CONTROLE OPERACIONAL (CCO)</div>
+    <h1>Frota CCO & Telemetria em Tempo Real</h1>
+    <p>Monitoramento contínuo de 150 ônibus, intervalos entre veículos (headway), pontualidade e ocorrências de tráfego.</p>
+  </div>
+
+  <div style="display: flex; gap: 8px;">
+    <button class="btn-primary" onclick="window.location.reload()">
+      <i class="fa-solid fa-arrows-rotate"></i> Atualizar Telemetria
+    </button>
+    <a href="http://10.11.1.100:5600" target="_blank" class="btn-mobile-badge" style="background:#fff; color:#475569; border:1px solid #cbd5e1;">
+      <i class="fa-solid fa-desktop"></i> Servidor 5600
+    </a>
+  </div>
+</div>
+
+<!-- LIVE STATUS BANNER -->
+<div class="demo-banner">
+  <span class="demo-label"><span></span> GPS OPERACIONAL</span>
+  <p>Todos os 142 veículos em tráfego transmitem coordenadas a cada 15 segundos. Pontualidade média da frota operando acima da meta contratual de 95%.</p>
+</div>
+
+<!-- 4 KPI CARDS -->
+<div class="metrics">
+  <article class="metric">
+    <div class="metric-top">
+      <span>Frota em Operação</span>
+      <span class="metric-icon emerald"><i class="fa-solid fa-bus"></i></span>
+    </div>
+    <strong>142 / 150</strong>
+    <p>94.6% dos veículos escalados em linha ativa</p>
+  </article>
+
+  <article class="metric">
+    <div class="metric-top">
+      <span>Pontualidade Geral</span>
+      <span class="metric-icon blue"><i class="fa-solid fa-satellite-dish"></i></span>
+    </div>
+    <strong style="color: #10b981;">98.4%</strong>
+    <p>Meta contratual de concessão: 95.0%</p>
+  </article>
+
+  <article class="metric">
+    <div class="metric-top">
+      <span>Headway Médio</span>
+      <span class="metric-icon violet"><i class="fa-solid fa-stopwatch"></i></span>
+    </div>
+    <strong>5.2 min</strong>
+    <p>Tempo médio de espera nos pontos de parada</p>
+  </article>
+
+  <article class="metric">
+    <div class="metric-top">
+      <span>Passageiros Transportados</span>
+      <span class="metric-icon amber"><i class="fa-solid fa-users"></i></span>
+    </div>
+    <strong>142.850</strong>
+    <p>Registrados na catraca até o momento</p>
+  </article>
+</div>
+
+<!-- SEÇÃO: CORREDORES & LINHAS DE TRANSPORTE -->
+<div class="section-heading">
+  <h2>Corredores & Linhas Monitoradas</h2>
+  <span>Status operacional de cada itinerário em tempo real</span>
+</div>
+
+<div class="routine-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+  {% for l in linhas %}
+  <div class="routine-card" style="padding-bottom: 16px;">
+    <div class="routine-card-top">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="type-icon {% if l.pontualidade >= 98 %}emerald{% elif l.pontualidade >= 95 %}blue{% else %}amber{% endif %}">
+          <i class="fa-solid fa-route"></i>
+        </span>
+        <div>
+          <strong style="font-size: 15px; color: #0f172a; display: block;">{{ l.linha }}</strong>
+          <span style="font-size: 11.5px; color: #64748b;">{{ l.nome }}</span>
+        </div>
+      </div>
+      <span class="status-badge {% if l.pontualidade >= 98 %}closed{% elif l.pontualidade >= 95 %}in_progress{% else %}open{% endif %}" style="font-weight: 700;">
+        {{ l.pontualidade }}% Pontual
+      </span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+      <div>
+        <span style="font-size: 10.5px; color: #64748b; font-weight: 600; display: block;">CARROS EM LINHA</span>
+        <strong style="font-size: 14px; color: #0f172a;">{{ l.frota }} Veículos</strong>
+      </div>
+      <div>
+        <span style="font-size: 10.5px; color: #64748b; font-weight: 600; display: block;">INTERVALO MÉDIO</span>
+        <strong style="font-size: 14px; color: #0284c7;">{{ l.intervalo }}</strong>
+      </div>
+      <div>
+        <span style="font-size: 10.5px; color: #64748b; font-weight: 600; display: block;">VELOCIDADE COMERCIAL</span>
+        <strong style="font-size: 14px; color: #10b981;">{{ l.velocidade }}</strong>
+      </div>
+      <div>
+        <span style="font-size: 10.5px; color: #64748b; font-weight: 600; display: block;">CORREDOR</span>
+        <span style="font-size: 12px; color: #475569; font-weight: 600;">{{ l.corredor }}</span>
+      </div>
+    </div>
+
+    <!-- BARRA DE PROGRESSO DE PONTUALIDADE -->
+    <div style="margin-top: 4px;">
+      <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; color: #64748b;">
+        <span>Índice de Pontualidade</span>
+        <strong style="color: #0f172a;">{{ l.pontualidade }}%</strong>
+      </div>
+      <div style="height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+        <div style="height: 100%; width: {{ l.pontualidade }}%; background: {% if l.pontualidade >= 98 %}#10b981{% elif l.pontualidade >= 95 %}#0284c7{% else %}#f59e0b{% endif %}; border-radius: 3px;"></div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- PAINEL DE OCORRÊNCIAS & STATUS DE FROTA -->
+<div class="operations-grid">
+  <!-- STATUS DOS BOXES E OFICINA -->
+  <div class="panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Status de Disponibilidade da Frota (150 Veículos)</h2>
+        <p>Distribuição de veículos em tráfego, reservas de guarnição e manutenção.</p>
+      </div>
+    </div>
+    <div style="padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
+      <div style="border: 1px solid #d1fae5; background: #ecfdf5; border-radius: 10px; padding: 14px;">
+        <span style="font-size: 11.5px; font-weight: 700; color: #047857; text-transform: uppercase;">Em Linha / Tráfego</span>
+        <strong style="font-size: 26px; color: #065f46; display: block; margin-top: 6px;">142 Ônibus</strong>
+        <span style="font-size: 11px; color: #047857;">Operação normal</span>
+      </div>
+      <div style="border: 1px solid #e0e7ff; background: #eef2ff; border-radius: 10px; padding: 14px;">
+        <span style="font-size: 11.5px; font-weight: 700; color: #3730a3; text-transform: uppercase;">Reserva Pronta</span>
+        <strong style="font-size: 26px; color: #312e81; display: block; margin-top: 6px;">6 Ônibus</strong>
+        <span style="font-size: 11px; color: #3730a3;">Guarita Central</span>
+      </div>
+      <div style="border: 1px solid #fee2e2; background: #fef2f2; border-radius: 10px; padding: 14px;">
+        <span style="font-size: 11.5px; font-weight: 700; color: #991b1b; text-transform: uppercase;">Oficina / Baixados</span>
+        <strong style="font-size: 26px; color: #7f1d1d; display: block; margin-top: 6px;">2 Ônibus</strong>
+        <span style="font-size: 11px; color: #991b1b;">OS Preventiva</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEED DE TELEMETRIA AO VIVO -->
+  <div class="panel">
+    <div class="panel-heading">
+      <h2>Ocorrências da Central</h2>
+      <i class="fa-solid fa-tower-broadcast" style="color: var(--primary);"></i>
+    </div>
+    <div class="activity-list">
+      <div class="activity-item">
+        <span class="event-icon success"><i class="fa-solid fa-check"></i></span>
+        <div>
+          <strong>Linha 801 - Regularizada</strong>
+          <span>Intervalo mantido em 4 minutos</span>
+        </div>
+      </div>
+      <div class="activity-item">
+        <span class="event-icon warning"><i class="fa-solid fa-triangle-exclamation"></i></span>
+        <div>
+          <strong>Linha 703 - Tráfego Intenso</strong>
+          <span>Reserva 5045 acionado para reforço</span>
+        </div>
+      </div>
+      <div class="activity-item">
+        <span class="event-icon info"><i class="fa-solid fa-gas-pump"></i></span>
+        <div>
+          <strong>Comboio de Abastecimento</strong>
+          <span>Garagem Sul com fluxo normal de diesel</span>
+        </div>
+      </div>
+      <div class="activity-item">
+        <span class="event-icon success"><i class="fa-solid fa-shield-halved"></i></span>
+        <div>
+          <strong>Fiscalização SPTrans</strong>
+          <span>100% de conformidade de frota</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

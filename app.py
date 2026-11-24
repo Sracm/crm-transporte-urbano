@@ -12,6 +12,28 @@ from datetime import datetime, timedelta
 from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
 
 app = Flask(__name__)
+
+@app.template_filter("moeda")
+def moeda_filter(val):
+    try:
+        return f"{float(val or 0.0):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    except Exception:
+        return "0,00"
+
+@app.template_filter("dec1")
+def dec1_filter(val):
+    try:
+        return f"{float(val or 0.0):.1f}"
+    except Exception:
+        return "0.0"
+
+@app.template_filter("intformat")
+def int_filter(val):
+    try:
+        return f"{int(float(val or 0)):,}".replace(",", ".")
+    except Exception:
+        return "0"
+
 DB_PATH = os.path.join(os.path.dirname(__file__), "crm_transporte.db")
 
 def get_db():
@@ -31,6 +53,24 @@ def service_worker():
 @app.route("/app")
 def mobile_view():
     return redirect(url_for("dashboard"))
+
+@app.route("/cco")
+def cco_view():
+    linhas_cco = [
+        {"linha": "Linha 801", "nome": "Central x Term. Sul", "frota": 32, "intervalo": "4 min", "pontualidade": 99.1, "status": "Normal", "velocidade": "21 km/h", "corredor": "Corredor Sul"},
+        {"linha": "Linha 703", "nome": "Bairro Alto x Metrô", "frota": 26, "intervalo": "6 min", "pontualidade": 94.8, "status": "Atenção", "velocidade": "16 km/h", "corredor": "Eixo Radial Leste"},
+        {"linha": "Linha 602", "nome": "Circular Hospitais", "frota": 18, "intervalo": "8 min", "pontualidade": 98.2, "status": "Normal", "velocidade": "24 km/h", "corredor": "Anel Viário Central"},
+        {"linha": "Linha 504", "nome": "Vila Progresso x Centro", "frota": 24, "intervalo": "5 min", "pontualidade": 97.9, "status": "Normal", "velocidade": "19 km/h", "corredor": "Corredor Norte"},
+        {"linha": "Linha 305", "nome": "Expresso Terminal Leste", "frota": 22, "intervalo": "6 min", "pontualidade": 96.5, "status": "Normal", "velocidade": "22 km/h", "corredor": "Pista Exclusiva Leste"},
+        {"linha": "Linha 412", "nome": "Interbairros Norte x Oeste", "frota": 20, "intervalo": "7 min", "pontualidade": 97.2, "status": "Normal", "velocidade": "18 km/h", "corredor": "Avenida Perimetral"}
+    ]
+    return render_template(
+        "cco.html",
+        linhas=linhas_cco,
+        total_em_linha=142,
+        total_programado=150,
+        pontualidade_geral=98.4
+    )
 
 def send_simulated_email(tipo_evento, protocolo_ref, dest_nome, dest_email, assunto, corpo_html):
     """Registra disparo de e-mail no banco de dados e simula envio automático"""

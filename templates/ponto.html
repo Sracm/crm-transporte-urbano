@@ -1,28 +1,27 @@
 {% extends "base.html" %}
 
-{% block title %}Ponto Eletrônico & Integração RH x Financeiro{% endblock %}
+{% block title %}Ponto Eletrônico & Jornada{% endblock %}
+{% block page_breadcrumb %}Ponto Eletrônico{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+<!-- HEADING DA PÁGINA -->
+<div class="page-heading">
   <div>
-    <h2 style="font-family: var(--font-brand); font-size: 1.4rem; color: #FFF; font-weight: 800;">
-      Acompanhamento de Ponto Eletrônico & Jornada
-    </h2>
-    <p style="font-size: 0.8rem; color: var(--text-muted);">
-      <i class="fa-solid fa-link" style="color: var(--cyan);"></i> Integração Direta: Os registros do RH alimentam instantaneamente as provisões do Financeiro (Contas a Pagar)
-    </p>
+    <div class="eyebrow">RECURSOS HUMANOS & JORNADA OPERACIONAL</div>
+    <h1>Ponto Eletrônico & Banco de Horas</h1>
+    <p>Apontamento biométrico de 60 colaboradores com cálculo de horas extras integrado automaticamente ao Financeiro.</p>
   </div>
 
-  <!-- FILTROS DE DATA E DEPARTAMENTO -->
+  <!-- FILTROS DE DATA E SETOR -->
   <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
     <div style="display: flex; align-items: center; gap: 6px;">
-      <span style="font-size: 0.8rem; color: var(--text-muted);">Data:</span>
-      <input type="date" class="form-control" style="width: auto; padding: 6px 10px;" value="{{ data_sel }}" onchange="filtrarPonto(this.value, '{{ dept_sel }}')">
+      <span style="font-size: 12px; color: #64748b; font-weight: 600;">Data:</span>
+      <input type="date" class="form-input" style="width: auto; padding: 7px 12px; font-size: 12.5px;" value="{{ data_sel }}" onchange="filtrarPonto(this.value, '{{ dept_sel }}')">
     </div>
 
     <div style="display: flex; align-items: center; gap: 6px;">
-      <span style="font-size: 0.8rem; color: var(--text-muted);">Setor:</span>
-      <select class="form-control" style="width: auto; padding: 6px 12px;" onchange="filtrarPonto('{{ data_sel }}', this.value)">
+      <span style="font-size: 12px; color: #64748b; font-weight: 600;">Setor:</span>
+      <select class="form-select" style="width: auto; padding: 7px 12px; font-size: 12.5px;" onchange="filtrarPonto('{{ data_sel }}', this.value)">
         <option value="Todos" {% if dept_sel == 'Todos' %}selected{% endif %}>Todos os Setores (60 Colaboradores)</option>
         <option value="Gerente Operacional" {% if dept_sel == 'Gerente Operacional' %}selected{% endif %}>Gerente Operacional</option>
         <option value="Manutenção" {% if dept_sel == 'Manutenção' %}selected{% endif %}>Manutenção</option>
@@ -30,6 +29,8 @@
         <option value="Treinamento" {% if dept_sel == 'Treinamento' %}selected{% endif %}>Treinamento</option>
         <option value="Contas a Pagar" {% if dept_sel == 'Contas a Pagar' %}selected{% endif %}>Contas a Pagar</option>
         <option value="Contas a Receber" {% if dept_sel == 'Contas a Receber' %}selected{% endif %}>Contas a Receber</option>
+        <option value="Diretor de Operações" {% if dept_sel == 'Diretor de Operações' %}selected{% endif %}>Diretor de Operações</option>
+        <option value="Gerente Administrativo" {% if dept_sel == 'Gerente Administrativo' %}selected{% endif %}>Gerente Administrativo</option>
         <option value="Garagem" {% if dept_sel == 'Garagem' %}selected{% endif %}>Garagem</option>
         <option value="Portaria" {% if dept_sel == 'Portaria' %}selected{% endif %}>Portaria</option>
       </select>
@@ -37,191 +38,158 @@
   </div>
 </div>
 
-<!-- CARDS DE IMPACTO FINANCEIRO DO PONTO -->
-<div class="kpi-grid">
-  <div class="kpi-card">
-    <div class="kpi-header">
-      <span class="kpi-label">Horas Extras Apuradas</span>
-      <div class="kpi-icon" style="background: rgba(139, 92, 246, 0.15); color: var(--purple);">
-        <i class="fa-solid fa-business-time"></i>
-      </div>
+<!-- LIVE INTEGRATION BANNER -->
+<div class="demo-banner">
+  <span class="demo-label"><span></span> SINCRONIZADO</span>
+  <p>Os apontamentos de ponto do RH alimentam instantaneamente as provisões de folha e horas extras no módulo <strong>Contas a Pagar</strong>.</p>
+  <a href="{{ url_for('financeiro_view') }}">
+    <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver no Financeiro
+  </a>
+</div>
+
+<!-- 4 KPI CARDS -->
+<div class="metrics">
+  <article class="metric">
+    <div class="metric-top">
+      <span>Horas Extras Apuradas</span>
+      <span class="metric-icon violet"><i class="fa-solid fa-clock"></i></span>
     </div>
-    <div class="kpi-val" style="color: var(--purple);">{{ "{:.1f}".format(resumo['total_he'] or 0.0) }} h</div>
-    <div class="kpi-footer">Jornada suplementar autorizada pela gestão</div>
+    <strong>{{ resumo.total_he|dec1 }} h</strong>
+    <p>Jornada suplementar autorizada pela gestão</p>
+  </article>
+
+  <article class="metric">
+    <div class="metric-top">
+      <span>Custo HE &rarr; Contas a Pagar</span>
+      <span class="metric-icon emerald"><i class="fa-solid fa-wallet"></i></span>
+    </div>
+    <strong>R$ {{ resumo.custo_he|moeda }}</strong>
+    <p>Visível em tempo real pelo setor financeiro</p>
+  </article>
+
+  <article class="metric">
+    <div class="metric-top">
+      <span>Faltas / Atrasos</span>
+      <span class="metric-icon amber"><i class="fa-solid fa-user-xmark"></i></span>
+    </div>
+    <strong>{{ resumo.total_faltas|dec1 }} h</strong>
+    <p>Ausências apuradas na folha de frequência</p>
+  </article>
+
+  <article class="metric">
+    <div class="metric-top">
+      <span>Efetivo Monitorado</span>
+      <span class="metric-icon blue"><i class="fa-solid fa-users-viewfinder"></i></span>
+    </div>
+    <strong>{{ registros|length }} de 60</strong>
+    <p>100% dos colaboradores com ponto auditado</p>
+  </article>
+</div>
+
+<!-- TABELA DE PONTO ELETRÔNICO -->
+<div class="panel">
+  <div class="panel-heading">
+    <div>
+      <h2>Espelho de Ponto Biométrico</h2>
+      <p>Registro de marcações horárias e reflexos no pagamento para a data {{ data_sel }}.</p>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn-primary" style="padding: 6px 12px; font-size: 11.5px;" onclick="window.print()">
+        <i class="fa-solid fa-print"></i> Imprimir Espelho
+      </button>
+    </div>
   </div>
 
-  <div class="kpi-card" style="border-color: var(--purple);">
-    <div class="kpi-header">
-      <span class="kpi-label">Custo HE &rarr; Contas a Pagar</span>
-      <div class="kpi-icon" style="background: rgba(139, 92, 246, 0.25); color: var(--purple);">
-        <i class="fa-solid fa-coins"></i>
-      </div>
-    </div>
-    <div class="kpi-val" style="color: var(--cyan);">R$ {{ "{:,.2f}".format(resumo['custo_he'] or 0.0) }}</div>
-    <div class="kpi-footer"><i class="fa-solid fa-eye" style="color: var(--emerald);"></i> Visível em tempo real pelo Financeiro</div>
-  </div>
-
-  <div class="kpi-card">
-    <div class="kpi-header">
-      <span class="kpi-label">Faltas / Atrasos Apurados</span>
-      <div class="kpi-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--red);">
-        <i class="fa-solid fa-user-xmark"></i>
-      </div>
-    </div>
-    <div class="kpi-val" style="color: var(--red);">{{ "{:.1f}".format(resumo['total_faltas'] or 0.0) }} h</div>
-    <div class="kpi-footer">Ausências apuradas na folha de frequência</div>
-  </div>
-
-  <div class="kpi-card">
-    <div class="kpi-header">
-      <span class="kpi-label">Descontos Previstos em Folha</span>
-      <div class="kpi-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--red);">
-        <i class="fa-solid fa-file-invoice-dollar"></i>
-      </div>
-    </div>
-    <div class="kpi-val" style="color: var(--amber);">R$ {{ "{:,.2f}".format(resumo['total_desconto'] or 0.0) }}</div>
-    <div class="kpi-footer">Abatimento na base de cálculo de pagamentos</div>
+  <div class="table-scroll">
+    <table class="jobs-table">
+      <thead>
+        <tr>
+          <th>MATRÍCULA / NOME</th>
+          <th>DEPARTAMENTO / CARGO</th>
+          <th>ENTRADA 1</th>
+          <th>SAÍDA 1</th>
+          <th>ENTRADA 2</th>
+          <th>SAÍDA 2</th>
+          <th>TOTAL HORAS</th>
+          <th>HORAS EXTRAS</th>
+          <th>STATUS / OCORRÊNCIA</th>
+          <th>REFLEXO FINANCEIRO</th>
+          <th>AJUSTE</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in registros %}
+        <tr>
+          <td>
+            <strong style="color: #0f172a; font-size: 13px; display: block;">{{ r.nome }}</strong>
+            <span style="font-size: 11px; color: #64748b; font-family: monospace;">{{ r.matricula }}</span>
+          </td>
+          <td>
+            <span style="font-weight: 600; color: #334155; font-size: 12px; display: block;">{{ r.departamento }}</span>
+            <span style="font-size: 11px; color: #94a3b8;">{{ r.cargo }}</span>
+          </td>
+          <td><span style="font-weight: 600; color: #0f172a;">{{ r.entrada_1 or '--:--' }}</span></td>
+          <td><span style="font-weight: 600; color: #0f172a;">{{ r.saida_1 or '--:--' }}</span></td>
+          <td><span style="font-weight: 600; color: #0f172a;">{{ r.entrada_2 or '--:--' }}</span></td>
+          <td><span style="font-weight: 600; color: #0f172a;">{{ r.saida_2 or '--:--' }}</span></td>
+          <td>
+            <strong style="color: #0f172a; font-size: 12.5px;">{{ r.total_horas_trabalhadas|dec1 }}h</strong>
+          </td>
+          <td>
+            {% if r.horas_extras and r.horas_extras > 0 %}
+              <span class="status-badge" style="background: #f5f3ff; color: #7c3aed; font-weight: 700;">
+                +{{ r.horas_extras|dec1 }}h
+              </span>
+            {% else %}
+              <span style="color: #94a3b8; font-size: 12px;">--</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.status_registro == 'Normal' %}
+              <span class="status-badge closed"><i class="fa-solid fa-circle-check" style="font-size: 8px;"></i> Normal</span>
+            {% elif r.status_registro and 'Extra' in r.status_registro %}
+              <span class="status-badge" style="background: #f5f3ff; color: #7c3aed;">
+                <i class="fa-solid fa-clock" style="font-size: 8px;"></i> {{ r.status_registro }}
+              </span>
+            {% else %}
+              <span class="status-badge open">{{ r.status_registro or 'Normal' }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.custo_hora_extra and r.custo_hora_extra > 0 %}
+              <strong style="color: #7c3aed; font-size: 12.5px;">+ R$ {{ r.custo_hora_extra|moeda }}</strong>
+            {% elif r.desconto_falta and r.desconto_falta > 0 %}
+              <strong style="color: #ef4444; font-size: 12.5px;">- R$ {{ r.desconto_falta|moeda }}</strong>
+            {% else %}
+              <span style="color: #64748b; font-size: 12px;">R$ 0,00</span>
+            {% endif %}
+          </td>
+          <td>
+            <button onclick="abrirAjuste('{{ r.id }}', '{{ r.nome }}', '{{ r.horas_extras }}')" style="color: var(--primary); font-size: 11.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <i class="fa-solid fa-pen-to-square"></i> Ajustar
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 
-<!-- TABELA DE REGISTROS DO PONTO -->
-<div class="table-container">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Matrícula</th>
-        <th>Colaborador</th>
-        <th>Departamento / Cargo</th>
-        <th>Entrada 1</th>
-        <th>Saída 1</th>
-        <th>Entrada 2</th>
-        <th>Saída 2</th>
-        <th>Total Horas</th>
-        <th>Horas Extras</th>
-        <th>Status / Ocorrência</th>
-        <th>Reflexo Financeiro</th>
-        <th>Ajuste RH</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for reg in registros %}
-      <tr>
-        <td style="font-family: monospace; font-weight: bold; color: var(--cyan);">
-          {{ reg['matricula'] }}
-        </td>
-        <td>
-          <strong style="color: #FFF;">{{ reg['nome'] }}</strong>
-        </td>
-        <td>
-          <span style="font-size: 0.74rem; color: #E2E8F0;">{{ reg['departamento'] }}</span><br>
-          <span style="font-size: 0.7rem; color: var(--text-muted);">{{ reg['cargo'] }}</span>
-        </td>
-        <td>{{ reg['entrada_1'] or '--:--' }}</td>
-        <td>{{ reg['saida_1'] or '--:--' }}</td>
-        <td>{{ reg['entrada_2'] or '--:--' }}</td>
-        <td>{{ reg['saida_2'] or '--:--' }}</td>
-        <td style="font-weight: 700; color: #FFF;">{{ "{:.1f}".format(reg['total_horas_trabalhadas']) }}h</td>
-        <td>
-          {% if reg['horas_extras'] > 0 %}
-          <span style="color: var(--purple); font-weight: bold;">+{{ reg['horas_extras'] }}h</span>
-          {% else %}
-          <span style="color: var(--text-muted);">-</span>
-          {% endif %}
-        </td>
-        <td>
-          {% if reg['status_registro'] == 'Normal' %}
-          <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">Normal</span>
-          {% elif reg['status_registro'] == 'Hora Extra' %}
-          <span class="badge" style="background: rgba(139, 92, 246, 0.2); color: #8B5CF6;">Hora Extra</span>
-          {% elif reg['status_registro'] == 'Atestado Médico' %}
-          <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38BDF8;">Atestado</span>
-          {% else %}
-          <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #EF4444;">Falta/Atraso</span>
-          {% endif %}
-          <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">{{ reg['observacao_rh'] or '' }}</div>
-        </td>
-        <td>
-          {% if reg['custo_hora_extra'] > 0 %}
-          <span style="color: var(--purple); font-weight: bold;">+ R$ {{ "{:,.2f}".format(reg['custo_hora_extra']) }}</span>
-          {% elif reg['desconto_falta'] > 0 %}
-          <span style="color: var(--red); font-weight: bold;">- R$ {{ "{:,.2f}".format(reg['desconto_falta']) }}</span>
-          {% else %}
-          <span style="color: var(--text-muted);">R$ 0,00</span>
-          {% endif %}
-        </td>
-        <td>
-          <button class="btn btn-cyan" style="padding: 4px 8px; font-size: 0.7rem;" onclick="abrirModalPonto('{{ reg['id'] }}', '{{ reg['nome'] }}', '{{ reg['status_registro'] }}', '{{ reg['horas_extras'] }}', '{{ reg['observacao_rh'] or '' }}')">
-            <i class="fa-solid fa-pen"></i> Ajustar
-          </button>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
-<!-- MODAL DE AJUSTE DE PONTO PELO RH -->
-<div class="modal" id="modalAjustePonto">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3><i class="fa-solid fa-user-pen" style="color: var(--cyan);"></i> Homologação de Frequência - RH</h3>
-      <button class="close-modal" onclick="closeModal('modalAjustePonto')">&times;</button>
-    </div>
-    <form action="{{ url_for('api_ajustar_ponto') }}" method="POST">
-      <input type="hidden" name="ponto_id" id="ajuste_ponto_id">
-
-      <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; margin-bottom: 14px;">
-        <div style="font-size: 0.75rem; color: var(--text-muted);">Colaborador:</div>
-        <div style="font-size: 1.05rem; font-weight: 800; color: #FFF;" id="ajuste_nome"></div>
-      </div>
-
-      <div class="form-group">
-        <label>Status do Registro *</label>
-        <select name="status_registro" id="ajuste_status" class="form-control" required>
-          <option value="Normal">Normal</option>
-          <option value="Hora Extra">Hora Extra Autorizada</option>
-          <option value="Atraso/Falta">Atraso / Falta Injustificada</option>
-          <option value="Atestado Médico">Atestado Médico Homologado</option>
-          <option value="DSR">DSR / Folga de Escala</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Quantidade de Horas Extras</label>
-        <input type="number" step="0.5" name="horas_extras" id="ajuste_he" class="form-control" placeholder="0.0">
-      </div>
-
-      <div class="form-group">
-        <label>Justificativa do RH / Gestor *</label>
-        <textarea name="observacao_rh" id="ajuste_obs" rows="2" class="form-control" placeholder="Ex: Hora extra para socorro mecânico de frota autorizada pelo Supervisor."></textarea>
-      </div>
-
-      <div style="background: rgba(139, 92, 246, 0.1); border: 1px dashed var(--purple); padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 0.78rem; color: #E2E8F0;">
-        <i class="fa-solid fa-arrows-split-up-and-left" style="color: var(--purple);"></i> <strong>Reflexo Automático no Financeiro:</strong> As horas extras ou faltas salvas aqui recalcularão instantaneamente a folha de pagamento no painel do Contas a Pagar.
-      </div>
-
-      <div style="display: flex; justify-content: flex-end; gap: 10px;">
-        <button type="button" class="btn" style="background: #334155; color: #FFF;" onclick="closeModal('modalAjustePonto')">Cancelar</button>
-        <button type="submit" class="btn btn-cyan"><i class="fa-solid fa-check"></i> Salvar Ajuste</button>
-      </div>
-    </form>
-  </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
 <script>
-  function abrirModalPonto(id, nome, status, he, obs) {
-    document.getElementById('ajuste_ponto_id').value = id;
-    document.getElementById('ajuste_nome').innerText = nome;
-    document.getElementById('ajuste_status').value = status;
-    document.getElementById('ajuste_he').value = he;
-    document.getElementById('ajuste_obs').value = obs;
-    openModal('modalAjustePonto');
+  function filtrarPonto(data, dept) {
+    window.location.href = '/ponto?data=' + data + '&dept=' + encodeURIComponent(dept);
   }
 
-  function filtrarPonto(data, dept) {
-    window.location.href = '/ponto?data=' + data + '&dept=' + dept;
+  function abrirAjuste(id, nome, he) {
+    const novasHE = prompt('Ajustar Horas Extras para ' + nome + ' (em horas decimais, ex: 2.0):', he);
+    if (novasHE !== null && novasHE.trim() !== '') {
+      fetch('/api/ponto/ajustar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'ponto_id=' + id + '&horas_extras=' + encodeURIComponent(novasHE) + '&observacao=Ajuste manual pelo gestor'
+      }).then(() => window.location.reload());
+    }
   }
 </script>
 {% endblock %}

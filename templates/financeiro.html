@@ -1,82 +1,187 @@
 {% extends "base.html" %}
 
-{% block title %}Financeiro Integrado (Contas a Pagar & Receber){% endblock %}
+{% block title %}Financeiro Integrado{% endblock %}
+{% block page_breadcrumb %}Financeiro Integrado{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+<!-- HEADING DA PÁGINA -->
+<div class="page-heading">
   <div>
-    <h2 style="font-family: var(--font-brand); font-size: 1.4rem; color: #FFF; font-weight: 800;">
-      Financeiro Integrado (Contas a Pagar & Receber)
-    </h2>
-    <p style="font-size: 0.8rem; color: var(--text-muted);">
-      <i class="fa-solid fa-link" style="color: var(--cyan);"></i> Visão consolidada alimentada em tempo real pelas áreas operacionais (RH, Manutenção, Garagem e Bilhetagem)
-    </p>
+    <div class="eyebrow">CONTROLADORIA & FLUXO DE CAIXA</div>
+    <h1>Financeiro Integrado (Contas a Pagar & Receber)</h1>
+    <p>Visão consolidada alimentada em tempo real pelas áreas operacionais (RH, Manutenção, Garagem e Bilhetagem).</p>
   </div>
 </div>
 
-<!-- CARDS COM TOTAIS POR ORIGEM -->
-<div class="kpi-grid">
+<!-- LIVE BANNER -->
+<div class="demo-banner">
+  <span class="demo-label"><span></span> CONCILIADO</span>
+  <p>Todas as despesas geradas na operação (diesel, peças de ônibus, horas extras) e receitas de tarifa convergem em tempo real para a Tesouraria.</p>
+</div>
+
+<!-- 4 KPI CARDS -->
+<div class="metrics">
+  <article class="metric">
+    <div class="metric-top">
+      <span>Total a Pagar (Despesas)</span>
+      <span class="metric-icon" style="background: #fef2f2; color: #dc2626;"><i class="fa-solid fa-arrow-trend-down"></i></span>
+    </div>
+    <strong style="color: #dc2626;">R$ 149.230,00</strong>
+    <p>Provisões de Diesel, Peças e Horas Extras</p>
+  </article>
+
+  <article class="metric">
+    <div class="metric-top">
+      <span>Total a Receber (Receitas)</span>
+      <span class="metric-icon emerald"><i class="fa-solid fa-arrow-trend-up"></i></span>
+    </div>
+    <strong style="color: #16a34a;">R$ 634.300,00</strong>
+    <p>Bilhetagem Eletrônica e Subsídio Municipal</p>
+  </article>
+
+  <article class="metric">
+    <div class="metric-top">
+      <span>Saldo Operacional</span>
+      <span class="metric-icon blue"><i class="fa-solid fa-scale-balanced"></i></span>
+    </div>
+    <strong style="color: #0284c7;">+ R$ 485.070,00</strong>
+    <p>Superávit operacional apurado no período</p>
+  </article>
+
+  <article class="metric">
+    <div class="metric-top">
+      <span>Títulos Ativos</span>
+      <span class="metric-icon violet"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+    </div>
+    <strong>{{ lancamentos|length }} Contratos</strong>
+    <p>100% integrados às áreas de origem</p>
+  </article>
+</div>
+
+<!-- SEÇÃO: CENTROS DE CUSTO OPERACIONAIS -->
+<div class="section-heading">
+  <h2>Lançamentos por Origem Operacional</h2>
+  <span>Demonstrativo analítico por departamento gerador</span>
+</div>
+
+<div class="routine-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
   {% for t in totais %}
-  <div class="kpi-card" style="border-left: 4px solid {% if t['tipo'] == 'Receber' %}var(--emerald){% else %}var(--red){% endif %};">
-    <div class="kpi-header">
-      <span class="kpi-label">{{ t['origem_area'].replace('_', ' - ') }}</span>
-      <span class="badge" style="background: {% if t['tipo'] == 'Receber' %}rgba(16, 185, 129, 0.2); color: #10B981;{% else %}rgba(239, 68, 68, 0.2); color: #EF4444;{% endif %}">
-        {{ t['tipo'] }}
+  <div class="routine-card">
+    <div class="routine-card-top">
+      <span class="type-icon {% if t.tipo == 'Pagar' %}amber{% else %}emerald{% endif %}">
+        {% if t.tipo == 'Pagar' %}
+          <i class="fa-solid fa-receipt"></i>
+        {% else %}
+          <i class="fa-solid fa-money-bill-trend-up"></i>
+        {% endif %}
+      </span>
+      <span class="status-badge {% if t.tipo == 'Pagar' %}critical{% else %}closed{% endif %}" style="font-weight: 700;">
+        {{ t.tipo }}
       </span>
     </div>
-    <div class="kpi-val" style="color: {% if t['tipo'] == 'Receber' %}var(--emerald){% else %}#FFF{% endif %}; font-size: 1.5rem;">
-      R$ {{ "{:,.2f}".format(t['total']) }}
+    <h3>{{ t.origem_area }}</h3>
+    <strong style="font-size: 22px; color: #0f172a; margin-top: 8px; display: block;">
+      R$ {{ t.total|moeda }}
+    </strong>
+    <p>Lançamento originado e auditado automaticamente pelo setor responsável.</p>
+    <div class="routine-card-footer">
+      <span style="font-size: 11.5px; color: #64748b;"><i class="fa-solid fa-check"></i> Sincronizado</span>
+      <span style="font-size: 11.5px; color: var(--primary); font-weight: 600;">Auditado</span>
     </div>
-    <div class="kpi-footer">Lançamento originado pelo setor</div>
   </div>
   {% endfor %}
 </div>
 
 <!-- TABELA DE LANÇAMENTOS FINANCEIROS -->
-<div class="table-container">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Documento / Ref.</th>
-        <th>Origem Operacional</th>
-        <th>Tipo</th>
-        <th>Descrição</th>
-        <th>Valor</th>
-        <th>Lançamento</th>
-        <th>Vencimento</th>
-        <th>Status</th>
-        <th>Aprovador</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for l in lancamentos %}
-      <tr>
-        <td style="font-family: monospace; font-weight: bold; color: var(--cyan);">
-          {{ l['referencia_documento'] or '--' }}
-        </td>
-        <td>
-          <span style="font-weight: 700; color: #FFF;">{{ l['origem_area'].replace('_', ' - ') }}</span>
-        </td>
-        <td>
-          <span class="badge" style="background: {% if l['tipo'] == 'Receber' %}rgba(16, 185, 129, 0.2); color: #10B981;{% else %}rgba(239, 68, 68, 0.2); color: #EF4444;{% endif %}">
-            {{ l['tipo'] }}
-          </span>
-        </td>
-        <td style="color: #E2E8F0;">{{ l['descricao'] }}</td>
-        <td style="font-weight: 800; color: {% if l['tipo'] == 'Receber' %}var(--emerald){% else %}var(--red){% endif %};">
-          R$ {{ "{:,.2f}".format(l['valor']) }}
-        </td>
-        <td style="font-size: 0.75rem; color: var(--text-muted);">{{ l['data_lancamento'] }}</td>
-        <td style="font-size: 0.75rem; color: var(--amber); font-weight: 600;">{{ l['data_vencimento'] }}</td>
-        <td>
-          <span class="badge badge-{{ l['status'].lower() }}">
-            {{ l['status'] }}
-          </span>
-        </td>
-        <td style="font-size: 0.75rem; color: var(--text-muted);">{{ l['responsavel_aprovacao'] or '--' }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="panel">
+  <div class="panel-heading">
+    <div>
+      <h2>Extrato de Títulos e Lançamentos Integrados</h2>
+      <p>Contas a pagar e receber auditadas com aprovação e vencimento.</p>
+    </div>
+    <div class="search-field" style="max-width: 250px;">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="buscaFinanceiro" placeholder="Buscar documento ou setor..." onkeyup="filtrarFinanceiro()">
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table class="jobs-table" id="tabelaFinanceiro">
+      <thead>
+        <tr>
+          <th>DOCUMENTO / REF.</th>
+          <th>ORIGEM OPERACIONAL</th>
+          <th>TIPO</th>
+          <th>DESCRIÇÃO DO LANÇAMENTO</th>
+          <th>VALOR</th>
+          <th>LANÇAMENTO</th>
+          <th>VENCIMENTO</th>
+          <th>STATUS</th>
+          <th>APROVADOR</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in lancamentos %}
+        <tr>
+          <td>
+            <strong style="font-family: monospace; font-size: 12.5px; color: #0284c7;">{{ l.documento_ref }}</strong>
+          </td>
+          <td>
+            <span style="font-weight: 600; font-size: 12px; color: #334155;">{{ l.origem_area }}</span>
+          </td>
+          <td>
+            {% if l.tipo == 'Pagar' %}
+              <span class="status-badge critical" style="font-weight: 700;">
+                <i class="fa-solid fa-arrow-down"></i> A Pagar
+              </span>
+            {% else %}
+              <span class="status-badge closed" style="font-weight: 700;">
+                <i class="fa-solid fa-arrow-up"></i> A Receber
+              </span>
+            {% endif %}
+          </td>
+          <td>
+            <span style="font-size: 12.5px; color: #1e293b; max-width: 280px; display: block; white-space: normal;">
+              {{ l.descricao }}
+            </span>
+          </td>
+          <td>
+            <strong style="font-size: 13.5px; {% if l.tipo == 'Pagar' %}color: #dc2626;{% else %}color: #16a34a;{% endif %}">
+              R$ {{ l.valor|moeda }}
+            </strong>
+          </td>
+          <td>
+            <span style="font-size: 11.5px; color: #64748b;">{{ l.data_lancamento }}</span>
+          </td>
+          <td>
+            <strong style="font-size: 12px; color: #0f172a;">{{ l.data_vencimento }}</strong>
+          </td>
+          <td>
+            {% if l.status == 'Aprovado' %}
+              <span class="status-badge closed"><i class="fa-solid fa-check"></i> Aprovado</span>
+            {% elif l.status == 'Pendente' %}
+              <span class="status-badge open"><i class="fa-solid fa-clock"></i> Pendente</span>
+            {% else %}
+              <span class="status-badge in_progress">{{ l.status }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <span style="font-size: 11.5px; color: #475569; font-weight: 500;">{{ l.aprovador_nome }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
+
+<script>
+  function filtrarFinanceiro() {
+    const val = document.getElementById('buscaFinanceiro').value.toLowerCase();
+    const rows = document.getElementById('tabelaFinanceiro').getElementsByTagName('tr');
+    for (let i = 1; i < rows.length; i++) {
+      rows[i].style.display = rows[i].textContent.toLowerCase().includes(val) ? '' : 'none';
+    }
+  }
+</script>
 {% endblock %}

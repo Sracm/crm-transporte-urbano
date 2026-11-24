@@ -1,167 +1,141 @@
 {% extends "base.html" %}
 
 {% block title %}Chamados & Ordens de Serviço{% endblock %}
+{% block page_breadcrumb %}Chamados & OS{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+<!-- HEADING DA PÁGINA -->
+<div class="page-heading">
   <div>
-    <h2 style="font-family: var(--font-brand); font-size: 1.4rem; color: #FFF; font-weight: 800;">
-      Central de Chamados & Ordens de Serviço
-    </h2>
-    <p style="font-size: 0.8rem; color: var(--text-muted);">
-      Abertura, acompanhamento de SLA e encerramento com disparo de e-mails automáticos
-    </p>
+    <div class="eyebrow">SERVICE DESK & MANUTENÇÃO</div>
+    <h1>Central de Chamados & Ordens de Serviço</h1>
+    <p>Abertura, acompanhamento de SLA e encerramento com disparo de e-mails automáticos.</p>
   </div>
 
   <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-    <!-- FILTRO STATUS -->
-    <select class="form-control" style="width: auto; padding: 6px 12px;" onchange="filtrar()">
+    <select class="form-select" style="width: auto; padding: 7px 12px; font-size: 12.5px;" onchange="window.location.href='/chamados?status=' + this.value">
       <option value="Todos" {% if status_atual == 'Todos' %}selected{% endif %}>Todos os Status</option>
       <option value="Aberto" {% if status_atual == 'Aberto' %}selected{% endif %}>Abertos</option>
       <option value="Em Atendimento" {% if status_atual == 'Em Atendimento' %}selected{% endif %}>Em Atendimento</option>
       <option value="Concluído" {% if status_atual == 'Concluído' %}selected{% endif %}>Concluídos</option>
     </select>
 
-    <!-- BOTAO NOVA OS -->
-    <button class="btn btn-cyan" onclick="openModal('modalNovaOS')">
+    <button class="btn-primary" onclick="openModalNovaOS()">
       <i class="fa-solid fa-plus"></i> Abrir Nova OS
     </button>
   </div>
 </div>
 
-<!-- TABELA DE CHAMADOS COMPLETA -->
-<div class="table-container">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Protocolo</th>
-        <th>Título & Descrição</th>
-        <th>Origem &rarr; Executor</th>
-        <th>Prefixo / Linha</th>
-        <th>Prioridade / SLA</th>
-        <th>Status</th>
-        <th>Abertura</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for ch in chamados %}
-      <tr>
-        <td style="font-family: monospace; font-weight: bold; color: var(--cyan); font-size: 0.85rem;">
-          {{ ch['protocolo'] }}
-        </td>
-        <td>
-          <strong style="color: #FFF;">{{ ch['titulo'] }}</strong><br>
-          <span style="font-size: 0.74rem; color: var(--text-muted);">{{ ch['descricao'][:80] }}...</span>
-          {% if ch['resolucao'] %}
-          <div style="margin-top: 4px; font-size: 0.72rem; color: var(--emerald);">
-            <i class="fa-solid fa-check-double"></i> <strong>Solução:</strong> {{ ch['resolucao'] }}
-          </div>
-          {% endif %}
-        </td>
-        <td>
-          <span style="font-size: 0.76rem; color: #E2E8F0;">{{ ch['solicitante_nome'] }}</span><br>
-          <span style="font-size: 0.7rem; color: var(--cyan);">{{ ch['departamento_origem'] }} &rarr; {{ ch['departamento_destino'] }}</span>
-        </td>
-        <td>
-          {% if ch['prefixo_veiculo'] %}
-          <span style="background: rgba(56, 189, 248, 0.15); color: var(--cyan); padding: 2px 6px; border-radius: 4px; font-weight: 700;">
-            🚍 {{ ch['prefixo_veiculo'] }}
-          </span><br>
-          <span style="font-size: 0.7rem; color: var(--text-muted);">{{ ch['linha'] or 'Sem Linha' }}</span>
-          {% else %}
-          <span style="color: var(--text-muted); font-size: 0.75rem;">Administrativo / Geral</span>
-          {% endif %}
-        </td>
-        <td>
-          <span class="badge badge-{{ ch['prioridade'].lower().replace('í', 'i') }}">
-            {{ ch['prioridade'] }}
-          </span><br>
-          <span style="font-size: 0.7rem; color: var(--text-muted);">SLA: {{ ch['sla_horas'] }}h</span>
-        </td>
-        <td>
-          <span class="badge badge-{{ ch['status'].lower().replace(' ', '') }}">
-            {{ ch['status'] }}
-          </span>
-        </td>
-        <td style="font-size: 0.75rem; color: var(--text-muted);">
-          {{ ch['data_abertura'][:16] }}
-        </td>
-        <td>
-          {% if ch['status'] != 'Concluído' %}
-          <button class="btn btn-cyan" style="padding: 4px 8px; font-size: 0.72rem;" onclick="abrirModalConcluir('{{ ch['id'] }}', '{{ ch['protocolo'] }}', '{{ ch['titulo'] }}')">
-            <i class="fa-solid fa-check"></i> Baixar OS
-          </button>
-          {% else %}
-          <span style="color: var(--emerald); font-size: 0.75rem; font-weight: 700;">
-            <i class="fa-solid fa-circle-check"></i> Concluído
-          </span>
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<!-- LIVE BANNER -->
+<div class="demo-banner">
+  <span class="demo-label"><span></span> SLA ATIVO</span>
+  <p>Chamados críticos (ônibus retido na oficina) disparam e-mail imediato com prazo máximo de resolução de 4 horas.</p>
 </div>
 
-<!-- MODAL PARA BAIXAR / CONCLUIR OS -->
-<div class="modal" id="modalConcluirOS">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3><i class="fa-solid fa-circle-check" style="color: var(--emerald);"></i> Finalizar Ordem de Serviço</h3>
-      <button class="close-modal" onclick="closeModal('modalConcluirOS')">&times;</button>
+<!-- TABELA DE CHAMADOS -->
+<div class="panel">
+  <div class="panel-heading">
+    <div>
+      <h2>Fila de Atendimento Operacional</h2>
+      <p>Gerencie o ciclo de vida de cada ordem de serviço aberta na empresa.</p>
     </div>
-    <form action="{{ url_for('api_fechar_chamado') }}" method="POST">
-      <input type="hidden" name="chamado_id" id="concluir_chamado_id">
-      
-      <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; margin-bottom: 14px;">
-        <div style="font-size: 0.75rem; color: var(--text-muted);">Ordem de Serviço Selecionada:</div>
-        <div style="font-size: 1rem; font-weight: 800; color: var(--cyan);" id="concluir_protocolo"></div>
-        <div style="font-size: 0.82rem; color: #FFF;" id="concluir_titulo"></div>
-      </div>
+    <div class="search-field" style="max-width: 250px;">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="buscaChamados" placeholder="Buscar por protocolo ou veículo..." onkeyup="filtrarChamados()">
+    </div>
+  </div>
 
-      <div class="form-group">
-        <label>Técnico / Responsável pelo Fechamento *</label>
-        <input type="text" name="usuario_nome" class="form-control" required value="Carlos Roberto (Supervisor Oficina)">
-      </div>
-
-      <div class="form-group">
-        <label>Resolução Técnica / Parecer de Encerramento *</label>
-        <textarea name="resolucao" rows="3" class="form-control" required placeholder="Ex: Substituída válvula de freio pneumático, sangria realizada e teste de rodagem liberado pelo encarregado."></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>Custo de Peças / Serviços Externos (R$) - Reflexo Financeiro</label>
-        <input type="number" step="0.01" name="custo_estimado" class="form-control" placeholder="0.00 (Se informado, gera lançamento automático no Contas a Pagar)">
-      </div>
-
-      <div style="background: rgba(16, 185, 129, 0.1); border: 1px dashed var(--emerald); padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 0.78rem; color: #E2E8F0;">
-        <i class="fa-solid fa-envelope-circle-check" style="color: var(--emerald);"></i> <strong>Disparo Automático de E-mail:</strong> O solicitante original receberá um e-mail com a confirmação de que a OS foi concluída e o laudo técnico anexado.
-      </div>
-
-      <div style="display: flex; justify-content: flex-end; gap: 10px;">
-        <button type="button" class="btn" style="background: #334155; color: #FFF;" onclick="closeModal('modalConcluirOS')">Cancelar</button>
-        <button type="submit" class="btn" style="background: var(--emerald); color: #000; font-weight: 800;">
-          <i class="fa-solid fa-check"></i> Confirmar Fechamento
-        </button>
-      </div>
-    </form>
+  <div class="table-scroll">
+    <table class="jobs-table" id="tabelaChamados">
+      <thead>
+        <tr>
+          <th>PROTOCOLO / TÍTULO</th>
+          <th>DEPARTAMENTO DESTINO</th>
+          <th>SOLICITANTE</th>
+          <th>RESPONSÁVEL</th>
+          <th>VEÍCULO / LINHA</th>
+          <th>PRIORIDADE</th>
+          <th>STATUS</th>
+          <th>DATA ABERTURA</th>
+          <th>AÇÃO</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ch in chamados %}
+        <tr>
+          <td>
+            <strong style="color: #0f172a; font-size: 13px; display: block;">{{ ch.protocolo }} - {{ ch.titulo }}</strong>
+            <span style="font-size: 11.5px; color: #64748b; max-width: 280px; display: block; white-space: normal;">
+              {{ ch.descricao }}
+            </span>
+          </td>
+          <td>
+            <span style="font-weight: 600; color: #334155; font-size: 12px;">{{ ch.departamento_destino }}</span>
+          </td>
+          <td>
+            <span style="font-size: 12px; color: #0f172a;">{{ ch.solicitante_nome }}</span>
+          </td>
+          <td>
+            <span style="font-size: 12px; color: #475569; font-weight: 500;">{{ ch.responsavel_nome or 'Não Atribuído' }}</span>
+          </td>
+          <td>
+            {% if ch.prefixo_veiculo %}
+              <span class="status-badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700; font-family: monospace;">
+                <i class="fa-solid fa-bus"></i> {{ ch.prefixo_veiculo }}
+              </span>
+            {% else %}
+              <span style="color: #94a3b8; font-size: 12px;">Geral</span>
+            {% endif %}
+            {% if ch.linha %}<span style="font-size: 11px; color: #64748b; display: block; margin-top: 2px;">{{ ch.linha }}</span>{% endif %}
+          </td>
+          <td>
+            {% if ch.prioridade == 'Crítica' %}
+              <span class="status-badge critical"><i class="fa-solid fa-bolt"></i> Crítica</span>
+            {% elif ch.prioridade == 'Alta' %}
+              <span class="status-badge open"><i class="fa-solid fa-triangle-exclamation"></i> Alta</span>
+            {% else %}
+              <span style="font-size: 12px; color: #64748b;">Normal</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if ch.status == 'Aberto' %}
+              <span class="status-badge open"><i class="fa-solid fa-circle" style="font-size: 6px;"></i> Aberto</span>
+            {% elif ch.status == 'Em Atendimento' or ch.status == 'Em Andamento' %}
+              <span class="status-badge in_progress"><i class="fa-solid fa-spinner" style="font-size: 8px;"></i> Em Atendimento</span>
+            {% else %}
+              <span class="status-badge closed"><i class="fa-solid fa-check" style="font-size: 8px;"></i> Concluído</span>
+            {% endif %}
+          </td>
+          <td>
+            <span style="font-size: 11.5px; color: #64748b;">{{ ch.data_abertura[:16] }}</span>
+          </td>
+          <td>
+            {% if ch.status != 'Concluído' %}
+            <form action="{{ url_for('api_fechar_chamado') }}" method="POST" style="display:inline;" onsubmit="return confirm('Concluir esta Ordem de Serviço e disparar e-mail automático ao solicitante?')">
+              <input type="hidden" name="chamado_id" value="{{ ch.id }}">
+              <input type="hidden" name="resolucao" value="Serviço executado e testado pelo responsável.">
+              <button type="submit" class="btn-primary" style="padding: 4px 8px; font-size: 11px; background: #10b981; border-color: #10b981;">
+                <i class="fa-solid fa-check"></i> Fechar OS
+              </button>
+            </form>
+            {% else %}
+              <span style="font-size: 11px; color: #10b981; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Concluído</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-  function abrirModalConcluir(id, protocolo, titulo) {
-    document.getElementById('concluir_chamado_id').value = id;
-    document.getElementById('concluir_protocolo').innerText = protocolo;
-    document.getElementById('concluir_titulo').innerText = titulo;
-    openModal('modalConcluirOS');
-  }
-
-  function filtrar() {
-    var select = document.querySelector('select[onchange="filtrar()"]');
-    window.location.href = '/chamados?status=' + select.value;
+  function filtrarChamados() {
+    const val = document.getElementById('buscaChamados').value.toLowerCase();
+    const rows = document.getElementById('tabelaChamados').getElementsByTagName('tr');
+    for (let i = 1; i < rows.length; i++) {
+      rows[i].style.display = rows[i].textContent.toLowerCase().includes(val) ? '' : 'none';
+    }
   }
 </script>
 {% endblock %}
