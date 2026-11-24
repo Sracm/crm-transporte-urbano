@@ -3,595 +3,251 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}CRM & Service Desk Transporte Urbano{% endblock %} | CCO</title>
-  
-  <!-- Google Fonts: Montserrat & Inter -->
+  <title>{% block title %}Central de Operações{% endblock %} | CCO & CRM Transporte Urbano</title>
+
+  <!-- PWA & Favicon -->
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <meta name="theme-color" content="#101d30">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+
+  <!-- Google Fonts: Inter & Montserrat -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+
   <!-- FontAwesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <style>
-    :root {
-      --bg-main: #060911;
-      --bg-card: #0D1424;
-      --bg-elevated: #162036;
-      --border-color: rgba(56, 189, 248, 0.15);
-      --border-glow: rgba(56, 189, 248, 0.35);
-      
-      --cyan: #38BDF8;
-      --emerald: #10B981;
-      --amber: #F59E0B;
-      --purple: #8B5CF6;
-      --red: #EF4444;
-      --text-main: #F1F5F9;
-      --text-muted: #94A3B8;
-      
-      --font-brand: 'Montserrat', sans-serif;
-      --font-body: 'Inter', sans-serif;
-    }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body {
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      font-family: var(--font-body);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
-    }
+  <!-- Design System Central de Operações -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/central_operacoes.css') }}">
 
-    /* TOPBAR */
-    header.crm-topbar {
-      background: rgba(13, 20, 36, 0.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-color);
-      padding: 0.75rem 1.8rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-
-    .brand-section {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .brand-badge {
-      background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);
-      color: #000;
-      font-family: var(--font-brand);
-      font-weight: 900;
-      font-size: 0.82rem;
-      padding: 5px 10px;
-      border-radius: 5px;
-      letter-spacing: 1.2px;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
-    }
-
-    .brand-text h1 {
-      font-family: var(--font-brand);
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: #FFF;
-      letter-spacing: 0.5px;
-    }
-
-    .brand-text span {
-      font-size: 0.75rem;
-      color: var(--cyan);
-      font-weight: 500;
-    }
-
-    /* NAV LINKS */
-    nav.topbar-nav {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-    }
-
-    .nav-item {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.82rem;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      border-radius: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .nav-item:hover, .nav-item.active {
-      color: #FFF;
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-    }
-
-    .nav-item i {
-      color: var(--cyan);
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: 700;
-      font-size: 0.8rem;
-      cursor: pointer;
-      border: none;
-      text-decoration: none;
-      transition: all 0.25s ease;
-    }
-
-    .btn-cyan {
-      background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);
-      color: #000;
-      box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
-    }
-    .btn-cyan:hover {
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
-      transform: translateY(-1px);
-    }
-
-    .btn-cco {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #10B981;
-    }
-    .btn-cco:hover {
-      background: rgba(16, 185, 129, 0.3);
-      color: #FFF;
-    }
-
-    /* MAIN CONTAINER */
-    main.crm-container {
-      flex: 1;
-      padding: 1.5rem 1.8rem;
-      max-width: 1650px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    /* CARDS & GRIDS */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .kpi-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 16px 20px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-    }
-
-    .kpi-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, var(--cyan), transparent);
-    }
-
-    .kpi-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .kpi-label {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.6px;
-    }
-
-    .kpi-icon {
-      width: 32px; height: 32px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-    }
-
-    .kpi-val {
-      font-family: var(--font-brand);
-      font-size: 1.7rem;
-      font-weight: 800;
-      color: #FFF;
-      line-height: 1.2;
-    }
-
-    .kpi-footer {
-      font-size: 0.74rem;
-      color: var(--text-muted);
-      margin-top: 6px;
-    }
-
-    /* BADGES */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-    .badge-critica { background: rgba(239, 68, 68, 0.2); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.4); }
-    .badge-alta { background: rgba(245, 158, 11, 0.2); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.4); }
-    .badge-media { background: rgba(56, 189, 248, 0.2); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); }
-    .badge-baixa { background: rgba(148, 163, 184, 0.2); color: #94A3B8; border: 1px solid rgba(148, 163, 184, 0.4); }
-    
-    .badge-aberto { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
-    .badge-atendimento { background: rgba(56, 189, 248, 0.15); color: #38BDF8; }
-    .badge-concluido { background: rgba(16, 185, 129, 0.15); color: #10B981; }
-
-    /* TABLES */
-    .table-container {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      overflow-x: auto;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    }
-
-    table.data-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.82rem;
-    }
-
-    table.data-table th {
-      background: var(--bg-elevated);
-      color: var(--cyan);
-      font-weight: 700;
-      text-transform: uppercase;
-      font-size: 0.74rem;
-      letter-spacing: 0.6px;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    table.data-table td {
-      padding: 12px 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      color: #E2E8F0;
-    }
-
-    table.data-table tr:hover {
-      background: rgba(56, 189, 248, 0.04);
-    }
-
-    /* MODAL */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(8px);
-      z-index: 2000;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .modal.active { display: flex; }
-
-    .modal-content {
-      background: var(--bg-card);
-      border: 1px solid var(--cyan);
-      border-radius: 12px;
-      width: 100%;
-      max-width: 650px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 0 35px rgba(56, 189, 248, 0.35);
-      padding: 24px;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .modal-header h3 {
-      font-family: var(--font-brand);
-      color: #FFF;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .close-modal {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
-    .close-modal:hover { color: #FFF; }
-
-    /* FORMS */
-    .form-group {
-      margin-bottom: 14px;
-    }
-    .form-group label {
-      display: block;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .form-control {
-      width: 100%;
-      padding: 10px 12px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      color: #FFF;
-      font-family: var(--font-body);
-      font-size: 0.85rem;
-      outline: none;
-    }
-    .form-control:focus {
-      border-color: var(--cyan);
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
-    }
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    /* FOOTER */
-    footer.crm-footer {
-      background: var(--bg-card);
-      border-top: 1px solid var(--border-color);
-      padding: 12px 1.8rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 992px) {
-      header.crm-topbar { flex-wrap: wrap; gap: 12px; padding: 0.8rem 1rem; }
-      nav.topbar-nav { order: 3; width: 100%; overflow-x: auto; padding-top: 8px; }
-      main.crm-container { padding: 1rem; }
-    }
-  </style>
-  {% block extra_css %}{% endblock %}
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
 
-  <!-- TOPBAR -->
-  <header class="crm-topbar">
-    <div class="brand-section">
-      <div class="brand-badge">CRM OPERACIONAL</div>
-      <div class="brand-text">
-        <h1>CCO TRANSPORTE URBANO</h1>
-        <span>Hub Multissetorial Integrado & Service Desk (60+ Colaboradores)</span>
+<div class="app-shell">
+  <!-- SCRIM PARA FECHAR SIDEBAR NO CELULAR -->
+  <div class="sidebar-scrim" id="sidebarScrim" onclick="toggleSidebar()"></div>
+
+  <!-- SIDEBAR (NAVY) -->
+  <aside class="sidebar" id="sidebar">
+    <!-- BRAND / LOGO -->
+    <a class="brand" href="{{ url_for('dashboard') }}">
+      <div class="brand-mark">
+        <i class="fa-solid fa-layer-group"></i>
       </div>
+      <div class="brand-text">
+        <strong>Central de</strong>
+        <span>Operações</span>
+      </div>
+    </a>
+
+    <!-- WORKSPACE / PRIVADO -->
+    <div class="workspace-switch">
+      <div class="workspace-avatar">CO</div>
+      <div class="workspace-info">
+        <strong>Operações</strong>
+        <span>Ambiente privado</span>
+      </div>
+      <i class="fa-solid fa-lock"></i>
     </div>
 
-    <!-- NAVEGAÇÃO ENTRE MÓDULOS -->
-    <nav class="topbar-nav">
+    <!-- SEÇÃO OPERAÇÃO -->
+    <p class="nav-section">OPERAÇÃO</p>
+    <nav aria-label="Navegação principal">
       <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.path == '/' %}active{% endif %}">
-        <i class="fa-solid fa-gauge-high"></i> Dashboard
+        <i class="fa-solid fa-table-cells-large"></i>
+        <span>Visão geral</span>
       </a>
       <a href="{{ url_for('chamados_view') }}" class="nav-item {% if '/chamados' in request.path %}active{% endif %}">
-        <i class="fa-solid fa-headset"></i> Chamados & OS
+        <i class="fa-solid fa-headset"></i>
+        <span>Chamados & OS</span>
+        <span class="nav-count">{{ chamados_abertos|default(9) }}</span>
       </a>
       <a href="{{ url_for('ponto_view') }}" class="nav-item {% if '/ponto' in request.path %}active{% endif %}">
-        <i class="fa-solid fa-fingerprint"></i> Ponto Eletrônico
+        <i class="fa-solid fa-fingerprint"></i>
+        <span>Ponto Eletrônico</span>
+      </a>
+      <a href="http://10.11.1.100:5600" target="_blank" class="nav-item">
+        <i class="fa-solid fa-tower-broadcast"></i>
+        <span>Frota CCO (5600)</span>
       </a>
       <a href="{{ url_for('portaria_view') }}" class="nav-item {% if '/portaria' in request.path %}active{% endif %}">
-        <i class="fa-solid fa-bus"></i> Portaria & Garagem
+        <i class="fa-solid fa-bus"></i>
+        <span>Portaria & Garagem</span>
       </a>
       <a href="{{ url_for('financeiro_view') }}" class="nav-item {% if '/financeiro' in request.path %}active{% endif %}">
-        <i class="fa-solid fa-coins"></i> Financeiro Integrado
-      </a>
-      <a href="{{ url_for('emails_view') }}" class="nav-item {% if '/emails' in request.path %}active{% endif %}">
-        <i class="fa-solid fa-envelope"></i> E-mails Disparados
+        <i class="fa-solid fa-wallet"></i>
+        <span>Financeiro Integrado</span>
       </a>
       <a href="{{ url_for('colaboradores_view') }}" class="nav-item {% if '/colaboradores' in request.path %}active{% endif %}">
-        <i class="fa-solid fa-users"></i> Colaboradores (60)
+        <i class="fa-solid fa-users"></i>
+        <span>Colaboradores (60)</span>
+      </a>
+      <a href="{{ url_for('emails_view') }}" class="nav-item {% if '/emails' in request.path %}active{% endif %}">
+        <i class="fa-solid fa-envelope"></i>
+        <span>Histórico E-mails</span>
       </a>
     </nav>
 
-    <!-- AÇÕES RÁPIDAS -->
-    <div class="header-actions">
-      <a href="{{ url_for('mobile_view') }}" class="btn" style="background: rgba(139, 92, 246, 0.2); border: 1px solid var(--purple); color: #C4B5FD;" title="Abrir Aplicativo Mobile no Celular">
-        <i class="fa-solid fa-mobile-screen-button"></i> App Celular
+    <!-- SEÇÃO CONFIGURAÇÃO -->
+    <p class="nav-section" style="margin-top: 18px;">CONFIGURAÇÃO</p>
+    <nav aria-label="Configurações">
+      <a href="#" class="nav-item" onclick="alert('Regras de SLA e Validação ativas no Servidor.')">
+        <i class="fa-solid fa-sliders"></i>
+        <span>Regras Operacionais</span>
       </a>
-      <button class="btn btn-cyan" onclick="openModal('modalNovaOS')">
-        <i class="fa-solid fa-plus"></i> Abrir Nova OS
-      </button>
-      <a href="http://10.11.1.100:5600" target="_blank" class="btn btn-cco" title="Ver CCO Monitoramento em Tempo Real">
-        <i class="fa-solid fa-tower-broadcast"></i> CCO 5600
+      <a href="{{ url_for('mobile_view') }}" class="nav-item {% if '/mobile' in request.path %}active{% endif %}">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+        <span>Modo App Celular</span>
       </a>
-    </div>
-  </header>
+    </nav>
 
-  <!-- CONTEÚDO PRINCIPAL -->
-  <main class="crm-container">
-    {% block content %}{% endblock %}
-  </main>
-
-  <!-- MODAL: ABRIR NOVA OS / CHAMADO -->
-  <div class="modal" id="modalNovaOS">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3><i class="fa-solid fa-wrench" style="color: var(--cyan);"></i> Abertura de Ordem de Serviço / Chamado</h3>
-        <button class="close-modal" onclick="closeModal('modalNovaOS')">&times;</button>
-      </div>
-      <form action="{{ url_for('api_abrir_chamado') }}" method="POST">
-        <div class="form-group">
-          <label>Título da Ocorrência *</label>
-          <input type="text" name="titulo" class="form-control" required placeholder="Ex: Falha no Compressor de Ar / Validador Travado">
+    <!-- FOOTER DA SIDEBAR -->
+    <div class="sidebar-bottom">
+      <div class="dot-card">
+        <div class="dot-symbol">
+          <span></span><span></span><span></span>
         </div>
-        
-        <div class="form-row">
+        <strong>CCO Transporte Urbano</strong>
+        <p>150 Ônibus monitorados ao vivo em 4 corredores principais.</p>
+        <a href="http://10.11.1.100:5600" target="_blank">Ver mapa de telemetria &rarr;</a>
+      </div>
+
+      <div class="sidebar-user">
+        <div class="avatar">AM</div>
+        <div class="sidebar-user-info">
+          <strong>Antonio Mello</strong>
+          <span>BI & Operações</span>
+        </div>
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN SHELL (ÁREA CENTRAL) -->
+  <div class="main-shell">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="breadcrumb">
+        <button class="icon-button mobile-toggle" aria-label="Abrir menu" onclick="toggleSidebar()">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <span class="breadcrumb-root">Central de operações</span>
+        <i class="fa-solid fa-chevron-right" style="font-size: 11px; color: #94a3b8;"></i>
+        <strong>{% block page_breadcrumb %}Visão geral{% endblock %}</strong>
+      </div>
+
+      <div class="topbar-actions">
+        <a href="{{ url_for('mobile_view') }}" class="btn-mobile-badge" title="Abrir interface mobile PWA">
+          <i class="fa-solid fa-mobile-screen"></i> App Celular
+        </a>
+        <button class="btn-primary" onclick="openModalNovaOS()">
+          <i class="fa-solid fa-plus"></i> Nova OS
+        </button>
+        <span class="private-label">
+          <i class="fa-solid fa-lock"></i> Acesso privado
+        </span>
+        <div class="top-avatar">AM</div>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO DA PÁGINA -->
+    <main class="main-content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<!-- MODAL: ABERTURA DE NOVA ORDEM DE SERVIÇO / CHAMADO -->
+<div class="modal-backdrop" id="modalNovaOS">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-screwdriver-wrench" style="color: var(--primary);"></i> Abertura de Ordem de Serviço</h3>
+      <button style="font-size: 20px; color: #94a3b8;" onclick="closeModalNovaOS()">&times;</button>
+    </div>
+    <form action="{{ url_for('api_abrir_chamado') }}" method="POST">
+      <input type="hidden" name="solicitante_id" value="1">
+      <input type="hidden" name="departamento_origem" value="Gerente Operacional">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Título do Chamado / OS</label>
+          <input type="text" name="titulo" class="form-input" placeholder="Ex: Freio com ruído anormal no Prefixo 1012" required>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div class="form-group">
-            <label>Departamento de Origem *</label>
-            <select name="departamento_origem" class="form-control" required>
+            <label class="form-label">Departamento de Destino</label>
+            <select name="departamento_destino" class="form-select" required>
+              <option value="Manutenção">Manutenção (Oficina)</option>
+              <option value="Garagem">Garagem (Pátio)</option>
               <option value="Gerente Operacional">Gerente Operacional</option>
-              <option value="Gerente Administrativo">Gerente Administrativo</option>
-              <option value="Diretor de Operações">Diretor de Operações</option>
-              <option value="Manutenção">Manutenção</option>
+              <option value="Portaria">Portaria (Guarita)</option>
               <option value="RH">RH</option>
               <option value="Treinamento">Treinamento</option>
               <option value="Contas a Pagar">Contas a Pagar</option>
               <option value="Contas a Receber">Contas a Receber</option>
-              <option value="Garagem">Garagem</option>
-              <option value="Portaria">Portaria</option>
+              <option value="Diretor de Operações">Diretor de Operações</option>
+              <option value="Gerente Administrativo">Gerente Administrativo</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Departamento de Destino (Executor) *</label>
-            <select name="departamento_destino" class="form-control" required>
-              <option value="Manutenção">Manutenção (Oficina)</option>
-              <option value="Gerente Operacional">Gerente Operacional (Tráfego)</option>
-              <option value="Gerente Administrativo">Gerente Administrativo (Facilities)</option>
-              <option value="RH">RH (Pessoal/Ponto)</option>
-              <option value="Treinamento">Treinamento</option>
-              <option value="Contas a Pagar">Contas a Pagar</option>
-              <option value="Contas a Receber">Contas a Receber</option>
-              <option value="Garagem">Garagem (Pátio)</option>
-              <option value="Portaria">Portaria</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Prioridade *</label>
-            <select name="prioridade" class="form-control" required>
-              <option value="Média">Média (SLA 24h)</option>
+            <label class="form-label">Prioridade</label>
+            <select name="prioridade" class="form-select">
+              <option value="Normal">Normal (SLA 48h)</option>
               <option value="Alta">Alta (SLA 12h)</option>
-              <option value="Crítica">Crítica (SLA 4h - Veículo Parado)</option>
-              <option value="Baixa">Baixa (SLA 48h)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Categoria do Reparo</label>
-            <select name="categoria" class="form-control">
-              <option value="Mecânica">Mecânica Diesel</option>
-              <option value="Elétrica">Elétrica & Telemetria</option>
-              <option value="Ar Condicionado">Ar Condicionado</option>
-              <option value="Pneu">Pneus & Rodas</option>
-              <option value="Bilhetagem">Validador / Bilhetagem</option>
-              <option value="Sinistro">Sinistro / Colisão</option>
-              <option value="RH/Folha">RH / Pessoal</option>
-              <option value="Infra Garagem">Infraestrutura Pátio</option>
+              <option value="Crítica">Crítica / Carro Baixado (SLA 4h)</option>
             </select>
           </div>
         </div>
-
-        <div class="form-row">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div class="form-group">
-            <label>Prefixo do Ônibus (se aplicável)</label>
-            <input type="text" name="prefixo_veiculo" class="form-control" placeholder="Ex: 5014">
+            <label class="form-label">Prefixo do Veículo (Opcional)</label>
+            <input type="text" name="prefixo_veiculo" class="form-input" placeholder="Ex: 1012">
           </div>
           <div class="form-group">
-            <label>Linha de Operação</label>
-            <input type="text" name="linha" class="form-control" placeholder="Ex: Linha 801 - Central">
+            <label class="form-label">Linha de Operação (Opcional)</label>
+            <input type="text" name="linha" class="form-input" placeholder="Ex: Linha 801">
           </div>
         </div>
-
         <div class="form-group">
-          <label>Solicitante Responsável *</label>
-          <select name="solicitante_id" class="form-control" required>
-            <option value="1">Antonio Carlos de Mello (Diretor de Operações)</option>
-            <option value="3">Marcos Vinicius Rezende (Gerente Geral)</option>
-            <option value="5">Sandra Helena Costa (Gerente Administrativa)</option>
-            <option value="7">Carlos Roberto Silva (Supervisor Oficina)</option>
-            <option value="17">Renata Vasconcelos (Supervisora RH)</option>
-            <option value="23">Sérgio Luiz Fontana (Coord. Treinamento)</option>
-            <option value="27">Mariana Fontes (Coord. Contas a Pagar)</option>
-            <option value="32">Luciano Barreto (Coord. Faturamento)</option>
-            <option value="37">Wellington Aparecido (Supervisor Garagem)</option>
-            <option value="47">Osvaldo Severino (Supervisor Portaria)</option>
-          </select>
+          <label class="form-label">Descrição do Problema & Causa Raiz</label>
+          <textarea name="descricao" class="form-textarea" rows="3" placeholder="Descreva os detalhes operacionais..." required></textarea>
         </div>
-
-        <div class="form-group">
-          <label>Descrição Detalhada do Problema *</label>
-          <textarea name="descricao" rows="3" class="form-control" required placeholder="Descreva os sintomas, barulhos, código de falha ou solicitação administrativa..."></textarea>
-        </div>
-
-        <div style="background: rgba(56, 189, 248, 0.1); border: 1px dashed var(--cyan); padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 0.78rem; color: #E2E8F0;">
-          <i class="fa-solid fa-paper-plane" style="color: var(--cyan);"></i> <strong>Disparo Automático de E-mail:</strong> Ao clicar em salvar, um e-mail com protocolo gerado e SLA de resposta será enviado imediatamente para a equipe responsável.
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; gap: 10px;">
-          <button type="button" class="btn" style="background: #334155; color: #FFF;" onclick="closeModal('modalNovaOS')">Cancelar</button>
-          <button type="submit" class="btn btn-cyan"><i class="fa-solid fa-check"></i> Emitir Ordem de Serviço</button>
-        </div>
-      </form>
-    </div>
+        <p style="font-size: 11.5px; color: #64748b; background: #f8fafc; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+          <i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> Ao cadastrar, um e-mail de notificação de abertura será disparado automaticamente para o gestor e registrado na auditoria.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-mobile-badge" style="background:#fff; color:#64748b; border:1px solid #cbd5e1;" onclick="closeModalNovaOS()">Cancelar</button>
+        <button type="submit" class="btn-primary">Criar & Notificar por E-mail</button>
+      </div>
+    </form>
   </div>
+</div>
 
-  <!-- FOOTER -->
-  <footer class="crm-footer">
-    <div>CCO TRANSPORTE URBANO &copy; 2026 | Sistema Operacional Integrado de 10 Departamentos</div>
-    <div style="display: flex; gap: 20px;">
-      <span><i class="fa-solid fa-users" style="color: var(--cyan);"></i> 60 Usuários Ativos</span>
-      <span><i class="fa-solid fa-shield-halved" style="color: var(--emerald);"></i> SLA em Tempo Real</span>
-      <span><i class="fa-solid fa-envelope-circle-check" style="color: var(--amber);"></i> Notificações por E-mail</span>
-    </div>
-  </footer>
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const scrim = document.getElementById('sidebarScrim');
+    sidebar.classList.toggle('is-open');
+    scrim.style.display = sidebar.classList.contains('is-open') ? 'block' : 'none';
+  }
 
-  <script>
-    function openModal(id) {
-      document.getElementById(id).classList.add('active');
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('active');
-    }
-    window.onclick = function(event) {
-      if (event.target.classList.contains('modal')) {
-        event.target.classList.remove('active');
-      }
-    }
-  </script>
-  {% block extra_js %}{% endblock %}
+  function openModalNovaOS() {
+    document.getElementById('modalNovaOS').classList.add('is-open');
+  }
+
+  function closeModalNovaOS() {
+    document.getElementById('modalNovaOS').classList.remove('is-open');
+  }
+
+  // Registra Service Worker se suportado
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/static/service-worker.js').catch(function() {});
+  }
+</script>
+
+{% block extra_scripts %}{% endblock %}
+
 </body>
 </html>

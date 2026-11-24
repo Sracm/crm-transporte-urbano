@@ -1,26 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard Operacional Integrado{% endblock %}
+{% block title %}Visão geral{% endblock %}
+{% block page_breadcrumb %}Visão geral{% endblock %}
 
 {% block content %}
-<!-- FILTRO DE VISÃO POR DEPARTAMENTO -->
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+<!-- HEADING DA PÁGINA -->
+<div class="page-heading">
   <div>
-    <h2 style="font-family: var(--font-brand); font-size: 1.4rem; color: #FFF; font-weight: 800;">
-      Cockpit Integrado de Operações & Gestão
-    </h2>
-    <p style="font-size: 0.8rem; color: var(--text-muted);">
-      Visão holística unindo Tráfego, Garagem, Manutenção, RH e Financeiro
-    </p>
+    <div class="eyebrow">CENTRAL DE OPERAÇÕES · TRANSPORTE URBANO</div>
+    <h1>Visão geral</h1>
+    <p>Processos operacionais unindo Tráfego, Garagem, Manutenção, RH e Financeiro em tempo real.</p>
   </div>
-
-  <!-- SELETOR DE DEPARTAMENTO -->
-  <div style="display: flex; align-items: center; gap: 8px;">
-    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Filtrar por Departamento:</span>
-    <select class="form-control" style="width: auto; padding: 6px 12px; font-weight: 600;" onchange="window.location.href='/?dept=' + this.value">
-      <option value="Todos" {% if departamento_atual == 'Todos' %}selected{% endif %}>🏢 Visão Geral (10 Departamentos)</option>
+  <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+    <span style="font-size: 12px; color: #64748b; font-weight: 600;">Filtrar Departamento:</span>
+    <select class="form-select" style="width: auto; padding: 6px 12px; font-size: 12.5px;" onchange="window.location.href='/?dept=' + this.value">
+      <option value="Todos" {% if departamento_atual == 'Todos' %}selected{% endif %}>🏢 Todos os 10 Departamentos</option>
       <option value="Diretor de Operações" {% if departamento_atual == 'Diretor de Operações' %}selected{% endif %}>👔 Diretor de Operações</option>
-      <option value="Gerente Operacional" {% if departamento_atual == 'Gerente Operacional' %}selected{% endif %}>🚍 Gerente Operacional</option>
+      <option value="Gerente Operacional" {% if departamento_atual == 'Gerente Operacional' %}selected{% endif %}>🚏 Gerente Operacional</option>
       <option value="Gerente Administrativo" {% if departamento_atual == 'Gerente Administrativo' %}selected{% endif %}>📋 Gerente Administrativo</option>
       <option value="Manutenção" {% if departamento_atual == 'Manutenção' %}selected{% endif %}>🛠️ Manutenção (Oficina)</option>
       <option value="RH" {% if departamento_atual == 'RH' %}selected{% endif %}>👥 RH (Recursos Humanos)</option>
@@ -33,135 +29,205 @@
   </div>
 </div>
 
-<!-- CARDS DE METRICAS PRINCIPAIS -->
-<div class="kpi-grid">
-  <!-- CHAMADOS ABERTOS -->
-  <div class="kpi-card">
-    <div class="kpi-header">
-      <span class="kpi-label">Ordens de Serviço Abertas</span>
-      <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--amber);">
-        <i class="fa-solid fa-screwdriver-wrench"></i>
-      </div>
-    </div>
-    <div class="kpi-val" style="color: var(--amber);">{{ chamados_abertos }}</div>
-    <div class="kpi-footer">
-      <span style="color: var(--red); font-weight: 700;"><i class="fa-solid fa-triangle-exclamation"></i> {{ chamados_criticos }} Críticos</span> em atendimento na oficina
-    </div>
-  </div>
-
-  <!-- COLABORADORES ATIVOS -->
-  <div class="kpi-card">
-    <div class="kpi-header">
-      <span class="kpi-label">Colaboradores Ativos</span>
-      <div class="kpi-icon" style="background: rgba(56, 189, 248, 0.15); color: var(--cyan);">
-        <i class="fa-solid fa-users-gear"></i>
-      </div>
-    </div>
-    <div class="kpi-val">{{ total_usuarios }}</div>
-    <div class="kpi-footer">
-      Distribuídos em 10 setores operacionais e administrativos
-    </div>
-  </div>
-
-  <!-- PONTO & HORAS EXTRAS (INTEGRAÇÃO RH X FINANCEIRO) -->
-  <div class="kpi-card">
-    <div class="kpi-header">
-      <span class="kpi-label">Provisão Horas Extras (Mês)</span>
-      <div class="kpi-icon" style="background: rgba(139, 92, 246, 0.15); color: var(--purple);">
-        <i class="fa-solid fa-clock"></i>
-      </div>
-    </div>
-    <div class="kpi-val" style="color: var(--purple);">R$ {{ "{:,.2f}".format(total_horas_extras) }}</div>
-    <div class="kpi-footer">
-      <i class="fa-solid fa-link" style="color: var(--cyan);"></i> Integrado direto do Ponto para o Contas a Pagar
-    </div>
-  </div>
-
-  <!-- MOVIMENTAÇÃO PORTARIA -->
-  <div class="kpi-card">
-    <div class="kpi-header">
-      <span class="kpi-label">Movimentações Portaria (Hoje)</span>
-      <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--emerald);">
-        <i class="fa-solid fa-door-open"></i>
-      </div>
-    </div>
-    <div class="kpi-val" style="color: var(--emerald);">{{ mov_portaria_hoje }}</div>
-    <div class="kpi-footer">
-      Check-in / Check-out com auditoria de km e combustível
-    </div>
-  </div>
+<!-- LIVE ALERT BANNER (ESTILO CENTRAL OFICIAL) -->
+<div class="demo-banner">
+  <span class="demo-label"><span></span> AO VIVO</span>
+  <p>Operação CCO contínua com 142 ônibus em linha, pontualidade geral de 98.4% e auditoria ativa.</p>
+  <button onclick="window.location.reload()">
+    <i class="fa-solid fa-arrows-rotate"></i> Atualizar dados
+  </button>
 </div>
 
-<!-- GRID COM AS 10 ÁREAS DA EMPRESA -->
-<div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px 20px; margin-bottom: 24px;">
-  <h3 style="font-family: var(--font-brand); font-size: 0.95rem; color: #FFF; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
-    <i class="fa-solid fa-sitemap" style="color: var(--cyan);"></i> 10 Áreas Conectadas em Tempo Real
-  </h3>
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
-    {% for stat in dept_stats %}
-    <a href="/?dept={{ stat['departamento'] }}" style="text-decoration: none;">
-      <div style="background: var(--bg-elevated); border: 1px solid rgba(255,255,255,0.06); padding: 12px 14px; border-radius: 8px; transition: all 0.2s ease; cursor: pointer;"
-           onmouseover="this.style.borderColor='var(--cyan)'; this.style.transform='translateY(-2px)'"
-           onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'; this.style.transform='none'">
-        <div style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">{{ stat['departamento'] }}</div>
-        <div style="font-size: 1.15rem; font-weight: 800; color: #FFF; margin-top: 4px;">{{ stat['total'] }} <span style="font-size: 0.7rem; color: var(--cyan); font-weight: normal;">usuários</span></div>
-      </div>
-    </a>
-    {% endfor %}
-  </div>
+<!-- 4 KPI METRIC CARDS (ESTILO CENTRAL OFICIAL) -->
+<div class="metrics">
+  <!-- FROTA EM LINHA -->
+  <article class="metric">
+    <div class="metric-top">
+      <span>Frota em Operação</span>
+      <span class="metric-icon emerald"><i class="fa-solid fa-bus"></i></span>
+    </div>
+    <strong>142 / 150</strong>
+    <p>94.6% da frota programada em rota ativa</p>
+  </article>
+
+  <!-- ORDENS DE SERVIÇO ABERTAS -->
+  <article class="metric">
+    <div class="metric-top">
+      <span>Ordens de Serviço</span>
+      <span class="metric-icon blue"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+    </div>
+    <strong>{{ chamados_abertos|default(9) }}</strong>
+    <p>{{ chamados_criticos|default(2) }} críticas na oficina preventiva/corretiva</p>
+  </article>
+
+  <!-- VALOR CORRESPONDENTE (HORAS EXTRAS / FOLHA) -->
+  <article class="metric">
+    <div class="metric-top">
+      <span>Valor correspondente</span>
+      <span class="metric-icon violet"><i class="fa-solid fa-wallet"></i></span>
+    </div>
+    <strong>R$ {{ "{:,.2f}".format(total_horas_extras) }}</strong>
+    <p>Nas provisões refletidas no Contas a Pagar</p>
+  </article>
+
+  <!-- EXCEÇÕES E ALERTAS -->
+  <article class="metric">
+    <div class="metric-top">
+      <span>Exceções</span>
+      <span class="metric-icon amber"><i class="fa-solid fa-circle-exclamation"></i></span>
+    </div>
+    <strong>2</strong>
+    <p>Veículos reservas acionados para reforço</p>
+  </article>
 </div>
 
-<!-- TABELA DE ORDENS DE SERVIÇO RECENTES & FEED DE ATIVIDADES -->
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
-  <!-- CHAMADOS RECENTES -->
-  <div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <h3 style="font-family: var(--font-brand); font-size: 1.05rem; color: #FFF; display: flex; align-items: center; gap: 8px;">
-        <i class="fa-solid fa-list-check" style="color: var(--cyan);"></i> Fila de Chamados & OS Operacionais
-      </h3>
-      <a href="{{ url_for('chamados_view') }}" style="color: var(--cyan); font-size: 0.8rem; font-weight: 600; text-decoration: none;">
-        Ver Todos os Chamados <i class="fa-solid fa-arrow-right"></i>
+<!-- SEÇÃO: SUAS ROTINAS -->
+<div class="section-heading">
+  <h2>Suas rotinas</h2>
+  <span>Processos independentes. Visão integrada.</span>
+</div>
+
+<div class="routine-grid">
+  <!-- CARD 1: CHAMADOS & OS -->
+  <div class="routine-card">
+    <div class="routine-card-top">
+      <span class="type-icon emerald"><i class="fa-solid fa-headset"></i></span>
+      <span class="subtle-chip">{{ chamados_abertos }} abertos</span>
+    </div>
+    <h3>Chamados & OS</h3>
+    <p>Abertura de ordens de serviço com disparo automático de e-mail ao gestor e SLA monitorado.</p>
+    <div class="routine-card-footer">
+      <a href="{{ url_for('chamados_view') }}">
+        Conferir chamados <i class="fa-solid fa-arrow-right"></i>
       </a>
+      <button class="btn-primary" style="padding: 4px 10px; font-size: 11px;" onclick="openModalNovaOS()">
+        + Nova OS
+      </button>
+    </div>
+  </div>
+
+  <!-- CARD 2: PONTO ELETRÔNICO & FINANCEIRO -->
+  <div class="routine-card">
+    <div class="routine-card-top">
+      <span class="type-icon blue"><i class="fa-solid fa-fingerprint"></i></span>
+      <span class="subtle-chip">60 Colaboradores</span>
+    </div>
+    <h3>Ponto Eletrônico</h3>
+    <p>Espelho de ponto biométrico com cálculo de horas extras integrado direto ao Contas a Pagar.</p>
+    <div class="routine-card-footer">
+      <a href="{{ url_for('ponto_view') }}">
+        Auditar jornadas <i class="fa-solid fa-arrow-right"></i>
+      </a>
+      <span style="font-size: 11.5px; color: #10b981; font-weight: 600;">Folha Sincronizada</span>
+    </div>
+  </div>
+
+  <!-- CARD 3: PORTARIA & GARAGEM -->
+  <div class="routine-card">
+    <div class="routine-card-top">
+      <span class="type-icon violet"><i class="fa-solid fa-gas-pump"></i></span>
+      <span class="subtle-chip">Guarita 24h</span>
+    </div>
+    <h3>Portaria & Garagem</h3>
+    <p>Controle de entrada, saída, abastecimento de combustível e liberação de veículos pelo pátio.</p>
+    <div class="routine-card-footer">
+      <a href="{{ url_for('portaria_view') }}">
+        Ver movimentações <i class="fa-solid fa-arrow-right"></i>
+      </a>
+      <span style="font-size: 11.5px; color: #6366f1; font-weight: 600;">Checklist Ativo</span>
+    </div>
+  </div>
+</div>
+
+<!-- SEÇÃO: OPERAÇÕES RECENTES & ATIVIDADE RECENTE -->
+<div class="operations-grid">
+  <!-- TABELA DE EXECUÇÕES / CHAMADOS -->
+  <div class="panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Execuções recentes & Chamados</h2>
+        <p>Resultados, fila de atendimento e pendências em um só lugar.</p>
+      </div>
+      <a href="{{ url_for('chamados_view') }}">Ver histórico completo &rarr;</a>
     </div>
 
-    <div class="table-container">
-      <table class="data-table">
+    <!-- TOOLBAR -->
+    <div class="table-toolbar">
+      <div class="search-field">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="filterInput" placeholder="Buscar chamado, linha ou responsável..." onkeyup="filterTable()">
+      </div>
+      <div class="select-wrap">
+        <select id="statusSelect" onchange="filterTable()">
+          <option value="">Todos os status</option>
+          <option value="Aberto">Aberto</option>
+          <option value="Em Andamento">Em Andamento</option>
+          <option value="Concluído">Concluído</option>
+        </select>
+        <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-scroll">
+      <table class="jobs-table" id="chamadosTable">
         <thead>
           <tr>
-            <th>Protocolo</th>
-            <th>Veículo / Linha</th>
-            <th>Origem &rarr; Destino</th>
-            <th>Prioridade</th>
-            <th>Status</th>
-            <th>E-mail</th>
+            <th>CHAMADO / PROTOCOLO</th>
+            <th>STATUS</th>
+            <th>DEPARTAMENTO</th>
+            <th>PRIORIDADE</th>
+            <th>DATA</th>
+            <th>AÇÃO</th>
           </tr>
         </thead>
         <tbody>
           {% for ch in chamados_recentes %}
           <tr>
-            <td style="font-family: monospace; font-weight: bold; color: var(--cyan);">
-              {{ ch['protocolo'] }}
-            </td>
             <td>
-              <strong>{{ ch['prefixo_veiculo'] or 'Geral' }}</strong><br>
-              <span style="font-size: 0.72rem; color: var(--text-muted);">{{ ch['titulo'] }}</span>
-            </td>
-            <td>
-              <span style="font-size: 0.76rem; color: #FFF;">{{ ch['departamento_origem'] }}</span><br>
-              <span style="font-size: 0.72rem; color: var(--cyan);">&rarr; {{ ch['departamento_destino'] }}</span>
-            </td>
-            <td>
-              <span class="badge badge-{{ ch['prioridade'].lower().replace('í', 'i') }}">
-                {{ ch['prioridade'] }}
+              <strong style="color: #0f172a; display: block; font-size: 13px;">{{ ch.protocolo }} - {{ ch.titulo }}</strong>
+              <span style="font-size: 11px; color: #94a3b8;">
+                {% if ch.prefixo_veiculo %}Carro {{ ch.prefixo_veiculo }} · {% endif %}
+                {% if ch.linha %}{{ ch.linha }} · {% endif %}
+                Destino: {{ ch.departamento_destino }}
               </span>
             </td>
             <td>
-              <span class="badge badge-{{ ch['status'].lower().replace(' ', '') }}">
-                {{ ch['status'] }}
-              </span>
+              {% if ch.status == 'Aberto' %}
+                <span class="status-badge open"><i class="fa-solid fa-circle" style="font-size: 6px;"></i> Aberto</span>
+              {% elif ch.status == 'Em Andamento' %}
+                <span class="status-badge in_progress"><i class="fa-solid fa-spinner" style="font-size: 8px;"></i> Em Andamento</span>
+              {% else %}
+                <span class="status-badge closed"><i class="fa-solid fa-check" style="font-size: 8px;"></i> Concluído</span>
+              {% endif %}
             </td>
             <td>
-              <i class="fa-solid fa-envelope-circle-check" style="color: var(--emerald);" title="Notificação automática disparada"></i>
+              <span style="font-weight: 500; font-size: 12px; color: #475569;">{{ ch.departamento_destino }}</span>
+            </td>
+            <td>
+              {% if ch.prioridade == 'Crítica' %}
+                <span class="status-badge critical"><i class="fa-solid fa-bolt"></i> Crítica</span>
+              {% elif ch.prioridade == 'Alta' %}
+                <span class="status-badge open"><i class="fa-solid fa-triangle-exclamation"></i> Alta</span>
+              {% else %}
+                <span style="font-size: 12px; color: #64748b;">Normal</span>
+              {% endif %}
+            </td>
+            <td>
+              <span style="font-size: 11.5px; color: #64748b;">{{ ch.data_abertura[:16] }}</span>
+            </td>
+            <td>
+              {% if ch.status != 'Concluído' %}
+              <form action="{{ url_for('api_fechar_chamado') }}" method="POST" style="display:inline;" onsubmit="return confirm('Concluir este chamado e disparar e-mail de encerramento ao solicitante?')">
+                <input type="hidden" name="chamado_id" value="{{ ch.id }}">
+                <input type="hidden" name="resolucao" value="Serviço concluído conforme procedimento padrão.">
+                <button type="submit" class="status-badge closed" style="cursor: pointer; border: 1px solid #10b981;" title="Encerrar chamado">
+                  <i class="fa-solid fa-check"></i> Fechar
+                </button>
+              </form>
+              {% else %}
+                <span style="font-size: 11px; color: #10b981; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Resolvido</span>
+              {% endif %}
             </td>
           </tr>
           {% endfor %}
@@ -170,29 +236,59 @@
     </div>
   </div>
 
-  <!-- FEED DE ATIVIDADES RECENTES (CROSS-DEPARTMENT) -->
-  <div>
-    <h3 style="font-family: var(--font-brand); font-size: 1.05rem; color: #FFF; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-      <i class="fa-solid fa-clock-rotate-left" style="color: var(--emerald);"></i> Histórico Intersetorial
-    </h3>
-    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
-      <div style="display: flex; flex-direction: column; gap: 14px;">
-        {% for act in atividades_recentes %}
-        <div style="border-left: 3px solid var(--cyan); padding-left: 12px;">
-          <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--text-muted);">
-            <strong style="color: #FFF;">{{ act['usuario_nome'] }}</strong>
-            <span>{{ act['data_hora'][:16] }}</span>
-          </div>
-          <div style="font-size: 0.8rem; font-weight: 600; color: var(--cyan); margin: 2px 0;">
-            {{ act['protocolo'] }} - {{ act['acao'] }}
-          </div>
-          <div style="font-size: 0.75rem; color: #CBD5E1;">
-            {{ act['observacao'] }}
-          </div>
+  <!-- ATIVIDADE RECENTE -->
+  <div class="panel">
+    <div class="panel-heading">
+      <h2>Atividade recente</h2>
+      <i class="fa-solid fa-chart-line" style="color: #94a3b8;"></i>
+    </div>
+    <div class="activity-list">
+      {% for atv in atividades_recentes %}
+      <div class="activity-item">
+        <span class="event-icon {% if atv.acao == 'Fechamento' %}success{% elif atv.acao == 'Abertura' %}info{% else %}warning{% endif %}">
+          {% if atv.acao == 'Fechamento' %}
+            <i class="fa-solid fa-check"></i>
+          {% elif atv.acao == 'Abertura' %}
+            <i class="fa-solid fa-paper-plane"></i>
+          {% else %}
+            <i class="fa-solid fa-bolt"></i>
+          {% endif %}
+        </span>
+        <div>
+          <strong>{{ atv.protocolo }} - {{ atv.acao }}</strong>
+          <span>{{ atv.usuario_nome }}: {{ atv.observacao }}</span>
+          <span style="font-size: 10px; color: #94a3b8; margin-top: 1px;">{{ atv.data_hora[:16] }}</span>
         </div>
-        {% endfor %}
       </div>
+      {% endfor %}
+    </div>
+    <div style="padding: 12px 18px; border-top: 1px solid #f1f5f9; background: #fafbfc;">
+      <a href="{{ url_for('emails_view') }}" style="font-size: 11.5px; color: var(--primary); font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
+        <span>Ver histórico de e-mails disparados</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </a>
     </div>
   </div>
 </div>
+
+<script>
+  function filterTable() {
+    const filterValue = document.getElementById('filterInput').value.toLowerCase();
+    const statusValue = document.getElementById('statusSelect').value.toLowerCase();
+    const table = document.getElementById('chamadosTable');
+    const tr = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < tr.length; i++) {
+      const text = tr[i].textContent.toLowerCase();
+      const matchesSearch = text.includes(filterValue);
+      const matchesStatus = !statusValue || text.includes(statusValue);
+
+      if (matchesSearch && matchesStatus) {
+        tr[i].style.display = '';
+      } else {
+        tr[i].style.display = 'none';
+      }
+    }
+  }
+</script>
 {% endblock %}

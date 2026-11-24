@@ -3,805 +3,934 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Central & CRM Transporte Urbano</title>
-  
-  <!-- PWA Manifest & Meta Tags -->
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0D1424">
+  <title>Central de Operações Mobile | CCO & CRM</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <meta name="theme-color" content="#101d30">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="CCO CRM">
-  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
 
-  <!-- Google Fonts: Inter & Montserrat -->
+  <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
-  
-  <!-- FontAwesome 6 -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     :root {
-      --bg-dark: #060911;
-      --card-bg: #0D1424;
-      --card-elevated: #162036;
-      --cyan: #38BDF8;
-      --emerald: #10B981;
-      --amber: #F59E0B;
-      --purple: #8B5CF6;
-      --red: #EF4444;
-      --text-main: #F1F5F9;
-      --text-muted: #94A3B8;
-      --border-soft: rgba(56, 189, 248, 0.15);
+      --background: #f5f7fa;
+      --foreground: #17243a;
+      --card: #ffffff;
+      --border: #e6ebf0;
+      --primary: #14866e;
+      --primary-hover: #10705c;
+      --sidebar: #101d30;
+      --accent-teal: #9cf0d9;
+      --accent-teal-dark: #1a3e42;
+      --accent-emerald: #198a70;
+      --accent-emerald-bg: #eaf6f1;
+      --accent-blue: #4d81c4;
+      --accent-blue-bg: #ebf2fc;
+      --accent-violet: #8a73c4;
+      --accent-violet-bg: #f0edfa;
+      --accent-amber: #bf9241;
+      --accent-amber-bg: #fff4df;
+      --accent-red: #d9534f;
+      --accent-red-bg: #fde8e8;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
+    
     body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      padding-bottom: 85px; /* Espaço para barra inferior */
-      user-select: none;
+      background: var(--background);
+      color: var(--foreground);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 75px;
     }
 
-    /* HEADER MOBILE */
-    header.mobile-header {
-      background: rgba(13, 20, 36, 0.98);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border-soft);
-      padding: 12px 16px;
+    /* TOPBAR */
+    .mobile-header {
+      background: #ffffff;
+      height: 58px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
       z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
     }
 
-    .brand-group {
+    .header-left {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
-    .brand-icon {
-      width: 38px; height: 38px;
-      background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);
-      color: #000;
-      border-radius: 8px;
+    .brand-mark-mini {
+      height: 36px;
+      width: 36px;
+      border-radius: 9px;
+      color: var(--accent-teal);
+      background: var(--accent-teal-dark);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.1rem;
-      font-weight: 900;
-      box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
+      font-size: 16px;
     }
 
-    .brand-titles h1 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: #FFF;
+    .brand-title-mini strong {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      display: block;
       line-height: 1.1;
     }
 
-    .brand-titles span {
-      font-size: 0.7rem;
-      color: var(--cyan);
+    .brand-title-mini span {
+      font-size: 10px;
       font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 0.4px;
+    }
+
+    .header-right {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 8px;
+    }
+
+    .user-pill {
+      height: 32px;
+      width: 32px;
+      border-radius: 50%;
+      background: #e3eee9;
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid #d1d5db;
+    }
+
+    /* BANNER AO VIVO */
+    .live-badge-card {
+      margin: 12px 16px 0;
+      background: #ecfdf5;
+      border: 1px solid #d1fae5;
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .live-dot {
-      width: 6px; height: 6px;
+      width: 8px;
+      height: 8px;
+      background: #10b981;
       border-radius: 50%;
-      background: var(--emerald);
-      box-shadow: 0 0 8px var(--emerald);
-      animation: pulse 1.8s infinite;
+      box-shadow: 0 0 6px #10b981;
+      flex-shrink: 0;
     }
 
-    @keyframes pulse {
-      0% { opacity: 0.4; }
-      50% { opacity: 1; }
-      100% { opacity: 0.4; }
+    .live-text {
+      font-size: 11.5px;
+      color: #065f46;
+      font-weight: 500;
+      line-height: 1.35;
+      flex: 1;
     }
 
-    .header-pwa-btn {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid var(--cyan);
-      color: var(--cyan);
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      cursor: pointer;
+    /* HORIZONTAL SCROLLING TABS */
+    .tabs-bar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs-bar::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      padding: 7px 14px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      white-space: nowrap;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
+      cursor: pointer;
     }
 
-    /* KPI STRIP 2x2 */
-    .kpi-strip {
+    .tab-btn.active {
+      background: var(--sidebar);
+      color: #ffffff;
+      border-color: var(--sidebar);
+    }
+
+    .tab-btn.active i {
+      color: var(--accent-teal);
+    }
+
+    /* METRICS (2x2 GRID) */
+    .mobile-metrics {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      padding: 12px 14px;
+      padding: 0 16px;
+      margin-bottom: 16px;
     }
 
-    .kpi-box {
-      background: var(--card-bg);
-      border: 1px solid var(--border-soft);
+    .mobile-metric {
+      background: #ffffff;
+      border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 12px;
-      position: relative;
+      padding: 12px 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
 
-    .kpi-box-title {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 600;
+    .metric-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 6px;
     }
 
-    .kpi-box-val {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 1.45rem;
-      font-weight: 800;
-      color: #FFF;
-      margin-top: 4px;
+    .metric-head i {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+    }
+
+    .mobile-metric strong {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+      display: block;
       line-height: 1.1;
     }
 
-    .kpi-box-sub {
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      margin-top: 3px;
+    .mobile-metric span {
+      font-size: 10px;
+      color: #94a3b8;
+      display: block;
+      margin-top: 4px;
     }
 
-    /* SEÇÃO DE CONTEÚDO DINÂMICO */
-    .app-screen {
-      display: none;
-      padding: 0 14px;
+    /* SECTION TITLE */
+    .section-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 14px 16px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .app-screen.active {
+
+    .section-title span {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    /* ROUTINES CARDS */
+    .routine-mobile-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 0 16px 10px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .routine-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    .routine-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .routine-info strong {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
       display: block;
     }
 
-    .screen-title {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: #FFF;
-      margin: 10px 0 12px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .routine-info p {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 2px;
+      line-height: 1.35;
     }
 
-    /* ITENS DA LISTA TOUCH */
-    .touch-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-soft);
+    .routine-arrow {
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    /* TICKET / ITEM CARDS */
+    .ticket-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
       border-radius: 10px;
+      margin: 0 16px 10px;
       padding: 14px;
-      margin-bottom: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
 
-    .touch-card-header {
+    .ticket-card-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
-    .touch-tag {
-      font-size: 0.7rem;
+    .ticket-badge {
+      font-size: 10px;
       font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 4px;
+      padding: 3px 7px;
+      border-radius: 5px;
       text-transform: uppercase;
     }
 
-    .tag-critica { background: rgba(239, 68, 68, 0.2); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.4); }
-    .tag-alta { background: rgba(245, 158, 11, 0.2); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.4); }
-    .tag-media { background: rgba(56, 189, 248, 0.2); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); }
+    .ticket-badge.open { background: var(--accent-amber-bg); color: var(--accent-amber); }
+    .ticket-badge.in_progress { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .ticket-badge.closed { background: var(--accent-emerald-bg); color: var(--accent-emerald); }
 
-    /* BOTÕES TÁTEIS */
-    .btn-touch {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
+    .ticket-title {
+      font-size: 13px;
       font-weight: 700;
-      font-size: 0.82rem;
+      color: #0f172a;
+      line-height: 1.3;
+    }
+
+    .ticket-meta {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 5px;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-wrap: wrap;
       gap: 8px;
-      cursor: pointer;
     }
 
-    .btn-touch-cyan {
-      background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);
-      color: #000;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
-    }
-
-    /* BARRA INFERIOR DE NAVEGAÇÃO */
-    nav.bottom-nav {
+    /* BOTTOM NAV BAR (TOUCH) */
+    .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      height: 68px;
-      background: rgba(13, 20, 36, 0.98);
-      backdrop-filter: blur(14px);
-      border-top: 1px solid var(--border-soft);
+      height: 60px;
+      background: #ffffff;
+      border-top: 1px solid var(--border);
       display: flex;
       justify-content: space-around;
       align-items: center;
-      z-index: 200;
-      padding-bottom: env(safe-area-inset-bottom, 6px);
+      z-index: 100;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
     }
 
-    .bottom-tab {
+    .nav-btn {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      font-size: 0.65rem;
+      gap: 3px;
+      color: #64748b;
+      font-size: 10px;
       font-weight: 600;
-      gap: 4px;
-      width: 20%;
-      height: 100%;
+      border: none;
+      background: none;
       cursor: pointer;
-      transition: all 0.2s ease;
+      padding: 6px 10px;
     }
 
-    .bottom-tab i {
-      font-size: 1.15rem;
+    .nav-btn.active {
+      color: var(--primary);
     }
 
-    .bottom-tab.active {
-      color: var(--cyan);
-    }
-    .bottom-tab.active i {
-      transform: translateY(-2px);
+    .nav-btn i {
+      font-size: 17px;
     }
 
     /* FLOATING ACTION BUTTON (FAB) */
-    .fab-btn {
+    .fab {
       position: fixed;
-      bottom: 80px;
+      bottom: 74px;
       right: 18px;
-      width: 54px;
-      height: 54px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-      color: #FFF;
+      background: var(--primary);
+      color: #ffffff;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      box-shadow: 0 4px 14px rgba(20, 134, 110, 0.4);
+      border: none;
+      z-index: 95;
+      cursor: pointer;
+    }
+
+    /* SIDEBAR DRAWER NO CELULAR */
+    .mobile-drawer {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: none;
+    }
+
+    .mobile-drawer.open {
+      display: flex;
+    }
+
+    .drawer-scrim {
+      position: absolute;
+      inset: 0;
+      background: rgba(16, 29, 48, 0.6);
+      backdrop-filter: blur(2px);
+    }
+
+    .drawer-content {
+      position: relative;
+      width: 280px;
+      background: var(--sidebar);
+      height: 100%;
+      color: #c7d1df;
+      padding: 24px 18px;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      animation: drawerSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes drawerSlide {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+
+    .drawer-link {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 1.35rem;
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
-      border: 2px solid #FFF;
-      cursor: pointer;
-      z-index: 150;
-    }
-
-    /* BOTTOM SHEET MODAL */
-    .bottom-sheet {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(8px);
-      z-index: 300;
-      align-items: flex-end;
-    }
-    .bottom-sheet.active { display: flex; }
-
-    .bottom-sheet-content {
-      background: var(--card-bg);
-      border-top: 2px solid var(--cyan);
-      border-radius: 20px 20px 0 0;
-      width: 100%;
-      max-height: 85vh;
-      overflow-y: auto;
-      padding: 20px 18px;
-      animation: slideUp 0.3s ease-out;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    .sheet-handle {
-      width: 40px; height: 4px;
-      background: #334155;
-      border-radius: 2px;
-      margin: 0 auto 16px auto;
-    }
-
-    .form-group-m {
-      margin-bottom: 12px;
-    }
-    .form-group-m label {
-      display: block;
-      font-size: 0.74rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-      text-transform: uppercase;
-    }
-    .form-input-m {
-      width: 100%;
+      gap: 12px;
       padding: 10px 12px;
-      background: var(--card-elevated);
-      border: 1px solid var(--border-soft);
       border-radius: 8px;
-      color: #FFF;
-      font-size: 0.85rem;
-      outline: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #aab9cc;
+      margin-bottom: 4px;
+      text-decoration: none;
+    }
+
+    .drawer-link.active {
+      background: #1b3d43;
+      color: #a1edda;
+      font-weight: 600;
+    }
+
+    .drawer-link i {
+      font-size: 15px;
+      width: 20px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER MOBILE -->
-  <header class="mobile-header">
-    <div class="brand-group">
-      <div class="brand-icon">
-        <i class="fa-solid fa-bus-simple"></i>
-      </div>
-      <div class="brand-titles">
-        <h1>CCO & CRM TRANSPORTE</h1>
-        <span><span class="live-dot"></span> 10 Áreas Conectadas ao Vivo</span>
-      </div>
-    </div>
-    <button class="header-pwa-btn" id="installPwaBtn" onclick="installApp()">
-      <i class="fa-solid fa-download"></i> Instalar
+<!-- HEADER MOBILE -->
+<header class="mobile-header">
+  <div class="header-left">
+    <button onclick="toggleDrawer()" style="font-size: 18px; color: #475569; padding: 4px;">
+      <i class="fa-solid fa-bars"></i>
     </button>
-  </header>
-
-  <!-- KPI STRIP 2x2 -->
-  <div class="kpi-strip">
-    <div class="kpi-box" style="border-left: 3px solid var(--cyan);">
-      <div class="kpi-box-title">
-        <span>Frota em Linha</span>
-        <i class="fa-solid fa-bus" style="color: var(--cyan);"></i>
-      </div>
-      <div class="kpi-box-val" style="color: var(--cyan);">142 / 150</div>
-      <div class="kpi-box-sub">94.6% em operação contínua</div>
+    <div class="brand-mark-mini">
+      <i class="fa-solid fa-layer-group"></i>
     </div>
-
-    <div class="kpi-box" style="border-left: 3px solid var(--emerald);">
-      <div class="kpi-box-title">
-        <span>Pontualidade</span>
-        <i class="fa-solid fa-gauge-high" style="color: var(--emerald);"></i>
-      </div>
-      <div class="kpi-box-val" style="color: var(--emerald);">98.4%</div>
-      <div class="kpi-box-sub">Meta do contrato: 95.0%</div>
-    </div>
-
-    <div class="kpi-box" style="border-left: 3px solid var(--amber);">
-      <div class="kpi-box-title">
-        <span>Ordens de Serviço</span>
-        <i class="fa-solid fa-wrench" style="color: var(--amber);"></i>
-      </div>
-      <div class="kpi-box-val" style="color: var(--amber);">{{ chamados_abertos }}</div>
-      <div class="kpi-box-sub">{{ chamados_criticos }} Críticos em oficina</div>
-    </div>
-
-    <div class="kpi-box" style="border-left: 3px solid var(--purple);">
-      <div class="kpi-box-title">
-        <span>Provisão Horas Extras</span>
-        <i class="fa-solid fa-clock" style="color: var(--purple);"></i>
-      </div>
-      <div class="kpi-box-val" style="color: var(--purple); font-size: 1.15rem;">R$ {{ "{:,.2f}".format(total_horas_extras) }}</div>
-      <div class="kpi-box-sub">Refletido no Contas a Pagar</div>
+    <div class="brand-title-mini">
+      <strong>Central de Operações</strong>
+      <span>CCO & CRM Transporte</span>
     </div>
   </div>
 
-  <!-- ABA 1: CCO & FROTA -->
-  <div class="app-screen active" id="screen-cco">
-    <div class="screen-title">
-      <span>🚍 Monitoramento CCO ao Vivo</span>
-      <span style="font-size: 0.72rem; color: var(--emerald); font-weight: 700;">GPS ATIVO</span>
-    </div>
-
-    <!-- CARDS DE LINHAS DE ÔNIBUS -->
-    <div class="touch-card">
-      <div class="touch-card-header">
-        <div>
-          <strong style="color: #FFF;">Linha 801 - Central x Term. Sul</strong>
-          <div style="font-size: 0.74rem; color: var(--text-muted);">32 Carros em Linha &bull; Intervalo: 4 min</div>
-        </div>
-        <span class="touch-tag tag-media">99.1% Pontual</span>
-      </div>
-      <div style="font-size: 0.72rem; color: #CBD5E1; margin-top: 6px;">
-        <i class="fa-solid fa-location-dot" style="color: var(--cyan);"></i> Trecho Av. Paulista sem retenção &bull; Telemetria normal
-      </div>
-    </div>
-
-    <div class="touch-card">
-      <div class="touch-card-header">
-        <div>
-          <strong style="color: #FFF;">Linha 703 - Bairro Alto x Metrô</strong>
-          <div style="font-size: 0.74rem; color: var(--text-muted);">26 Carros em Linha &bull; Intervalo: 6 min</div>
-        </div>
-        <span class="touch-tag tag-alta">94.8% Atenção</span>
-      </div>
-      <div style="font-size: 0.72rem; color: #CBD5E1; margin-top: 6px;">
-        <i class="fa-solid fa-triangle-exclamation" style="color: var(--amber);"></i> Tráfego lento na rotatória central &bull; 1 veículo reserva acionado
-      </div>
-    </div>
-
-    <div class="touch-card">
-      <div class="touch-card-header">
-        <div>
-          <strong style="color: #FFF;">Linha 602 - Circular Hospitais</strong>
-          <div style="font-size: 0.74rem; color: var(--text-muted);">18 Carros em Linha &bull; Intervalo: 8 min</div>
-        </div>
-        <span class="touch-tag tag-media">98.2% Pontual</span>
-      </div>
-      <div style="font-size: 0.72rem; color: #CBD5E1; margin-top: 6px;">
-        <i class="fa-solid fa-circle-check" style="color: var(--emerald);"></i> Operação sem intercorrências
-      </div>
-    </div>
-
-    <div class="touch-card">
-      <div class="touch-card-header">
-        <div>
-          <strong style="color: #FFF;">Linha 504 - Vila Progresso x Centro</strong>
-          <div style="font-size: 0.74rem; color: var(--text-muted);">24 Carros em Linha &bull; Intervalo: 5 min</div>
-        </div>
-        <span class="touch-tag tag-media">97.9% Pontual</span>
-      </div>
-      <div style="font-size: 0.72rem; color: #CBD5E1; margin-top: 6px;">
-        <i class="fa-solid fa-route" style="color: var(--cyan);"></i> Desvio operacional sinalizado pela CET
-      </div>
-    </div>
-
-    <div class="touch-card">
-      <div class="touch-card-header">
-        <div>
-          <strong style="color: #FFF;">Linha 805 - Expresso Corredor Norte</strong>
-          <div style="font-size: 0.74rem; color: var(--text-muted);">42 Carros em Linha (Articulados) &bull; Intervalo: 3 min</div>
-        </div>
-        <span class="touch-tag tag-media">99.4% Pontual</span>
-      </div>
-      <div style="font-size: 0.72rem; color: #CBD5E1; margin-top: 6px;">
-        <i class="fa-solid fa-bolt" style="color: var(--cyan);"></i> Corredor exclusivo BRT com velocidade média de 28 km/h
-      </div>
-    </div>
+  <div class="header-right">
+    <button onclick="openModalNovaOS()" style="background: var(--primary); color: #fff; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+      <i class="fa-solid fa-plus"></i> OS
+    </button>
+    <div class="user-pill">AM</div>
   </div>
+</header>
 
-  <!-- ABA 2: CRM & CHAMADOS (OS) -->
-  <div class="app-screen" id="screen-chamados">
-    <div class="screen-title">
-      <span>🎫 Fila de Chamados & OS</span>
-      <button class="header-pwa-btn" onclick="openBottomSheet()">+ Abrir OS</button>
-    </div>
-
-    {% for ch in chamados_recentes %}
-    <div class="touch-card">
-      <div class="touch-card-header">
-        <div>
-          <span style="font-family: monospace; font-size: 0.74rem; color: var(--cyan); font-weight: 800;">{{ ch['protocolo'] }}</span>
-          <div style="font-size: 0.85rem; font-weight: 700; color: #FFF; margin: 2px 0;">{{ ch['titulo'] }}</div>
-        </div>
-        <span class="touch-tag tag-{{ ch['prioridade'].lower().replace('í', 'i') }}">
-          {{ ch['prioridade'] }}
-        </span>
-      </div>
-      <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px;">
-        🚍 Veículo: <strong style="color: #FFF;">{{ ch['prefixo_veiculo'] or 'Geral' }}</strong> &bull; Setor: <strong style="color: var(--cyan);">{{ ch['departamento_destino'] }}</strong>
-      </div>
-      <div style="font-size: 0.72rem; color: #CBD5E1; background: rgba(255,255,255,0.04); padding: 8px; border-radius: 6px; margin-bottom: 8px;">
-        {{ ch['descricao'] }}
-      </div>
-      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: var(--text-muted);">
-        <span><i class="fa-solid fa-envelope-circle-check" style="color: var(--emerald);"></i> Notificado</span>
-        <span style="color: {% if ch['status'] == 'Concluído' %}var(--emerald){% else %}var(--amber){% endif %}; font-weight: 700;">
-          {{ ch['status'] }}
-        </span>
-      </div>
-    </div>
-    {% endfor %}
+<!-- LIVE STATUS BADGE -->
+<div class="live-badge-card">
+  <div class="live-dot"></div>
+  <div class="live-text">
+    <strong>Operação ao Vivo:</strong> 142 ônibus em tráfego ativo · Pontualidade 98.4%
   </div>
+</div>
 
-  <!-- ABA 3: PONTO ELETRÔNICO (RH X FINANCEIRO) -->
-  <div class="app-screen" id="screen-ponto">
-    <div class="screen-title">
-      <span>⏱️ Ponto Eletrônico & RH</span>
-      <span style="font-size: 0.72rem; color: var(--purple); font-weight: 700;">REFLEXO FINANCEIRO</span>
-    </div>
-
-    <div class="touch-card" style="border-color: var(--purple); background: rgba(139, 92, 246, 0.08);">
-      <div style="font-size: 0.78rem; font-weight: 700; color: #FFF;">
-        <i class="fa-solid fa-calculator" style="color: var(--purple);"></i> Integração Direta com a Folha
-      </div>
-      <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">
-        Lançamentos de horas extras e faltas atualizam instantaneamente a provisão do Contas a Pagar.
-      </div>
-    </div>
-
-    <!-- EXEMPLOS DE REGISTROS MÓVEIS -->
-    <div class="touch-card">
-      <div class="touch-card-header">
-        <div>
-          <strong style="color: #FFF;">Carlos Roberto Silva</strong>
-          <div style="font-size: 0.72rem; color: var(--text-muted);">VUR-1007 &bull; Manutenção (Oficina)</div>
-        </div>
-        <span class="touch-tag" style="background: rgba(139, 92, 246, 0.2); color: #8B5CF6;">+2.0h Extra</span>
-      </div>
-      <div style="font-size: 0.74rem; color: #CBD5E1; margin: 4px 0;">
-        Batidas: <strong>08:00 &bull; 12:00 &bull; 13:00 &bull; 19:00</strong>
-      </div>
-      <div style="font-size: 0.7rem; color: var(--cyan); display: flex; justify-content: space-between;">
-        <span>Custo Adicional Folha:</span>
-        <strong style="color: var(--purple);">+ R$ 77,00</strong>
-      </div>
-    </div>
-
-    <div class="touch-card">
-      <div class="touch-card-header">
-        <div>
-          <strong style="color: #FFF;">Ailton Ferreira de Souza</strong>
-          <div style="font-size: 0.72rem; color: var(--text-muted);">VUR-1009 &bull; Mecânico Socorrista SOS</div>
-        </div>
-        <span class="touch-tag" style="background: rgba(139, 92, 246, 0.2); color: #8B5CF6;">+2.5h Extra</span>
-      </div>
-      <div style="font-size: 0.74rem; color: #CBD5E1; margin: 4px 0;">
-        Batidas: <strong>08:00 &bull; 12:00 &bull; 13:00 &bull; 19:30</strong>
-      </div>
-      <div style="font-size: 0.7rem; color: var(--cyan); display: flex; justify-content: space-between;">
-        <span>Custo Adicional Folha:</span>
-        <strong style="color: var(--purple);">+ R$ 96,25</strong>
-      </div>
-    </div>
-
-    <div class="touch-card">
-      <div class="touch-card-header">
-        <div>
-          <strong style="color: #FFF;">Severino Ramos</strong>
-          <div style="font-size: 0.72rem; color: var(--text-muted);">VUR-1049 &bull; Portaria</div>
-        </div>
-        <span class="touch-tag" style="background: rgba(16, 185, 129, 0.2); color: #10B981;">Normal</span>
-      </div>
-      <div style="font-size: 0.74rem; color: #CBD5E1; margin: 4px 0;">
-        Batidas: <strong>06:00 &bull; 12:00 &bull; 13:00 &bull; 18:00</strong> (12x36)
-      </div>
-      <div style="font-size: 0.7rem; color: var(--text-muted);">
-        Jornada regular cumprida integralmente
-      </div>
-    </div>
-  </div>
-
-  <!-- ABA 4: PORTARIA & GARAGEM -->
-  <div class="app-screen" id="screen-portaria">
-    <div class="screen-title">
-      <span>🚪 Portaria & Garagem</span>
-      <span style="font-size: 0.72rem; color: var(--emerald); font-weight: 700;">CHECK-IN / OUT</span>
-    </div>
-
-    <div class="touch-card">
-      <div class="touch-card-header">
-        <div>
-          <span style="background: rgba(56, 189, 248, 0.2); color: var(--cyan); padding: 2px 6px; border-radius: 4px; font-weight: 800; font-size: 0.8rem;">🚍 ÔNIBUS 5014</span>
-          <div style="font-size: 0.74rem; color: #FFF; margin-top: 4px;">Linha 801 - Central</div>
-        </div>
-        <span style="color: var(--cyan); font-weight: 700; font-size: 0.75rem;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Saída</span>
-      </div>
-      <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-top: 6px;">
-        <span>Km: <strong style="color: var(--amber);">145.280</strong></span>
-        <span>Tanque: <strong style="color: var(--emerald);"><i class="fa-solid fa-gas-pump"></i> 100%</strong></span>
-        <span>Status: <strong style="color: var(--emerald);">Liberado</strong></span>
-      </div>
-    </div>
-
-    <div class="touch-card">
-      <div class="touch-card-header">
-        <div>
-          <span style="background: rgba(56, 189, 248, 0.2); color: var(--cyan); padding: 2px 6px; border-radius: 4px; font-weight: 800; font-size: 0.8rem;">🚍 ÔNIBUS 5045</span>
-          <div style="font-size: 0.74rem; color: #FFF; margin-top: 4px;">Linha 602 - Hospitais</div>
-        </div>
-        <span style="color: var(--emerald); font-weight: 700; font-size: 0.75rem;"><i class="fa-solid fa-arrow-down-left-and-up-right-to-center"></i> Entrada</span>
-      </div>
-      <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-top: 6px;">
-        <span>Km: <strong style="color: var(--amber);">182.110</strong></span>
-        <span>Tanque: <strong style="color: var(--amber);"><i class="fa-solid fa-gas-pump"></i> 35%</strong></span>
-        <span style="color: var(--red); font-weight: 700;"><i class="fa-solid fa-wrench"></i> OS Aberta</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ABA 5: GESTÃO & FINANCEIRO -->
-  <div class="app-screen" id="screen-gestao">
-    <div class="screen-title">
-      <span>💰 Gestão & Financeiro</span>
-      <span style="font-size: 0.72rem; color: var(--cyan); font-weight: 700;">CONTABILIDADE</span>
-    </div>
-
-    <!-- HERDADO DA CENTRAL DE OPERAÇÕES -->
-    <div class="touch-card" style="border-left: 3px solid var(--emerald);">
-      <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Receita Bilhetagem SPTrans</div>
-      <div style="font-family: 'Montserrat', sans-serif; font-size: 1.35rem; font-weight: 800; color: var(--emerald); margin: 3px 0;">
-        R$ 348.900,00
-      </div>
-      <div style="font-size: 0.7rem; color: var(--text-muted);">Repasse semanal de catracas eletrônicas</div>
-    </div>
-
-    <div class="touch-card" style="border-left: 3px solid var(--emerald);">
-      <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Subsídio Municipal (Câmara)</div>
-      <div style="font-family: 'Montserrat', sans-serif; font-size: 1.35rem; font-weight: 800; color: var(--emerald); margin: 3px 0;">
-        R$ 285.400,00
-      </div>
-      <div style="font-size: 0.7rem; color: var(--text-muted);">Remuneração por quilômetro rodado apurado</div>
-    </div>
-
-    <div class="touch-card" style="border-left: 3px solid var(--red);">
-      <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Combustível Diesel S-10 (Garagem)</div>
-      <div style="font-family: 'Montserrat', sans-serif; font-size: 1.35rem; font-weight: 800; color: var(--red); margin: 3px 0;">
-        R$ 118.400,00
-      </div>
-      <div style="font-size: 0.7rem; color: var(--text-muted);">Fornecimento de 20.000 Litros para o pátio</div>
-    </div>
-
-    <div class="touch-card" style="border-left: 3px solid var(--amber);">
-      <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Peças & Manutenção de Frota</div>
-      <div style="font-family: 'Montserrat', sans-serif; font-size: 1.35rem; font-weight: 800; color: var(--amber); margin: 3px 0;">
-        R$ 12.380,00
-      </div>
-      <div style="font-size: 0.7rem; color: var(--text-muted);">Filtros, lubrificantes e válvulas pneumáticas</div>
-    </div>
-  </div>
-
-  <!-- FLOATING ACTION BUTTON (FAB) -->
-  <button class="fab-btn" onclick="openBottomSheet()" title="Nova Ação Rápida">
-    <i class="fa-solid fa-plus"></i>
+<!-- TABS HORIZONTAIS -->
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('tab-geral', this)">
+    <i class="fa-solid fa-table-cells-large"></i> Visão Geral
   </button>
+  <button class="tab-btn" onclick="switchTab('tab-chamados', this)">
+    <i class="fa-solid fa-headset"></i> Chamados & OS ({{ chamados_abertos|default(9) }})
+  </button>
+  <button class="tab-btn" onclick="switchTab('tab-ponto', this)">
+    <i class="fa-solid fa-fingerprint"></i> Ponto Eletrônico
+  </button>
+  <button class="tab-btn" onclick="switchTab('tab-frota', this)">
+    <i class="fa-solid fa-bus"></i> CCO Linhas
+  </button>
+  <button class="tab-btn" onclick="switchTab('tab-garagem', this)">
+    <i class="fa-solid fa-warehouse"></i> Portaria
+  </button>
+</div>
 
-  <!-- BOTTOM SHEET MODAL (AÇÃO RÁPIDA NO CELULAR) -->
-  <div class="bottom-sheet" id="quickActionSheet">
-    <div class="bottom-sheet-content">
-      <div class="sheet-handle"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="font-family: 'Montserrat', sans-serif; color: #FFF; font-size: 1.05rem;">
-          <i class="fa-solid fa-bolt" style="color: var(--cyan);"></i> Ação Rápida no Celular
-        </h3>
-        <button onclick="closeBottomSheet()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem;">&times;</button>
+<!-- ABA 1: VISÃO GERAL -->
+<div id="tab-geral" class="tab-content">
+  <!-- 4 KPI CARDS (2x2) -->
+  <div class="mobile-metrics">
+    <div class="mobile-metric">
+      <div class="metric-head">
+        <span>FROTA ATIVA</span>
+        <i class="fa-solid fa-bus" style="background: var(--accent-emerald-bg); color: var(--accent-emerald);"></i>
       </div>
+      <strong>142/150</strong>
+      <span>94.6% em linha</span>
+    </div>
 
-      <form action="{{ url_for('api_abrir_chamado') }}" method="POST">
-        <div class="form-group-m">
-          <label>Título da Ocorrência *</label>
-          <input type="text" name="titulo" class="form-input-m" required placeholder="Ex: Falha Compressor / Vidro Quebrado">
+    <div class="mobile-metric">
+      <div class="metric-head">
+        <span>ORDENS SERV.</span>
+        <i class="fa-solid fa-screwdriver-wrench" style="background: var(--accent-blue-bg); color: var(--accent-blue);"></i>
+      </div>
+      <strong>{{ chamados_abertos|default(9) }}</strong>
+      <span>{{ chamados_criticos|default(2) }} em oficina</span>
+    </div>
+
+    <div class="mobile-metric">
+      <div class="metric-head">
+        <span>HORAS EXTRAS</span>
+        <i class="fa-solid fa-wallet" style="background: var(--accent-violet-bg); color: var(--accent-violet);"></i>
+      </div>
+      <strong>R$ {{ "{:,.0f}".format(total_horas_extras) }}</strong>
+      <span>Refletido no Pagar</span>
+    </div>
+
+    <div class="mobile-metric">
+      <div class="metric-head">
+        <span>EXCEÇÕES</span>
+        <i class="fa-solid fa-circle-exclamation" style="background: var(--accent-amber-bg); color: var(--accent-amber);"></i>
+      </div>
+      <strong>2</strong>
+      <span>Veículos reservas</span>
+    </div>
+  </div>
+
+  <!-- SUAS ROTINAS -->
+  <div class="section-title">
+    <span>SUAS ROTINAS</span>
+    <span>Acesso rápido</span>
+  </div>
+
+  <div class="routine-mobile-card" onclick="switchTab('tab-chamados')">
+    <div class="routine-icon" style="background: var(--accent-emerald-bg); color: var(--accent-emerald);">
+      <i class="fa-solid fa-headset"></i>
+    </div>
+    <div class="routine-info">
+      <strong>Chamados & Ordens de Serviço</strong>
+      <p>Abertura com e-mail automático ao gestor e fila SLA.</p>
+    </div>
+    <i class="fa-solid fa-chevron-right routine-arrow"></i>
+  </div>
+
+  <div class="routine-mobile-card" onclick="switchTab('tab-ponto')">
+    <div class="routine-icon" style="background: var(--accent-blue-bg); color: var(--accent-blue);">
+      <i class="fa-solid fa-fingerprint"></i>
+    </div>
+    <div class="routine-info">
+      <strong>Ponto Eletrônico & Horas Extras</strong>
+      <p>Apontamento de 60 colaboradores integrado ao Financeiro.</p>
+    </div>
+    <i class="fa-solid fa-chevron-right routine-arrow"></i>
+  </div>
+
+  <div class="routine-mobile-card" onclick="switchTab('tab-frota')">
+    <div class="routine-icon" style="background: var(--accent-violet-bg); color: var(--accent-violet);">
+      <i class="fa-solid fa-tower-broadcast"></i>
+    </div>
+    <div class="routine-info">
+      <strong>Telemetria CCO Linhas</strong>
+      <p>Intervalo e pontualidade das linhas 801, 703, 602 e 504.</p>
+    </div>
+    <i class="fa-solid fa-chevron-right routine-arrow"></i>
+  </div>
+
+  <!-- ÚLTIMOS CHAMADOS -->
+  <div class="section-title">
+    <span>CHAMADOS RECENTES</span>
+    <a href="#" onclick="switchTab('tab-chamados')" style="color: var(--primary); font-size: 11.5px; font-weight: 600;">Ver todos</a>
+  </div>
+
+  {% for ch in chamados_recentes[:4] %}
+  <div class="ticket-card">
+    <div class="ticket-card-header">
+      <span class="ticket-title">{{ ch.protocolo }} - {{ ch.titulo }}</span>
+      {% if ch.status == 'Aberto' %}
+        <span class="ticket-badge open">Aberto</span>
+      {% elif ch.status == 'Em Andamento' %}
+        <span class="ticket-badge in_progress">Em Andamento</span>
+      {% else %}
+        <span class="ticket-badge closed">Concluído</span>
+      {% endif %}
+    </div>
+    <div class="ticket-meta">
+      <span><i class="fa-solid fa-building"></i> {{ ch.departamento_destino }}</span>
+      {% if ch.prefixo_veiculo %}<span><i class="fa-solid fa-bus"></i> Carro {{ ch.prefixo_veiculo }}</span>{% endif %}
+      <span><i class="fa-solid fa-clock"></i> {{ ch.data_abertura[:16] }}</span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ABA 2: CHAMADOS & OS -->
+<div id="tab-chamados" class="tab-content" style="display: none;">
+  <div class="section-title">
+    <span>TODOS OS CHAMADOS ({{ chamados_recentes|length }})</span>
+    <button onclick="openModalNovaOS()" style="color: var(--primary); font-weight: 700; font-size: 12px;">+ Nova OS</button>
+  </div>
+
+  {% for ch in chamados_recentes %}
+  <div class="ticket-card">
+    <div class="ticket-card-header">
+      <div>
+        <strong style="font-size: 13px; color: #0f172a;">{{ ch.protocolo }} - {{ ch.titulo }}</strong>
+        <p style="font-size: 11.5px; color: #64748b; margin-top: 2px;">{{ ch.descricao }}</p>
+      </div>
+      {% if ch.status == 'Aberto' %}
+        <span class="ticket-badge open">Aberto</span>
+      {% elif ch.status == 'Em Andamento' %}
+        <span class="ticket-badge in_progress">Em Andamento</span>
+      {% else %}
+        <span class="ticket-badge closed">Concluído</span>
+      {% endif %}
+    </div>
+    <div class="ticket-meta" style="margin-bottom: 8px;">
+      <span><strong>Depto:</strong> {{ ch.departamento_destino }}</span>
+      {% if ch.prefixo_veiculo %}<span><strong>Carro:</strong> {{ ch.prefixo_veiculo }}</span>{% endif %}
+      <span><strong>Prioridade:</strong> {{ ch.prioridade }}</span>
+    </div>
+    {% if ch.status != 'Concluído' %}
+    <form action="{{ url_for('api_fechar_chamado') }}" method="POST" onsubmit="return confirm('Fechar este chamado e enviar e-mail ao solicitante?')">
+      <input type="hidden" name="chamado_id" value="{{ ch.id }}">
+      <input type="hidden" name="resolucao" value="Serviço concluído conforme procedimento padrão.">
+      <button type="submit" style="width: 100%; padding: 7px; background: #ecfdf5; border: 1px solid #10b981; color: #065f46; border-radius: 6px; font-weight: 600; font-size: 11.5px;">
+        <i class="fa-solid fa-check"></i> Encerrar Chamado & Disparar E-mail
+      </button>
+    </form>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ABA 3: PONTO ELETRÔNICO -->
+<div id="tab-ponto" class="tab-content" style="display: none;">
+  <div class="section-title">
+    <span>FOLHA DE PONTO & BANCO DE HORAS</span>
+    <span>60 Colaboradores</span>
+  </div>
+
+  <div style="background: #ffffff; border: 1px solid var(--border); border-radius: 10px; margin: 0 16px 14px; padding: 14px;">
+    <strong style="font-size: 13px; color: #0f172a; display: block;">Integração RH &rarr; Financeiro</strong>
+    <p style="font-size: 11.5px; color: #64748b; margin-top: 4px; line-height: 1.4;">
+      As horas extras apontadas pela catraca biométrica alimentam automaticamente a provisão de pagamento no módulo Contas a Pagar.
+    </p>
+    <div style="margin-top: 10px; padding: 8px 12px; background: #f0edfa; border-radius: 6px; color: #6d28d9; font-size: 12px; font-weight: 700;">
+      Provisão Total no Mês: R$ {{ "{:,.2f}".format(total_horas_extras) }}
+    </div>
+  </div>
+
+  <div class="section-title"><span>ÚLTIMAS MARCAÇÕES</span></div>
+  <div style="margin: 0 16px;">
+    <div class="ticket-card">
+      <strong>Carlos Eduardo Motorista</strong>
+      <p style="font-size: 11.5px; color: #64748b;">Entrada: 05:48 · Saída Almoço: 11:30 · Retorno: 12:30 · Saída: 15:48</p>
+      <span style="font-size: 11px; color: #10b981; font-weight: 600;">+ 1h 48m Horas Extras (R$ 42,50)</span>
+    </div>
+    <div class="ticket-card">
+      <strong>Marcos Souza Eletricista</strong>
+      <p style="font-size: 11.5px; color: #64748b;">Entrada: 07:00 · Saída: 17:00 · Jornada normal cumprida</p>
+      <span style="font-size: 11px; color: #64748b; font-weight: 600;">Sem pendências</span>
+    </div>
+  </div>
+</div>
+
+<!-- ABA 4: CCO LINHAS -->
+<div id="tab-frota" class="tab-content" style="display: none;">
+  <div class="section-title">
+    <span>MONITORAMENTO CCO AO VIVO</span>
+    <span style="color: #10b981;"><i class="fa-solid fa-satellite-dish"></i> GPS Ativo</span>
+  </div>
+
+  <div class="ticket-card">
+    <div class="ticket-card-header">
+      <strong class="ticket-title">Linha 801 - Central x Term. Sul</strong>
+      <span class="ticket-badge closed">99.1% Pontual</span>
+    </div>
+    <p style="font-size: 11.5px; color: #64748b; margin-top: 4px;">
+      32 Carros em Linha · Intervalo médio: 4 min · Telemetria normal
+    </p>
+  </div>
+
+  <div class="ticket-card">
+    <div class="ticket-card-header">
+      <strong class="ticket-title">Linha 703 - Bairro Alto x Metrô</strong>
+      <span class="ticket-badge open">94.8% Atenção</span>
+    </div>
+    <p style="font-size: 11.5px; color: #64748b; margin-top: 4px;">
+      26 Carros em Linha · Tráfego lento na rotatória central · 1 reserva acionado
+    </p>
+  </div>
+
+  <div class="ticket-card">
+    <div class="ticket-card-header">
+      <strong class="ticket-title">Linha 602 - Circular Hospitais</strong>
+      <span class="ticket-badge closed">98.2% Pontual</span>
+    </div>
+    <p style="font-size: 11.5px; color: #64748b; margin-top: 4px;">
+      18 Carros em Linha · Intervalo: 8 min · Operação sem intercorrências
+    </p>
+  </div>
+
+  <div class="ticket-card">
+    <div class="ticket-card-header">
+      <strong class="ticket-title">Linha 504 - Vila Progresso x Centro</strong>
+      <span class="ticket-badge closed">97.9% Pontual</span>
+    </div>
+    <p style="font-size: 11.5px; color: #64748b; margin-top: 4px;">
+      24 Carros em Linha · Desvio operacional sinalizado pela CET
+    </p>
+  </div>
+</div>
+
+<!-- ABA 5: GARAGEM / PORTARIA -->
+<div id="tab-garagem" class="tab-content" style="display: none;">
+  <div class="section-title"><span>PORTARIA & GUARTA 24H</span></div>
+  <div class="ticket-card">
+    <div class="ticket-card-header">
+      <strong>Prefixo 2045 (Scania Caio Millennium)</strong>
+      <span class="ticket-badge closed">Liberado</span>
+    </div>
+    <p style="font-size: 11.5px; color: #64748b; margin-top: 4px;">
+      Saída: 05:40 · Motorista: Carlos Eduardo · Linha: 801 · Odômetro: 184.220 km
+    </p>
+  </div>
+  <div class="ticket-card">
+    <div class="ticket-card-header">
+      <strong>Prefixo 1012 (Mercedes-Benz OF-1721)</strong>
+      <span class="ticket-badge open">Retido Oficina</span>
+    </div>
+    <p style="font-size: 11.5px; color: #64748b; margin-top: 4px;">
+      Entrada: 08:15 · Motivo: Barulho no freio · OS aberta
+    </p>
+  </div>
+</div>
+
+<!-- FLOATING ACTION BUTTON (FAB) -->
+<button class="fab" onclick="openModalNovaOS()" title="Nova Ordem de Serviço">
+  <i class="fa-solid fa-plus"></i>
+</button>
+
+<!-- BOTTOM NAVIGATION BAR (TOUCH) -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="btn-nav-geral" onclick="switchTab('tab-geral', null, this)">
+    <i class="fa-solid fa-table-cells-large"></i>
+    <span>Geral</span>
+  </button>
+  <button class="nav-btn" id="btn-nav-chamados" onclick="switchTab('tab-chamados', null, this)">
+    <i class="fa-solid fa-headset"></i>
+    <span>Chamados</span>
+  </button>
+  <button class="nav-btn" id="btn-nav-ponto" onclick="switchTab('tab-ponto', null, this)">
+    <i class="fa-solid fa-fingerprint"></i>
+    <span>Ponto</span>
+  </button>
+  <button class="nav-btn" id="btn-nav-frota" onclick="switchTab('tab-frota', null, this)">
+    <i class="fa-solid fa-bus"></i>
+    <span>Frota CCO</span>
+  </button>
+  <button class="nav-btn" id="btn-nav-garagem" onclick="switchTab('tab-garagem', null, this)">
+    <i class="fa-solid fa-warehouse"></i>
+    <span>Portaria</span>
+  </button>
+</nav>
+
+<!-- SIDEBAR DRAWER NO CELULAR -->
+<div class="mobile-drawer" id="mobileDrawer">
+  <div class="drawer-scrim" onclick="toggleDrawer()"></div>
+  <div class="drawer-content">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="brand-mark-mini"><i class="fa-solid fa-layer-group"></i></div>
+        <div class="brand-title-mini">
+          <strong style="color: #fff;">Central de Operações</strong>
+          <span>CCO & CRM Transporte</span>
         </div>
+      </div>
+      <button onclick="toggleDrawer()" style="color: #94a3b8; font-size: 18px;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <div class="form-group-m">
-            <label>Prefixo Ônibus</label>
-            <input type="text" name="prefixo_veiculo" class="form-input-m" placeholder="Ex: 5014">
-          </div>
-          <div class="form-group-m">
-            <label>Prioridade</label>
-            <select name="prioridade" class="form-input-m">
-              <option value="Alta">Alta</option>
-              <option value="Crítica">Crítica</option>
-              <option value="Média">Média</option>
-            </select>
-          </div>
+    <div style="border: 1px solid #2d3b4d; border-radius: 8px; padding: 10px; margin-bottom: 18px; display: flex; align-items: center; gap: 10px;">
+      <div style="width: 28px; height: 28px; background: #2c3b50; border-radius: 6px; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff;">CO</div>
+      <div>
+        <strong style="font-size: 12px; color: #fff; display: block;">Operações</strong>
+        <span style="font-size: 10px; color: #93a3b9;">Ambiente privado</span>
+      </div>
+    </div>
+
+    <p style="font-size: 10px; letter-spacing: 1.5px; font-weight: 700; color: #7c8ea6; margin-bottom: 8px;">OPERAÇÃO</p>
+    <a href="/" class="drawer-link active"><i class="fa-solid fa-table-cells-large"></i> Visão Geral</a>
+    <a href="/chamados" class="drawer-link"><i class="fa-solid fa-headset"></i> Chamados & OS</a>
+    <a href="/ponto" class="drawer-link"><i class="fa-solid fa-fingerprint"></i> Ponto Eletrônico</a>
+    <a href="http://10.11.1.100:5600" target="_blank" class="drawer-link"><i class="fa-solid fa-tower-broadcast"></i> CCO ao Vivo (5600)</a>
+    <a href="/portaria" class="drawer-link"><i class="fa-solid fa-bus"></i> Portaria & Garagem</a>
+    <a href="/financeiro" class="drawer-link"><i class="fa-solid fa-wallet"></i> Financeiro Integrado</a>
+    <a href="/colaboradores" class="drawer-link"><i class="fa-solid fa-users"></i> Colaboradores (60)</a>
+    <a href="/emails" class="drawer-link"><i class="fa-solid fa-envelope"></i> Histórico de E-mails</a>
+
+    <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid #29374b;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="user-pill" style="background: #344258; color: #fff; border: none;">AM</div>
+        <div>
+          <strong style="font-size: 12px; color: #fff; display: block;">Antonio Mello</strong>
+          <span style="font-size: 10px; color: #8c9db4;">BI & Analytics</span>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <div class="form-group-m">
-          <label>Setor Destino *</label>
-          <select name="departamento_destino" class="form-input-m" required>
-            <option value="Manutenção">🛠️ Manutenção (Oficina)</option>
-            <option value="Gerente Operacional">🚍 Gerente Operacional</option>
-            <option value="RH">👥 RH (Pessoal/Ponto)</option>
-            <option value="Garagem">⛽ Garagem (Pátio)</option>
-            <option value="Portaria">🚪 Portaria</option>
+<!-- MODAL: ABERTURA DE NOVA OS -->
+<div class="mobile-drawer" id="modalNovaOSMobile">
+  <div class="drawer-scrim" onclick="closeModalNovaOS()"></div>
+  <div style="position: relative; margin: auto; width: 92%; max-width: 420px; background: #fff; border-radius: 12px; padding: 20px; z-index: 210;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <strong style="font-size: 15px; color: #0f172a;"><i class="fa-solid fa-plus" style="color: var(--primary);"></i> Nova Ordem de Serviço</strong>
+      <button onclick="closeModalNovaOS()" style="font-size: 18px; color: #94a3b8;">&times;</button>
+    </div>
+    <form action="{{ url_for('api_abrir_chamado') }}" method="POST">
+      <input type="hidden" name="solicitante_id" value="1">
+      <input type="hidden" name="departamento_origem" value="Operação Mobile">
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11.5px; font-weight: 600; color: #475569; margin-bottom: 4px;">Título da OS</label>
+        <input type="text" name="titulo" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12.5px;" placeholder="Ex: Ar condicionado inoperante" required>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 600; color: #475569; margin-bottom: 4px;">Departamento Destino</label>
+          <select name="departamento_destino" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px;">
+            <option value="Manutenção">Manutenção</option>
+            <option value="Garagem">Garagem</option>
+            <option value="Gerente Operacional">Gerente Operacional</option>
+            <option value="Portaria">Portaria</option>
+            <option value="RH">RH</option>
           </select>
         </div>
-
-        <div class="form-group-m">
-          <label>Descrição do Problema *</label>
-          <textarea name="descricao" rows="2" class="form-input-m" required placeholder="Descreva a falha ou necessidade..."></textarea>
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 600; color: #475569; margin-bottom: 4px;">Prioridade</label>
+          <select name="prioridade" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px;">
+            <option value="Normal">Normal</option>
+            <option value="Alta">Alta</option>
+            <option value="Crítica">Crítica</option>
+          </select>
         </div>
-
-        <!-- Hidden defaults para mobile -->
-        <input type="hidden" name="departamento_origem" value="Gerente Operacional">
-        <input type="hidden" name="solicitante_id" value="1">
-
-        <button type="submit" class="btn-touch btn-touch-cyan" style="margin-top: 8px;">
-          <i class="fa-solid fa-paper-plane"></i> Emitir OS & Disparar E-mail
-        </button>
-      </form>
-    </div>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11.5px; font-weight: 600; color: #475569; margin-bottom: 4px;">Prefixo do Veículo</label>
+        <input type="text" name="prefixo_veiculo" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12.5px;" placeholder="Ex: 1012">
+      </div>
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 11.5px; font-weight: 600; color: #475569; margin-bottom: 4px;">Descrição</label>
+        <textarea name="descricao" rows="2" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12.5px;" placeholder="Descreva o problema..." required></textarea>
+      </div>
+      <button type="submit" style="width: 100%; padding: 10px; background: var(--primary); color: #fff; border: none; border-radius: 7px; font-weight: 700; font-size: 13px; cursor: pointer;">
+        Abrir OS & Notificar por E-mail
+      </button>
+    </form>
   </div>
+</div>
 
-  <!-- BARRA INFERIOR DE NAVEGAÇÃO -->
-  <nav class="bottom-nav">
-    <div class="bottom-tab active" onclick="switchScreen('cco', this)">
-      <i class="fa-solid fa-bus-simple"></i>
-      <span>CCO Frota</span>
-    </div>
-    <div class="bottom-tab" onclick="switchScreen('chamados', this)">
-      <i class="fa-solid fa-headset"></i>
-      <span>Chamados</span>
-    </div>
-    <div class="bottom-tab" onclick="switchScreen('ponto', this)">
-      <i class="fa-solid fa-fingerprint"></i>
-      <span>Ponto RH</span>
-    </div>
-    <div class="bottom-tab" onclick="switchScreen('portaria', this)">
-      <i class="fa-solid fa-door-open"></i>
-      <span>Portaria</span>
-    </div>
-    <div class="bottom-tab" onclick="switchScreen('gestao', this)">
-      <i class="fa-solid fa-coins"></i>
-      <span>Gestão</span>
-    </div>
-  </nav>
+<script>
+  function switchTab(tabId, tabBtn, navBtn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    const target = document.getElementById(tabId);
+    if (target) target.style.display = 'block';
 
-  <script>
-    function switchScreen(screenId, tabElem) {
-      document.querySelectorAll('.app-screen').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.bottom-tab').forEach(el => el.classList.remove('active'));
-      
-      const target = document.getElementById('screen-' + screenId);
-      if (target) target.classList.add('active');
-      if (tabElem) tabElem.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (tabBtn) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      tabBtn.classList.add('active');
     }
 
-    function openBottomSheet() {
-      document.getElementById('quickActionSheet').classList.add('active');
-    }
-    function closeBottomSheet() {
-      document.getElementById('quickActionSheet').classList.remove('active');
-    }
-    window.onclick = function(e) {
-      if (e.target.classList.contains('bottom-sheet')) closeBottomSheet();
-    }
-
-    // PWA Service Worker Registration
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/static/service-worker.js').catch(err => console.log('SW Fail:', err));
-    }
-
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('installPwaBtn').style.display = 'flex';
-    });
-
-    function installApp() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choice) => {
-          if (choice.outcome === 'accepted') {
-            console.log('App instalado!');
-          }
-          deferredPrompt = null;
-        });
-      } else {
-        alert('Para instalar no celular:\n\n• No Android (Chrome): Toque nos 3 pontinhos e selecione "Instalar aplicativo" ou "Adicionar à tela inicial".\n• No iPhone (Safari): Toque no botão de Compartilhar e selecione "Adicionar à Tela de Início".');
+    if (navBtn) {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      navBtn.classList.add('active');
+    } else {
+      const targetNav = document.getElementById('btn-nav-' + tabId.replace('tab-', ''));
+      if (targetNav) {
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        targetNav.classList.add('active');
       }
     }
-  </script>
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleDrawer() {
+    document.getElementById('mobileDrawer').classList.toggle('open');
+  }
+
+  function openModalNovaOS() {
+    document.getElementById('modalNovaOSMobile').classList.add('open');
+  }
+
+  function closeModalNovaOS() {
+    document.getElementById('modalNovaOSMobile').classList.remove('open');
+  }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/static/service-worker.js').catch(function() {});
+  }
+</script>
+
 </body>
 </html>

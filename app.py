@@ -473,4 +473,4 @@ def api_portaria_registrar():
 
 if __name__ == "__main__":
     print("🚀 Iniciando CRM & Service Desk Transporte Urbano na porta 5700...")
-    app.run(host="0.0.0.0", port=5700, debug=True)
+    app.run(host="0.0.0.0", port=5700, debug=False, threaded=True)
