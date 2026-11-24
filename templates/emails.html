@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}E-mails Automáticos Disparados{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+  <div>
+    <h2 style="font-family: var(--font-brand); font-size: 1.4rem; color: #FFF; font-weight: 800;">
+      Auditoria de Notificações por E-mail
+    </h2>
+    <p style="font-size: 0.8rem; color: var(--text-muted);">
+      Registro em tempo real de todos os e-mails disparados automaticamente pelo sistema (Abertura de Chamado, Fechamento de OS e Alertas)
+    </p>
+  </div>
+</div>
+
+<div class="table-container">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Data / Hora</th>
+        <th>Tipo de Notificação</th>
+        <th>Protocolo</th>
+        <th>Destinatário</th>
+        <th>Assunto</th>
+        <th>Status</th>
+        <th>Visualizar E-mail</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for em in emails %}
+      <tr>
+        <td style="font-size: 0.75rem; color: var(--text-muted);">{{ em['data_envio'][:16] }}</td>
+        <td>
+          {% if 'Abertura' in em['tipo_evento'] %}
+          <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38BDF8;">
+            <i class="fa-solid fa-paper-plane"></i> Abertura OS
+          </span>
+          {% elif 'Fechamento' in em['tipo_evento'] %}
+          <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10B981;">
+            <i class="fa-solid fa-envelope-circle-check"></i> Fechamento OS
+          </span>
+          {% else %}
+          <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #F59E0B;">
+            {{ em['tipo_evento'] }}
+          </span>
+          {% endif %}
+        </td>
+        <td style="font-family: monospace; font-weight: bold; color: var(--cyan);">{{ em['protocolo_ref'] or '--' }}</td>
+        <td>
+          <strong style="color: #FFF;">{{ em['destinatario_nome'] }}</strong><br>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">{{ em['destinatario_email'] }}</span>
+        </td>
+        <td style="color: #E2E8F0; font-weight: 600;">{{ em['assunto'] }}</td>
+        <td>
+          <span style="color: var(--emerald); font-weight: 700; font-size: 0.74rem;">
+            <i class="fa-solid fa-circle-check"></i> {{ em['status_envio'] }}
+          </span>
+        </td>
+        <td>
+          <button class="btn btn-cyan" style="padding: 4px 8px; font-size: 0.7rem;" onclick="abrirPreviewEmail('{{ em['assunto']|replace("'", "\\'") }}', `{{ em['corpo_html']|safe }}`)">
+            <i class="fa-solid fa-eye"></i> Ler E-mail
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- MODAL PREVIEW DE EMAIL -->
+<div class="modal" id="modalPreviewEmail">
+  <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-header">
+      <h3 id="email_modal_titulo" style="font-size: 0.95rem;"></h3>
+      <button class="close-modal" onclick="closeModal('modalPreviewEmail')">&times;</button>
+    </div>
+    <div id="email_modal_corpo" style="background: #FFF; color: #000; border-radius: 6px; padding: 15px; margin-top: 10px; max-height: 400px; overflow-y: auto;">
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function abrirPreviewEmail(titulo, corpo) {
+    document.getElementById('email_modal_titulo').innerText = titulo;
+    document.getElementById('email_modal_corpo').innerHTML = corpo;
+    openModal('modalPreviewEmail');
+  }
+</script>
+{% endblock %}

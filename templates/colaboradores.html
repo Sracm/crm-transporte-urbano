@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Diretório de Colaboradores (60 Usuários){% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+  <div>
+    <h2 style="font-family: var(--font-brand); font-size: 1.4rem; color: #FFF; font-weight: 800;">
+      Diretório de Colaboradores & Acessos
+    </h2>
+    <p style="font-size: 0.8rem; color: var(--text-muted);">
+      60 profissionais cadastrados nos 10 departamentos operacionais e administrativos
+    </p>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Filtrar Setor:</span>
+    <select class="form-control" style="width: auto; padding: 6px 12px;" onchange="window.location.href='/colaboradores?dept=' + this.value">
+      <option value="Todos" {% if dept_sel == 'Todos' %}selected{% endif %}>Todos os 10 Setores</option>
+      <option value="Diretor de Operações" {% if dept_sel == 'Diretor de Operações' %}selected{% endif %}>Diretor de Operações</option>
+      <option value="Gerente Operacional" {% if dept_sel == 'Gerente Operacional' %}selected{% endif %}>Gerente Operacional</option>
+      <option value="Gerente Administrativo" {% if dept_sel == 'Gerente Administrativo' %}selected{% endif %}>Gerente Administrativo</option>
+      <option value="Manutenção" {% if dept_sel == 'Manutenção' %}selected{% endif %}>Manutenção (Oficina)</option>
+      <option value="RH" {% if dept_sel == 'RH' %}selected{% endif %}>RH (Recursos Humanos)</option>
+      <option value="Treinamento" {% if dept_sel == 'Treinamento' %}selected{% endif %}>Treinamento</option>
+      <option value="Contas a Pagar" {% if dept_sel == 'Contas a Pagar' %}selected{% endif %}>Contas a Pagar</option>
+      <option value="Contas a Receber" {% if dept_sel == 'Contas a Receber' %}selected{% endif %}>Contas a Receber</option>
+      <option value="Garagem" {% if dept_sel == 'Garagem' %}selected{% endif %}>Garagem (Pátio)</option>
+      <option value="Portaria" {% if dept_sel == 'Portaria' %}selected{% endif %}>Portaria</option>
+    </select>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+  {% for col in colaboradores %}
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between;">
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+        <span style="font-family: monospace; font-size: 0.75rem; color: var(--cyan); background: rgba(56, 189, 248, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: bold;">
+          {{ col['matricula'] }}
+        </span>
+        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">
+          {{ col['status'] }}
+        </span>
+      </div>
+
+      <div style="font-family: var(--font-brand); font-size: 0.95rem; font-weight: 700; color: #FFF; margin-bottom: 2px;">
+        {{ col['nome'] }}
+      </div>
+      <div style="font-size: 0.78rem; color: var(--cyan); margin-bottom: 8px;">
+        {{ col['cargo'] }}
+      </div>
+      <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 12px;">
+        <i class="fa-solid fa-building-user"></i> {{ col['departamento'] }}
+      </div>
+    </div>
+
+    <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; font-size: 0.72rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+      <div><i class="fa-solid fa-envelope" style="color: var(--cyan);"></i> {{ col['email'] }}</div>
+      <div><i class="fa-solid fa-phone" style="color: var(--emerald);"></i> {{ col['telefone'] }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

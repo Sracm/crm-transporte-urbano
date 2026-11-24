@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Portaria & Garagem - Controle de Movimentação{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+  <div>
+    <h2 style="font-family: var(--font-brand); font-size: 1.4rem; color: #FFF; font-weight: 800;">
+      Portaria & Garagem (Controle de Frota)
+    </h2>
+    <p style="font-size: 0.8rem; color: var(--text-muted);">
+      Registro de Saídas e Entradas, Nível de Combustível, Km e Abertura Automática de OS para Oficina
+    </p>
+  </div>
+
+  <button class="btn btn-cyan" onclick="openModal('modalNovaMov')">
+    <i class="fa-solid fa-arrow-right-arrow-left"></i> Registrar Entrada / Saída
+  </button>
+</div>
+
+<!-- TABELA DE MOVIMENTAÇÕES -->
+<div class="table-container">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Data / Hora</th>
+        <th>Tipo</th>
+        <th>Prefixo</th>
+        <th>Linha</th>
+        <th>Motorista</th>
+        <th>Km Registro</th>
+        <th>Combustível</th>
+        <th>Avaria Apontada</th>
+        <th>Status Liberação</th>
+        <th>Porteiro Plantão</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in movimentacoes %}
+      <tr>
+        <td style="font-size: 0.75rem; color: var(--text-muted);">{{ m['data_hora'][:16] }}</td>
+        <td>
+          {% if 'Saída' in m['tipo_movimento'] %}
+          <span style="color: var(--cyan); font-weight: 700;"><i class="fa-solid fa-arrow-up-right-from-square"></i> {{ m['tipo_movimento'] }}</span>
+          {% else %}
+          <span style="color: var(--emerald); font-weight: 700;"><i class="fa-solid fa-arrow-down-left-and-up-right-to-center"></i> {{ m['tipo_movimento'] }}</span>
+          {% endif %}
+        </td>
+        <td>
+          <span style="background: rgba(56, 189, 248, 0.15); color: var(--cyan); padding: 2px 6px; border-radius: 4px; font-weight: 800;">
+            🚍 {{ m['prefixo_veiculo'] }}
+          </span>
+        </td>
+        <td style="font-size: 0.75rem; color: #E2E8F0;">{{ m['linha'] }}</td>
+        <td style="font-size: 0.78rem; color: #FFF; font-weight: 600;">{{ m['motorista_nome'] }}</td>
+        <td style="font-family: monospace; color: var(--amber);">{{ "{:,}".format(m['km_registro']).replace(',', '.') }} km</td>
+        <td>
+          <span style="color: {% if m['nivel_combustivel'] in ['100%', '85%'] %}var(--emerald){% else %}var(--amber){% endif %}; font-weight: 700;">
+            <i class="fa-solid fa-gas-pump"></i> {{ m['nivel_combustivel'] }}
+          </span>
+        </td>
+        <td>
+          {% if m['avaria_apontada'] and m['avaria_apontada'] != 'Sem avarias visuais' %}
+          <span style="color: var(--red); font-size: 0.75rem; font-weight: 600;">
+            <i class="fa-solid fa-triangle-exclamation"></i> {{ m['avaria_apontada'] }}
+          </span>
+          {% if m['os_aberta_id'] %}
+          <span style="display: block; font-size: 0.68rem; color: var(--cyan);">OS Automática Gerada</span>
+          {% endif %}
+          {% else %}
+          <span style="color: var(--text-muted); font-size: 0.75rem;">Sem avarias</span>
+          {% endif %}
+        </td>
+        <td>
+          <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">
+            {{ m['status_liberacao'] }}
+          </span>
+        </td>
+        <td style="font-size: 0.75rem; color: var(--text-muted);">{{ m['porteiro_nome'] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- MODAL PARA REGISTRAR ENTRADA/SAIDA -->
+<div class="modal" id="modalNovaMov">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-bus" style="color: var(--cyan);"></i> Registro de Movimentação na Portaria</h3>
+      <button class="close-modal" onclick="closeModal('modalNovaMov')">&times;</button>
+    </div>
+    <form action="{{ url_for('api_portaria_registrar') }}" method="POST">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de Movimento *</label>
+          <select name="tipo_movimento" class="form-control" required>
+            <option value="Saída Garagem">Saída para Linha (Início de Jornada)</option>
+            <option value="Entrada Garagem">Entrada na Garagem (Fim de Jornada / Troca)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Prefixo do Ônibus *</label>
+          <input type="text" name="prefixo_veiculo" class="form-control" required placeholder="Ex: 5014">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Linha Operada *</label>
+          <input type="text" name="linha" class="form-control" required placeholder="Ex: Linha 801 - Central">
+        </div>
+        <div class="form-group">
+          <label>Porteiro Responsável *</label>
+          <select name="porteiro_nome" class="form-control" required>
+            {% for p in porteiros %}
+            <option value="{{ p['nome'] }}">{{ p['nome'] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Quilometragem (Hodômetro) *</label>
+          <input type="number" name="km_registro" class="form-control" required placeholder="145200">
+        </div>
+        <div class="form-group">
+          <label>Nível de Combustível *</label>
+          <select name="nivel_combustivel" class="form-control" required>
+            <option value="100%">100% (Cheio)</option>
+            <option value="85%">85%</option>
+            <option value="70%">70%</option>
+            <option value="50%">50% (Meio Tanque)</option>
+            <option value="30%">30% (Reserva)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Apontamento de Avarias / Problemas Mecânicos</label>
+        <input type="text" name="avaria_apontada" class="form-control" placeholder="Ex: Vidro trincado, ruído de correia, barulho no freio... (ou deixe em branco se ok)">
+      </div>
+
+      <div style="background: rgba(239, 68, 68, 0.1); border: 1px dashed var(--red); padding: 12px; border-radius: 6px; margin-bottom: 16px;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #FFF; font-weight: 600; font-size: 0.8rem;">
+          <input type="checkbox" name="abrir_os_automatica" checked>
+          <span>Abrir Ordem de Serviço Imediata para a Oficina se houver avaria apontada</span>
+        </label>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn" style="background: #334155; color: #FFF;" onclick="closeModal('modalNovaMov')">Cancelar</button>
+        <button type="submit" class="btn btn-cyan"><i class="fa-solid fa-check"></i> Registrar Movimentação</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

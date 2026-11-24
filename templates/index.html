@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Operacional Integrado{% endblock %}
+
+{% block content %}
+<!-- FILTRO DE VISÃO POR DEPARTAMENTO -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+  <div>
+    <h2 style="font-family: var(--font-brand); font-size: 1.4rem; color: #FFF; font-weight: 800;">
+      Cockpit Integrado de Operações & Gestão
+    </h2>
+    <p style="font-size: 0.8rem; color: var(--text-muted);">
+      Visão holística unindo Tráfego, Garagem, Manutenção, RH e Financeiro
+    </p>
+  </div>
+
+  <!-- SELETOR DE DEPARTAMENTO -->
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Filtrar por Departamento:</span>
+    <select class="form-control" style="width: auto; padding: 6px 12px; font-weight: 600;" onchange="window.location.href='/?dept=' + this.value">
+      <option value="Todos" {% if departamento_atual == 'Todos' %}selected{% endif %}>🏢 Visão Geral (10 Departamentos)</option>
+      <option value="Diretor de Operações" {% if departamento_atual == 'Diretor de Operações' %}selected{% endif %}>👔 Diretor de Operações</option>
+      <option value="Gerente Operacional" {% if departamento_atual == 'Gerente Operacional' %}selected{% endif %}>🚍 Gerente Operacional</option>
+      <option value="Gerente Administrativo" {% if departamento_atual == 'Gerente Administrativo' %}selected{% endif %}>📋 Gerente Administrativo</option>
+      <option value="Manutenção" {% if departamento_atual == 'Manutenção' %}selected{% endif %}>🛠️ Manutenção (Oficina)</option>
+      <option value="RH" {% if departamento_atual == 'RH' %}selected{% endif %}>👥 RH (Recursos Humanos)</option>
+      <option value="Treinamento" {% if departamento_atual == 'Treinamento' %}selected{% endif %}>🎓 Treinamento</option>
+      <option value="Contas a Pagar" {% if departamento_atual == 'Contas a Pagar' %}selected{% endif %}>💳 Contas a Pagar</option>
+      <option value="Contas a Receber" {% if departamento_atual == 'Contas a Receber' %}selected{% endif %}>💰 Contas a Receber</option>
+      <option value="Garagem" {% if departamento_atual == 'Garagem' %}selected{% endif %}>⛽ Garagem (Pátio)</option>
+      <option value="Portaria" {% if departamento_atual == 'Portaria' %}selected{% endif %}>🚪 Portaria (Guarita)</option>
+    </select>
+  </div>
+</div>
+
+<!-- CARDS DE METRICAS PRINCIPAIS -->
+<div class="kpi-grid">
+  <!-- CHAMADOS ABERTOS -->
+  <div class="kpi-card">
+    <div class="kpi-header">
+      <span class="kpi-label">Ordens de Serviço Abertas</span>
+      <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--amber);">
+        <i class="fa-solid fa-screwdriver-wrench"></i>
+      </div>
+    </div>
+    <div class="kpi-val" style="color: var(--amber);">{{ chamados_abertos }}</div>
+    <div class="kpi-footer">
+      <span style="color: var(--red); font-weight: 700;"><i class="fa-solid fa-triangle-exclamation"></i> {{ chamados_criticos }} Críticos</span> em atendimento na oficina
+    </div>
+  </div>
+
+  <!-- COLABORADORES ATIVOS -->
+  <div class="kpi-card">
+    <div class="kpi-header">
+      <span class="kpi-label">Colaboradores Ativos</span>
+      <div class="kpi-icon" style="background: rgba(56, 189, 248, 0.15); color: var(--cyan);">
+        <i class="fa-solid fa-users-gear"></i>
+      </div>
+    </div>
+    <div class="kpi-val">{{ total_usuarios }}</div>
+    <div class="kpi-footer">
+      Distribuídos em 10 setores operacionais e administrativos
+    </div>
+  </div>
+
+  <!-- PONTO & HORAS EXTRAS (INTEGRAÇÃO RH X FINANCEIRO) -->
+  <div class="kpi-card">
+    <div class="kpi-header">
+      <span class="kpi-label">Provisão Horas Extras (Mês)</span>
+      <div class="kpi-icon" style="background: rgba(139, 92, 246, 0.15); color: var(--purple);">
+        <i class="fa-solid fa-clock"></i>
+      </div>
+    </div>
+    <div class="kpi-val" style="color: var(--purple);">R$ {{ "{:,.2f}".format(total_horas_extras) }}</div>
+    <div class="kpi-footer">
+      <i class="fa-solid fa-link" style="color: var(--cyan);"></i> Integrado direto do Ponto para o Contas a Pagar
+    </div>
+  </div>
+
+  <!-- MOVIMENTAÇÃO PORTARIA -->
+  <div class="kpi-card">
+    <div class="kpi-header">
+      <span class="kpi-label">Movimentações Portaria (Hoje)</span>
+      <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--emerald);">
+        <i class="fa-solid fa-door-open"></i>
+      </div>
+    </div>
+    <div class="kpi-val" style="color: var(--emerald);">{{ mov_portaria_hoje }}</div>
+    <div class="kpi-footer">
+      Check-in / Check-out com auditoria de km e combustível
+    </div>
+  </div>
+</div>
+
+<!-- GRID COM AS 10 ÁREAS DA EMPRESA -->
+<div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px 20px; margin-bottom: 24px;">
+  <h3 style="font-family: var(--font-brand); font-size: 0.95rem; color: #FFF; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+    <i class="fa-solid fa-sitemap" style="color: var(--cyan);"></i> 10 Áreas Conectadas em Tempo Real
+  </h3>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+    {% for stat in dept_stats %}
+    <a href="/?dept={{ stat['departamento'] }}" style="text-decoration: none;">
+      <div style="background: var(--bg-elevated); border: 1px solid rgba(255,255,255,0.06); padding: 12px 14px; border-radius: 8px; transition: all 0.2s ease; cursor: pointer;"
+           onmouseover="this.style.borderColor='var(--cyan)'; this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'; this.style.transform='none'">
+        <div style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">{{ stat['departamento'] }}</div>
+        <div style="font-size: 1.15rem; font-weight: 800; color: #FFF; margin-top: 4px;">{{ stat['total'] }} <span style="font-size: 0.7rem; color: var(--cyan); font-weight: normal;">usuários</span></div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- TABELA DE ORDENS DE SERVIÇO RECENTES & FEED DE ATIVIDADES -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+  <!-- CHAMADOS RECENTES -->
+  <div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 style="font-family: var(--font-brand); font-size: 1.05rem; color: #FFF; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-list-check" style="color: var(--cyan);"></i> Fila de Chamados & OS Operacionais
+      </h3>
+      <a href="{{ url_for('chamados_view') }}" style="color: var(--cyan); font-size: 0.8rem; font-weight: 600; text-decoration: none;">
+        Ver Todos os Chamados <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Protocolo</th>
+            <th>Veículo / Linha</th>
+            <th>Origem &rarr; Destino</th>
+            <th>Prioridade</th>
+            <th>Status</th>
+            <th>E-mail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ch in chamados_recentes %}
+          <tr>
+            <td style="font-family: monospace; font-weight: bold; color: var(--cyan);">
+              {{ ch['protocolo'] }}
+            </td>
+            <td>
+              <strong>{{ ch['prefixo_veiculo'] or 'Geral' }}</strong><br>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">{{ ch['titulo'] }}</span>
+            </td>
+            <td>
+              <span style="font-size: 0.76rem; color: #FFF;">{{ ch['departamento_origem'] }}</span><br>
+              <span style="font-size: 0.72rem; color: var(--cyan);">&rarr; {{ ch['departamento_destino'] }}</span>
+            </td>
+            <td>
+              <span class="badge badge-{{ ch['prioridade'].lower().replace('í', 'i') }}">
+                {{ ch['prioridade'] }}
+              </span>
+            </td>
+            <td>
+              <span class="badge badge-{{ ch['status'].lower().replace(' ', '') }}">
+                {{ ch['status'] }}
+              </span>
+            </td>
+            <td>
+              <i class="fa-solid fa-envelope-circle-check" style="color: var(--emerald);" title="Notificação automática disparada"></i>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FEED DE ATIVIDADES RECENTES (CROSS-DEPARTMENT) -->
+  <div>
+    <h3 style="font-family: var(--font-brand); font-size: 1.05rem; color: #FFF; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-clock-rotate-left" style="color: var(--emerald);"></i> Histórico Intersetorial
+    </h3>
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        {% for act in atividades_recentes %}
+        <div style="border-left: 3px solid var(--cyan); padding-left: 12px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--text-muted);">
+            <strong style="color: #FFF;">{{ act['usuario_nome'] }}</strong>
+            <span>{{ act['data_hora'][:16] }}</span>
+          </div>
+          <div style="font-size: 0.8rem; font-weight: 600; color: var(--cyan); margin: 2px 0;">
+            {{ act['protocolo'] }} - {{ act['acao'] }}
+          </div>
+          <div style="font-size: 0.75rem; color: #CBD5E1;">
+            {{ act['observacao'] }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
