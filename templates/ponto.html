@@ -47,16 +47,13 @@
       </div>
 
       <!-- FILTRO DE DIA -->
-      <div class="ponto-filter-field" style="max-width: 120px;">
+      <div class="ponto-filter-field" style="max-width: 130px;">
         <label><i class="fa-solid fa-clock"></i> Dia</label>
         <select name="dia" id="filtroDia" class="form-select">
           <option value="Todos" {% if dia_sel == 'Todos' %}selected{% endif %}>Todos os Dias</option>
-          <option value="24" {% if dia_sel == '24' %}selected{% endif %}>Dia 24 (Hoje)</option>
-          <option value="23" {% if dia_sel == '23' %}selected{% endif %}>Dia 23</option>
-          <option value="22" {% if dia_sel == '22' %}selected{% endif %}>Dia 22</option>
-          <option value="21" {% if dia_sel == '21' %}selected{% endif %}>Dia 21</option>
-          <option value="20" {% if dia_sel == '20' %}selected{% endif %}>Dia 20</option>
-          <option value="19" {% if dia_sel == '19' %}selected{% endif %}>Dia 19</option>
+          {% for d in range(1, num_dias_mes + 1) %}
+            <option value="{{ d }}" {% if dia_sel|string == d|string or dia_sel == '%02d'|format(d) %}selected{% endif %}>Dia {{ '%02d'|format(d) }}</option>
+          {% endfor %}
         </select>
       </div>
 
@@ -104,6 +101,83 @@
       </div>
     </div>
   </form>
+</div>
+
+<!-- ESTEIRA DIÁRIA DE AUDITORIA DE PONTO & QUANTIDADE DE IRREGULARIDADES (CALENDÁRIO HORIZONTAL) -->
+<div class="esteira-card">
+  <div class="esteira-header">
+    <div class="esteira-title">
+      <h3>
+        <i class="fa-solid fa-calendar-week" style="color: #ef4444;"></i>
+        Esteira Diária de Pontos Irregulares &mdash; Mês de {{ nome_mes_sel }} / {{ ano_sel }}
+      </h3>
+      <p>
+        Total acumulado no mês: <strong>{{ total_irregulares_mes }}</strong> inconsistências de ponto.
+        <strong>Clique em qualquer dia ou na quantidade</strong> para filtrar o espelho biométrico instantaneamente com os colaboradores irregulares.
+      </p>
+    </div>
+
+    <div class="esteira-legend">
+      <span class="legend-item"><span class="legend-dot red"></span> Com Irregularidades</span>
+      <span class="legend-item"><span class="legend-dot green"></span> 100% Regular</span>
+      <span class="legend-item"><span class="legend-dot gray"></span> Sem Apontamento / Futuro</span>
+    </div>
+  </div>
+
+  <div class="esteira-scroll-wrapper">
+    <div class="esteira-scroll" id="esteiraDiasScroll">
+      {% for item in esteira_dias %}
+      <div 
+        class="dia-tile-btn {% if item.is_selecionado %}is-active-day{% endif %} {% if item.is_fim_de_semana %}is-weekend{% endif %}"
+        onclick="selecionarDiaEsteira('{{ item.dia_num }}')"
+        title="Dia {{ item.dia_str }} ({{ item.dia_semana }}): {{ item.qtd_irregulares }} colaborador(es) com ponto irregular. Clique para filtrar!">
+        
+        <span class="dia-tile-sem">{{ item.dia_semana }}</span>
+        <span class="dia-tile-num">{{ item.dia_str }}</span>
+        
+        {% if item.tem_dados %}
+          {% if item.qtd_irregulares > 0 %}
+            <span class="dia-tile-badge badge-has-irr" title="{{ item.qtd_irregulares }} pontos irregulares">{{ item.qtd_irregulares }}</span>
+          {% else %}
+            <span class="dia-tile-badge badge-zero-irr" title="Nenhum ponto irregular">0</span>
+          {% endif %}
+        {% else %}
+          <span class="dia-tile-badge badge-no-data" title="Sem registros">--</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="esteira-actions-bar">
+    <div class="badge-dia-destaque">
+      <i class="fa-solid fa-filter" style="color: var(--primary);"></i>
+      {% if dia_sel != 'Todos' %}
+        Dia em Foco: <strong>Dia {{ dia_sel }} de {{ nome_mes_sel }} / {{ ano_sel }}</strong>
+        {% if status_filtro == 'irregular' %}
+          <span style="color: #ef4444; font-weight: 700; margin-left: 6px;">[Exibindo apenas os {{ resumo.qtd_irregulares }} colaboradores com ponto irregular]</span>
+        {% else %}
+          <span style="color: #334155; font-weight: 600; margin-left: 6px;">[Exibindo todos os {{ resumo.total_colab }} colaboradores do dia]</span>
+        {% endif %}
+      {% else %}
+        Visão Consolidada: <strong>Todos os Dias de {{ nome_mes_sel }} / {{ ano_sel }}</strong>
+      {% endif %}
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+      {% if dia_sel != 'Todos' and status_filtro == 'irregular' %}
+        <button type="button" class="btn-limpar-filtros" style="height: 28px; font-size: 11px; padding: 0 10px;" onclick="verTodosDoDia()">
+          <i class="fa-solid fa-users"></i> Ver Todos os Colaboradores do Dia {{ dia_sel }}
+        </button>
+      {% endif %}
+      <button type="button" class="btn-limpar-filtros" style="height: 28px; font-size: 11px; padding: 0 10px;" onclick="scrollEsteira(-240)" title="Rolar dias anteriores">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button type="button" class="btn-limpar-filtros" style="height: 28px; font-size: 11px; padding: 0 10px;" onclick="scrollEsteira(240)" title="Rolar próximos dias">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- 4 KPI CARDS INTERATIVOS (CLICÁVEIS PARA FILTRAGEM INSTANTÂNEA) -->
@@ -515,5 +589,33 @@
     document.getElementById('filtroOrdenar').value = criterio;
     document.getElementById('formFiltrosPonto').submit();
   }
+
+  // Interatividade da Esteira Diária
+  function selecionarDiaEsteira(diaNum) {
+    document.getElementById('filtroDia').value = diaNum;
+    // Conforme solicitado pelo usuário: ao clicar no dia ou na quantidade, filtra somente as pessoas com ponto irregular
+    document.getElementById('filtroStatus').value = 'irregular';
+    document.getElementById('formFiltrosPonto').submit();
+  }
+
+  function verTodosDoDia() {
+    document.getElementById('filtroStatus').value = 'todos';
+    document.getElementById('formFiltrosPonto').submit();
+  }
+
+  function scrollEsteira(delta) {
+    const el = document.getElementById('esteiraDiasScroll');
+    if (el) el.scrollBy({ left: delta, behavior: 'smooth' });
+  }
+
+  // Rola suavemente para centralizar o dia ativo no carregamento
+  window.addEventListener('DOMContentLoaded', function() {
+    const ativo = document.querySelector('.dia-tile-btn.is-active-day');
+    if (ativo) {
+      setTimeout(() => {
+        ativo.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }, 150);
+    }
+  });
 </script>
 {% endblock %}

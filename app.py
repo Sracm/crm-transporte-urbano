@@ -8,6 +8,7 @@ Manutenção, RH, Treinamento, Contas a Pagar, Contas a Receber, Garagem, Portar
 
 import os
 import sqlite3
+import calendar
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
 
@@ -262,6 +263,7 @@ def ponto_view():
     else: # nome_asc
         registros_exibir.sort(key=lambda x: x.get('nome', '').lower())
         
+    # Resumo para os Cards
     resumo = {
         'total_colab': total_colab,
         'qtd_irregulares': qtd_irregulares,
@@ -273,6 +275,72 @@ def ponto_view():
         'total_faltas': total_faltas,
         'total_desconto': total_desconto
     }
+    
+    # ==================== ESTEIRA DE DIAS DO MÊS (CALENDÁRIO HORIZONTAL) ====================
+    num_dias_mes = calendar.monthrange(int(ano_sel), int(mes_sel))[1]
+    
+    # Consulta a contagem de irregularidades por dia para todo o mês selecionado
+    cursor.execute("""
+    SELECT 
+        data_ponto,
+        COUNT(*) as total_dia,
+        SUM(CASE WHEN 
+            entrada_1 IN ('--:--', '', NULL) OR saida_1 IN ('--:--', '', NULL) OR
+            entrada_2 IN ('--:--', '', NULL) OR saida_2 IN ('--:--', '', NULL) OR
+            horas_falta > 0 OR status_registro IN ('Atraso/Falta', 'Atestado Médico', 'Incompleto')
+            THEN 1 ELSE 0 END) as qtd_irregulares
+    FROM ponto_eletronico
+    WHERE data_ponto LIKE ?
+    GROUP BY data_ponto
+    """, (f"{ano_sel}-{int(mes_sel):02d}%",))
+    
+    dados_dias_mes = {row[0]: {'total_dia': row[1], 'qtd_irregulares': row[2]} for row in cursor.fetchall()}
+    
+    nomes_meses = {
+        1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril",
+        5: "Maio", 6: "Junho", 7: "Julho", 8: "Agosto",
+        9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"
+    }
+    nome_mes_sel = nomes_meses.get(int(mes_sel), "Novembro")
+    dias_semana_abrev = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
+    
+    esteira_dias = []
+    total_irregulares_mes = 0
+    
+    for d in range(1, num_dias_mes + 1):
+        data_iso_d = f"{ano_sel}-{int(mes_sel):02d}-{d:02d}"
+        try:
+            dt_d = datetime(int(ano_sel), int(mes_sel), d)
+            dia_sem = dias_semana_abrev[dt_d.weekday()]
+            is_fds = dt_d.weekday() in (5, 6)
+        except Exception:
+            dia_sem = "--"
+            is_fds = False
+            
+        info = dados_dias_mes.get(data_iso_d)
+        if info:
+            qtd_irr = int(info['qtd_irregulares'] or 0)
+            total_d = int(info['total_dia'] or 0)
+            tem_dados = True
+            total_irregulares_mes += qtd_irr
+        else:
+            qtd_irr = 0
+            total_d = 0
+            tem_dados = False
+            
+        is_sel = (str(dia_sel) == str(d) or str(dia_sel) == f"{d:02d}")
+        
+        esteira_dias.append({
+            'dia_num': d,
+            'dia_str': f"{d:02d}",
+            'data_iso': data_iso_d,
+            'dia_semana': dia_sem,
+            'is_fim_de_semana': is_fds,
+            'qtd_irregulares': qtd_irr,
+            'total_dia': total_d,
+            'tem_dados': tem_dados,
+            'is_selecionado': is_sel
+        })
     
     # Lista de departamentos únicos
     cursor.execute("SELECT DISTINCT departamento FROM usuarios ORDER BY departamento ASC")
@@ -292,7 +360,11 @@ def ponto_view():
         status_filtro=status_filtro,
         ordenar_sel=ordenar_sel,
         departamentos=departamentos,
-        data_sel=data_sel
+        data_sel=data_sel,
+        esteira_dias=esteira_dias,
+        num_dias_mes=num_dias_mes,
+        nome_mes_sel=nome_mes_sel,
+        total_irregulares_mes=total_irregulares_mes
     )
 
 @app.route("/portaria")
