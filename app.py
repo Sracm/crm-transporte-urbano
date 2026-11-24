@@ -9,7 +9,7 @@ Manutenção, RH, Treinamento, Contas a Pagar, Contas a Receber, Garagem, Portar
 import os
 import sqlite3
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
 
 app = Flask(__name__)
 DB_PATH = os.path.join(os.path.dirname(__file__), "crm_transporte.db")
@@ -18,6 +18,32 @@ def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+@app.route("/manifest.json")
+def manifest():
+    return send_from_directory("static", "manifest.json")
+
+@app.route("/mobile")
+@app.route("/app")
+def mobile_view():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM chamados WHERE status != 'Concluído'")
+    chamados_abertos = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM chamados WHERE prioridade = 'Crítica' AND status != 'Concluído'")
+    chamados_criticos = cursor.fetchone()[0]
+    cursor.execute("SELECT SUM(custo_hora_extra) FROM ponto_eletronico WHERE strftime('%Y-%m', data_ponto) = strftime('%Y-%m', 'now')")
+    total_horas_extras = cursor.fetchone()[0] or 0.0
+    cursor.execute("SELECT * FROM chamados ORDER BY data_abertura DESC LIMIT 15")
+    chamados_recentes = cursor.fetchall()
+    conn.close()
+    return render_template(
+        "app_mobile.html",
+        chamados_abertos=chamados_abertos,
+        chamados_criticos=chamados_criticos,
+        total_horas_extras=total_horas_extras,
+        chamados_recentes=chamados_recentes
+    )
 
 def send_simulated_email(tipo_evento, protocolo_ref, dest_nome, dest_email, assunto, corpo_html):
     """Registra disparo de e-mail no banco de dados e simula envio automático"""
