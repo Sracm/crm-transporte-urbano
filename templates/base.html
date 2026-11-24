@@ -132,7 +132,11 @@
     <!-- TOPBAR -->
     <header class="topbar">
       <div class="breadcrumb">
-        <button class="icon-button mobile-toggle" aria-label="Abrir menu" onclick="toggleSidebar()">
+        <!-- BOTÃO TOGGLE SIDEBAR (DESKTOP & MOBILE RETRÁTIL) -->
+        <button class="sidebar-toggle-btn" id="btnToggleSidebar" onclick="toggleDesktopSidebar()" title="Recolher / Expandir Menu Lateral">
+          <i class="fa-solid fa-bars-staggered"></i>
+        </button>
+        <button class="icon-button mobile-toggle" aria-label="Abrir menu mobile" onclick="toggleSidebar()">
           <i class="fa-solid fa-bars"></i>
         </button>
         <span class="breadcrumb-root">Central de operações</span>
@@ -141,9 +145,11 @@
       </div>
 
       <div class="topbar-actions">
+        {% block topbar_actions %}
         <button class="btn-primary" onclick="openModalNovaOS()">
           <i class="fa-solid fa-plus"></i> Nova OS
         </button>
+        {% endblock %}
         <span class="private-label">
           <i class="fa-solid fa-lock"></i> Acesso privado
         </span>
@@ -254,6 +260,26 @@
 </div>
 
 <script>
+  function toggleDesktopSidebar() {
+    if (window.innerWidth <= 900) {
+      toggleSidebar();
+    } else {
+      const shell = document.querySelector('.app-shell');
+      shell.classList.toggle('sidebar-collapsed');
+      const isCollapsed = shell.classList.contains('sidebar-collapsed');
+      localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
+    }
+  }
+
+  // Restaura estado da sidebar se salvo anteriormente
+  (function() {
+    try {
+      if (localStorage.getItem('sidebar_collapsed') === '1' && window.innerWidth > 900) {
+        document.querySelector('.app-shell')?.classList.add('sidebar-collapsed');
+      }
+    } catch(e) {}
+  })();
+
   function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const scrim = document.getElementById('sidebarScrim');

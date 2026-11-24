@@ -1,172 +1,375 @@
 {% extends "base.html" %}
 
-{% block title %}Ponto Eletrônico & Jornada{% endblock %}
-{% block page_breadcrumb %}Ponto Eletrônico{% endblock %}
+{% block title %}Ponto Eletrônico & Banco de Horas{% endblock %}
+{% block page_breadcrumb %}Ponto Eletrônico & Jornada{% endblock %}
+
+{# REMOVE O BOTÃO DE NOVA OS NESTA TELA, CONFORME SOLICITADO PELO USUÁRIO #}
+{% block topbar_actions %}
+<span class="private-label" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #10b981; background: #ecfdf5; padding: 6px 12px; border-radius: 8px; border: 1px solid #a7f3d0;">
+  <i class="fa-solid fa-fingerprint"></i> Biometria Integrada ao RH
+</span>
+{% endblock %}
 
 {% block content %}
 <!-- HEADING DA PÁGINA -->
 <div class="page-heading">
   <div>
-    <div class="eyebrow">RECURSOS HUMANOS & JORNADA OPERACIONAL</div>
-    <h1>Ponto Eletrônico & Banco de Horas</h1>
-    <p>Apontamento biométrico de 60 colaboradores com cálculo de horas extras integrado automaticamente ao Financeiro.</p>
-  </div>
-
-  <!-- FILTROS DE DATA E SETOR -->
-  <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-    <div style="display: flex; align-items: center; gap: 6px;">
-      <span style="font-size: 12px; color: #64748b; font-weight: 600;">Data:</span>
-      <input type="date" class="form-input" style="width: auto; padding: 7px 12px; font-size: 12.5px;" value="{{ data_sel }}" onchange="filtrarPonto(this.value, '{{ dept_sel }}')">
-    </div>
-
-    <div style="display: flex; align-items: center; gap: 6px;">
-      <span style="font-size: 12px; color: #64748b; font-weight: 600;">Setor:</span>
-      <select class="form-select" style="width: auto; padding: 7px 12px; font-size: 12.5px;" onchange="filtrarPonto('{{ data_sel }}', this.value)">
-        <option value="Todos" {% if dept_sel == 'Todos' %}selected{% endif %}>Todos os Setores (60 Colaboradores)</option>
-        <option value="Gerente Operacional" {% if dept_sel == 'Gerente Operacional' %}selected{% endif %}>Gerente Operacional</option>
-        <option value="Manutenção" {% if dept_sel == 'Manutenção' %}selected{% endif %}>Manutenção</option>
-        <option value="RH" {% if dept_sel == 'RH' %}selected{% endif %}>RH</option>
-        <option value="Treinamento" {% if dept_sel == 'Treinamento' %}selected{% endif %}>Treinamento</option>
-        <option value="Contas a Pagar" {% if dept_sel == 'Contas a Pagar' %}selected{% endif %}>Contas a Pagar</option>
-        <option value="Contas a Receber" {% if dept_sel == 'Contas a Receber' %}selected{% endif %}>Contas a Receber</option>
-        <option value="Diretor de Operações" {% if dept_sel == 'Diretor de Operações' %}selected{% endif %}>Diretor de Operações</option>
-        <option value="Gerente Administrativo" {% if dept_sel == 'Gerente Administrativo' %}selected{% endif %}>Gerente Administrativo</option>
-        <option value="Garagem" {% if dept_sel == 'Garagem' %}selected{% endif %}>Garagem</option>
-        <option value="Portaria" {% if dept_sel == 'Portaria' %}selected{% endif %}>Portaria</option>
-      </select>
-    </div>
+    <div class="eyebrow"><i class="fa-solid fa-users-gear"></i> RECURSOS HUMANOS & CONTROLE OPERACIONAL</div>
+    <h1>Acompanhamento de Ponto Eletrônico & Jornada</h1>
+    <p>Auditoria em tempo real de marcações biométricas, detecção automática de irregularidades e cálculo integrado de horas extras.</p>
   </div>
 </div>
 
-<!-- LIVE INTEGRATION BANNER -->
-<div class="demo-banner">
-  <span class="demo-label"><span></span> SINCRONIZADO</span>
-  <p>Os apontamentos de ponto do RH alimentam instantaneamente as provisões de folha e horas extras no módulo <strong>Contas a Pagar</strong>.</p>
-  <a href="{{ url_for('financeiro_view') }}">
-    <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver no Financeiro
-  </a>
+<!-- BARRA DE FILTROS AVANÇADA COM BOTÃO APLICAR -->
+<div class="ponto-filter-card">
+  <form id="formFiltrosPonto" method="GET" action="{{ url_for('ponto_view') }}">
+    <div class="ponto-filter-grid">
+      <!-- FILTRO DE ANO -->
+      <div class="ponto-filter-field" style="max-width: 110px;">
+        <label><i class="fa-solid fa-calendar"></i> Ano</label>
+        <select name="ano" id="filtroAno" class="form-select">
+          <option value="2026" {% if ano_sel == '2026' %}selected{% endif %}>2026</option>
+          <option value="2025" {% if ano_sel == '2025' %}selected{% endif %}>2025</option>
+        </select>
+      </div>
+
+      <!-- FILTRO DE MÊS -->
+      <div class="ponto-filter-field" style="min-width: 140px;">
+        <label><i class="fa-solid fa-calendar-days"></i> Mês</label>
+        <select name="mes" id="filtroMes" class="form-select">
+          <option value="11" {% if mes_sel == '11' %}selected{% endif %}>11 - Novembro</option>
+          <option value="10" {% if mes_sel == '10' %}selected{% endif %}>10 - Outubro</option>
+          <option value="09" {% if mes_sel == '09' %}selected{% endif %}>09 - Setembro</option>
+          <option value="08" {% if mes_sel == '08' %}selected{% endif %}>08 - Agosto</option>
+          <option value="07" {% if mes_sel == '07' %}selected{% endif %}>07 - Julho</option>
+          <option value="06" {% if mes_sel == '06' %}selected{% endif %}>06 - Junho</option>
+        </select>
+      </div>
+
+      <!-- FILTRO DE DIA -->
+      <div class="ponto-filter-field" style="max-width: 120px;">
+        <label><i class="fa-solid fa-clock"></i> Dia</label>
+        <select name="dia" id="filtroDia" class="form-select">
+          <option value="Todos" {% if dia_sel == 'Todos' %}selected{% endif %}>Todos os Dias</option>
+          <option value="24" {% if dia_sel == '24' %}selected{% endif %}>Dia 24 (Hoje)</option>
+          <option value="23" {% if dia_sel == '23' %}selected{% endif %}>Dia 23</option>
+          <option value="22" {% if dia_sel == '22' %}selected{% endif %}>Dia 22</option>
+          <option value="21" {% if dia_sel == '21' %}selected{% endif %}>Dia 21</option>
+          <option value="20" {% if dia_sel == '20' %}selected{% endif %}>Dia 20</option>
+          <option value="19" {% if dia_sel == '19' %}selected{% endif %}>Dia 19</option>
+        </select>
+      </div>
+
+      <!-- FILTRO DE SETOR -->
+      <div class="ponto-filter-field" style="min-width: 180px;">
+        <label><i class="fa-solid fa-building"></i> Departamento</label>
+        <select name="dept" id="filtroDept" class="form-select">
+          <option value="Todos" {% if dept_sel == 'Todos' %}selected{% endif %}>Todos os Departamentos</option>
+          {% for d in departamentos %}
+            <option value="{{ d }}" {% if dept_sel == d %}selected{% endif %}>{{ d }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- FILTRO DE STATUS / CONFORMIDADE -->
+      <div class="ponto-filter-field" style="min-width: 170px;">
+        <label><i class="fa-solid fa-shield-halved"></i> Situação</label>
+        <select name="status_filtro" id="filtroStatus" class="form-select">
+          <option value="todos" {% if status_filtro == 'todos' %}selected{% endif %}>Todos os Registros</option>
+          <option value="irregular" {% if status_filtro == 'irregular' %}selected{% endif %}>⚠️ Apenas Irregulares</option>
+          <option value="regular" {% if status_filtro == 'regular' %}selected{% endif %}>✅ Apenas Regulares</option>
+        </select>
+      </div>
+
+      <!-- ORDENAÇÃO -->
+      <div class="ponto-filter-field" style="min-width: 190px;">
+        <label><i class="fa-solid fa-arrow-down-short-wide"></i> Ordenar Por</label>
+        <select name="ordenar" id="filtroOrdenar" class="form-select">
+          <option value="nome_asc" {% if ordenar_sel == 'nome_asc' %}selected{% endif %}>Colaborador (A &rarr; Z)</option>
+          <option value="nome_desc" {% if ordenar_sel == 'nome_desc' %}selected{% endif %}>Colaborador (Z &rarr; A)</option>
+          <option value="horas_desc" {% if ordenar_sel == 'horas_desc' %}selected{% endif %}>Total de Horas (Maior p/ Menor)</option>
+          <option value="horas_asc" {% if ordenar_sel == 'horas_asc' %}selected{% endif %}>Total de Horas (Menor p/ Maior)</option>
+          <option value="extras_desc" {% if ordenar_sel == 'extras_desc' %}selected{% endif %}>Horas Extras (Maior p/ Menor)</option>
+        </select>
+      </div>
+
+      <!-- BOTÃO APLICAR FILTROS -->
+      <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+        <button type="submit" class="btn-aplicar-filtros" title="Aplicar seleção de filtros">
+          <i class="fa-solid fa-filter"></i> Aplicar Filtros
+        </button>
+        <a href="{{ url_for('ponto_view') }}" class="btn-limpar-filtros" title="Redefinir filtros padrão">
+          <i class="fa-solid fa-rotate-left"></i> Limpar
+        </a>
+      </div>
+    </div>
+  </form>
 </div>
 
-<!-- 4 KPI CARDS -->
-<div class="metrics">
-  <article class="metric">
-    <div class="metric-top">
-      <span>Horas Extras Apuradas</span>
-      <span class="metric-icon violet"><i class="fa-solid fa-clock"></i></span>
+<!-- 4 KPI CARDS INTERATIVOS (CLICÁVEIS PARA FILTRAGEM INSTANTÂNEA) -->
+<div class="ponto-kpis">
+  <!-- CARD 1: IRREGULARIDADE (ALERTA EM DESTAQUE) -->
+  <div class="ponto-kpi-card irregular-card {% if status_filtro == 'irregular' %}active-filter{% endif %}" onclick="aplicarFiltroRapido('irregular')" title="Clique para filtrar apenas colaboradores com ponto irregular">
+    <div class="ponto-kpi-header">
+      <span class="ponto-kpi-title" style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Ponto Irregular</span>
+      <span class="ponto-kpi-icon" style="background: #fee2e2; color: #ef4444;"><i class="fa-solid fa-user-xmark"></i></span>
     </div>
-    <strong>{{ resumo.total_he|dec1 }} h</strong>
-    <p>Jornada suplementar autorizada pela gestão</p>
-  </article>
-
-  <article class="metric">
-    <div class="metric-top">
-      <span>Custo HE &rarr; Contas a Pagar</span>
-      <span class="metric-icon emerald"><i class="fa-solid fa-wallet"></i></span>
+    <div class="ponto-kpi-value" style="color: #b91c1c;">
+      {{ resumo.qtd_irregulares }} <span style="font-size: 15px; color: #64748b; font-weight: 600;">/ {{ resumo.total_colab }}</span>
     </div>
-    <strong>R$ {{ resumo.custo_he|moeda }}</strong>
-    <p>Visível em tempo real pelo setor financeiro</p>
-  </article>
-
-  <article class="metric">
-    <div class="metric-top">
-      <span>Faltas / Atrasos</span>
-      <span class="metric-icon amber"><i class="fa-solid fa-user-xmark"></i></span>
-    </div>
-    <strong>{{ resumo.total_faltas|dec1 }} h</strong>
-    <p>Ausências apuradas na folha de frequência</p>
-  </article>
-
-  <article class="metric">
-    <div class="metric-top">
-      <span>Efetivo Monitorado</span>
-      <span class="metric-icon blue"><i class="fa-solid fa-users-viewfinder"></i></span>
-    </div>
-    <strong>{{ registros|length }} de 60</strong>
-    <p>100% dos colaboradores com ponto auditado</p>
-  </article>
-</div>
-
-<!-- TABELA DE PONTO ELETRÔNICO -->
-<div class="panel">
-  <div class="panel-heading">
     <div>
-      <h2>Espelho de Ponto Biométrico</h2>
-      <p>Registro de marcações horárias e reflexos no pagamento para a data {{ data_sel }}.</p>
+      <span class="ponto-kpi-badge" style="background: #fee2e2; color: #b91c1c;">
+        <i class="fa-solid fa-percent"></i> {{ resumo.perc_irregulares }}% de Irregularidade
+      </span>
     </div>
-    <div style="display: flex; gap: 8px;">
-      <button class="btn-primary" style="padding: 6px 12px; font-size: 11.5px;" onclick="window.print()">
+    <p class="ponto-kpi-desc">Falta marcação de entrada/saída, atraso ou inconsistência apurada.</p>
+  </div>
+
+  <!-- CARD 2: REGULARIDADE (CONFORME) -->
+  <div class="ponto-kpi-card regular-card {% if status_filtro == 'regular' %}active-filter{% endif %}" onclick="aplicarFiltroRapido('regular')" title="Clique para filtrar apenas colaboradores com ponto regular">
+    <div class="ponto-kpi-header">
+      <span class="ponto-kpi-title" style="color: #10b981;"><i class="fa-solid fa-circle-check"></i> Ponto Regular</span>
+      <span class="ponto-kpi-icon" style="background: #dcfce7; color: #10b981;"><i class="fa-solid fa-user-check"></i></span>
+    </div>
+    <div class="ponto-kpi-value" style="color: #047857;">
+      {{ resumo.qtd_regulares }} <span style="font-size: 15px; color: #64748b; font-weight: 600;">/ {{ resumo.total_colab }}</span>
+    </div>
+    <div>
+      <span class="ponto-kpi-badge" style="background: #dcfce7; color: #047857;">
+        <i class="fa-solid fa-shield-check"></i> {{ resumo.perc_regulares }}% em Conformidade
+      </span>
+    </div>
+    <p class="ponto-kpi-desc">4 marcações completas e jornada diária cumprida integralmente.</p>
+  </div>
+
+  <!-- CARD 3: HORAS EXTRAS APURADAS -->
+  <div class="ponto-kpi-card" style="border-left: 5px solid #8b5cf6;" onclick="aplicarOrdenacaoRapida('extras_desc')" title="Clique para ordenar por maiores horas extras">
+    <div class="ponto-kpi-header">
+      <span class="ponto-kpi-title" style="color: #7c3aed;"><i class="fa-solid fa-business-time"></i> Horas Extras</span>
+      <span class="ponto-kpi-icon" style="background: #f3e8ff; color: #8b5cf6;"><i class="fa-solid fa-clock-rotate-left"></i></span>
+    </div>
+    <div class="ponto-kpi-value" style="color: #6d28d9;">
+      {{ resumo.total_he|dec1 }} <span style="font-size: 15px; color: #64748b; font-weight: 600;">horas</span>
+    </div>
+    <div>
+      <span class="ponto-kpi-badge" style="background: #f3e8ff; color: #6d28d9;">
+        <i class="fa-solid fa-wallet"></i> R$ {{ resumo.custo_he|moeda }} no Contas a Pagar
+      </span>
+    </div>
+    <p class="ponto-kpi-desc">Jornada suplementar autorizada alimentando provisão financeira.</p>
+  </div>
+
+  <!-- CARD 4: EFETIVO TOTAL AUDITADO -->
+  <div class="ponto-kpi-card" style="border-left: 5px solid #0284c7;" onclick="aplicarFiltroRapido('todos')" title="Clique para exibir todos os colaboradores">
+    <div class="ponto-kpi-header">
+      <span class="ponto-kpi-title" style="color: #0284c7;"><i class="fa-solid fa-users"></i> Efetivo Auditado</span>
+      <span class="ponto-kpi-icon" style="background: #e0f2fe; color: #0284c7;"><i class="fa-solid fa-users-viewfinder"></i></span>
+    </div>
+    <div class="ponto-kpi-value" style="color: #0369a1;">
+      {{ resumo.total_colab }} <span style="font-size: 15px; color: #64748b; font-weight: 600;">Colaboradores</span>
+    </div>
+    <div>
+      <span class="ponto-kpi-badge" style="background: #e0f2fe; color: #0369a1;">
+        <i class="fa-solid fa-database"></i> 100% dos Registros Auditados
+      </span>
+    </div>
+    <p class="ponto-kpi-desc">Data de referência ativa: <strong>{{ data_sel }}</strong>.</p>
+  </div>
+</div>
+
+<!-- PAINEL DA TABELA -->
+<div class="panel">
+  <div class="panel-heading" style="flex-wrap: wrap; gap: 12px;">
+    <div>
+      <h2 style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-fingerprint" style="color: var(--primary);"></i>
+        Espelho de Ponto Biométrico & Ocorrências
+      </h2>
+      <p>
+        Exibindo <strong>{{ total_exibido }}</strong> apontamentos encontrados para a seleção atual.
+        {% if status_filtro == 'irregular' %}
+          <span style="color: #ef4444; font-weight: 700;">[Filtro Ativo: Apenas Irregulares]</span>
+        {% elif status_filtro == 'regular' %}
+          <span style="color: #10b981; font-weight: 700;">[Filtro Ativo: Apenas Regulares]</span>
+        {% endif %}
+      </p>
+    </div>
+
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <!-- SELETOR RÁPIDO DE ORDENAÇÃO -->
+      <span style="font-size: 11.5px; color: #64748b; font-weight: 600;">Classificar:</span>
+      <select class="form-select" style="padding: 6px 10px; font-size: 12px; height: 34px;" onchange="alterarOrdenacao(this.value)">
+        <option value="horas_desc" {% if ordenar_sel == 'horas_desc' %}selected{% endif %}>Total Horas: Maior &rarr; Menor</option>
+        <option value="horas_asc" {% if ordenar_sel == 'horas_asc' %}selected{% endif %}>Total Horas: Menor &rarr; Maior</option>
+        <option value="extras_desc" {% if ordenar_sel == 'extras_desc' %}selected{% endif %}>Horas Extras: Maior</option>
+        <option value="nome_asc" {% if ordenar_sel == 'nome_asc' %}selected{% endif %}>Colaborador: A &rarr; Z</option>
+        <option value="nome_desc" {% if ordenar_sel == 'nome_desc' %}selected{% endif %}>Colaborador: Z &rarr; A</option>
+      </select>
+
+      <button class="btn-primary" style="padding: 6px 14px; font-size: 12px; height: 34px;" onclick="window.print()">
         <i class="fa-solid fa-print"></i> Imprimir Espelho
       </button>
     </div>
   </div>
 
   <div class="table-scroll">
-    <table class="jobs-table">
+    <table class="table-ponto-alta-legibilidade">
       <thead>
         <tr>
-          <th>MATRÍCULA / NOME</th>
-          <th>DEPARTAMENTO / CARGO</th>
-          <th>ENTRADA 1</th>
-          <th>SAÍDA 1</th>
-          <th>ENTRADA 2</th>
-          <th>SAÍDA 2</th>
-          <th>TOTAL HORAS</th>
-          <th>HORAS EXTRAS</th>
-          <th>STATUS / OCORRÊNCIA</th>
-          <th>REFLEXO FINANCEIRO</th>
-          <th>AJUSTE</th>
+          <th style="min-width: 220px;">
+            <a href="javascript:void(0)" onclick="alterarOrdenacao('{{ 'nome_desc' if ordenar_sel == 'nome_asc' else 'nome_asc' }}')" title="Clique para ordenar por nome">
+              COLABORADOR
+              {% if ordenar_sel == 'nome_asc' %}<i class="fa-solid fa-sort-up" style="color: var(--primary);"></i>
+              {% elif ordenar_sel == 'nome_desc' %}<i class="fa-solid fa-sort-down" style="color: var(--primary);"></i>
+              {% else %}<i class="fa-solid fa-sort" style="color: #cbd5e1;"></i>{% endif %}
+            </a>
+          </th>
+          <th style="min-width: 170px;">DEPARTAMENTO / CARGO</th>
+          <th style="text-align: center;">ENTRADA 1</th>
+          <th style="text-align: center;">SAÍDA 1</th>
+          <th style="text-align: center;">ENTRADA 2</th>
+          <th style="text-align: center;">SAÍDA 2</th>
+          <th style="text-align: center; min-width: 110px;">
+            <a href="javascript:void(0)" onclick="alterarOrdenacao('{{ 'horas_asc' if ordenar_sel == 'horas_desc' else 'horas_desc' }}')" title="Clique para ordenar por total de horas">
+              TOTAL HORAS
+              {% if ordenar_sel == 'horas_desc' %}<i class="fa-solid fa-sort-down" style="color: var(--primary);"></i>
+              {% elif ordenar_sel == 'horas_asc' %}<i class="fa-solid fa-sort-up" style="color: var(--primary);"></i>
+              {% else %}<i class="fa-solid fa-sort" style="color: #cbd5e1;"></i>{% endif %}
+            </a>
+          </th>
+          <th style="text-align: center; min-width: 100px;">
+            <a href="javascript:void(0)" onclick="alterarOrdenacao('extras_desc')" title="Clique para ordenar por horas extras">
+              HORAS EXTRAS
+              {% if ordenar_sel == 'extras_desc' %}<i class="fa-solid fa-sort-down" style="color: #8b5cf6;"></i>
+              {% else %}<i class="fa-solid fa-sort" style="color: #cbd5e1;"></i>{% endif %}
+            </a>
+          </th>
+          <th style="min-width: 140px;">STATUS / OCORRÊNCIA</th>
+          <th style="text-align: center; min-width: 100px;">AJUSTE RH</th>
         </tr>
       </thead>
       <tbody>
-        {% for r in registros %}
+        {% if registros|length == 0 %}
         <tr>
-          <td>
-            <strong style="color: #0f172a; font-size: 13px; display: block;">{{ r.nome }}</strong>
-            <span style="font-size: 11px; color: #64748b; font-family: monospace;">{{ r.matricula }}</span>
+          <td colspan="10" style="text-align: center; padding: 40px; color: #64748b;">
+            <i class="fa-solid fa-magnifying-glass" style="font-size: 24px; margin-bottom: 8px; display: block; color: #94a3b8;"></i>
+            Nenhum apontamento encontrado para os filtros selecionados.
+            <div style="margin-top: 10px;">
+              <a href="{{ url_for('ponto_view') }}" class="btn-primary" style="padding: 6px 12px; font-size: 12px;">Limpar Filtros</a>
+            </div>
           </td>
+        </tr>
+        {% endif %}
+
+        {% for r in registros %}
+        <tr class="{% if r.is_irregular %}row-irregular{% endif %}">
+          <!-- COLABORADOR (FONTE PRETA NÍTIDA DE ALTO CONTRASTE) -->
           <td>
-            <span style="font-weight: 600; color: #334155; font-size: 12px; display: block;">{{ r.departamento }}</span>
-            <span style="font-size: 11px; color: #94a3b8;">{{ r.cargo }}</span>
+            <span class="colab-nome-bold">{{ r.nome }}</span>
+            <span class="colab-matricula-tag"><i class="fa-solid fa-id-card"></i> {{ r.matricula }}</span>
           </td>
-          <td><span style="font-weight: 600; color: #0f172a;">{{ r.entrada_1 or '--:--' }}</span></td>
-          <td><span style="font-weight: 600; color: #0f172a;">{{ r.saida_1 or '--:--' }}</span></td>
-          <td><span style="font-weight: 600; color: #0f172a;">{{ r.entrada_2 or '--:--' }}</span></td>
-          <td><span style="font-weight: 600; color: #0f172a;">{{ r.saida_2 or '--:--' }}</span></td>
+
+          <!-- DEPARTAMENTO E CARGO (NÍTIDO) -->
           <td>
-            <strong style="color: #0f172a; font-size: 12.5px;">{{ r.total_horas_trabalhadas|dec1 }}h</strong>
+            <span class="colab-depto-bold">{{ r.departamento }}</span>
+            <span class="colab-cargo-sub">{{ r.cargo }}</span>
           </td>
-          <td>
+
+          <!-- BATIDAS DE PONTO COM TRATAMENTO DE AUSÊNCIA -->
+          <td style="text-align: center;">
+            {% if r.entrada_1 and r.entrada_1 != '--:--' %}
+              <span class="ponto-punch-box">{{ r.entrada_1 }}</span>
+            {% else %}
+              <span class="ponto-punch-missing"><i class="fa-solid fa-circle-exclamation"></i> --:--</span>
+            {% endif %}
+          </td>
+
+          <td style="text-align: center;">
+            {% if r.saida_1 and r.saida_1 != '--:--' %}
+              <span class="ponto-punch-box">{{ r.saida_1 }}</span>
+            {% else %}
+              <span class="ponto-punch-missing"><i class="fa-solid fa-circle-exclamation"></i> --:--</span>
+            {% endif %}
+          </td>
+
+          <td style="text-align: center;">
+            {% if r.entrada_2 and r.entrada_2 != '--:--' %}
+              <span class="ponto-punch-box">{{ r.entrada_2 }}</span>
+            {% else %}
+              <span class="ponto-punch-missing"><i class="fa-solid fa-circle-exclamation"></i> --:--</span>
+            {% endif %}
+          </td>
+
+          <td style="text-align: center;">
+            {% if r.saida_2 and r.saida_2 != '--:--' %}
+              <span class="ponto-punch-box">{{ r.saida_2 }}</span>
+            {% else %}
+              <span class="ponto-punch-missing"><i class="fa-solid fa-circle-exclamation"></i> --:--</span>
+            {% endif %}
+          </td>
+
+          <!-- TOTAL DE HORAS (DESTAQUE NÍTIDO EM FUNDO CINZA CLARO COM FONTE ESCURA) -->
+          <td style="text-align: center;">
+            <span class="total-horas-destaque">
+              {{ r.total_horas_trabalhadas|dec1 }}h
+            </span>
+          </td>
+
+          <!-- HORAS EXTRAS -->
+          <td style="text-align: center;">
             {% if r.horas_extras and r.horas_extras > 0 %}
-              <span class="status-badge" style="background: #f5f3ff; color: #7c3aed; font-weight: 700;">
+              <span class="status-badge" style="background: #f5f3ff; color: #7c3aed; font-weight: 800; border: 1px solid #ddd6fe;">
                 +{{ r.horas_extras|dec1 }}h
               </span>
             {% else %}
-              <span style="color: #94a3b8; font-size: 12px;">--</span>
+              <span style="color: #94a3b8; font-size: 12px; font-weight: 500;">--</span>
             {% endif %}
           </td>
+
+          <!-- STATUS / OCORRÊNCIA -->
           <td>
-            {% if r.status_registro == 'Normal' %}
-              <span class="status-badge closed"><i class="fa-solid fa-circle-check" style="font-size: 8px;"></i> Normal</span>
+            {% if r.status_registro == 'Normal' and not r.is_irregular %}
+              <span class="status-badge closed" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;">
+                <i class="fa-solid fa-circle-check"></i> Normal
+              </span>
             {% elif r.status_registro and 'Extra' in r.status_registro %}
-              <span class="status-badge" style="background: #f5f3ff; color: #7c3aed;">
-                <i class="fa-solid fa-clock" style="font-size: 8px;"></i> {{ r.status_registro }}
+              <span class="status-badge" style="background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;">
+                <i class="fa-solid fa-business-time"></i> {{ r.status_registro }}
+              </span>
+            {% elif r.status_registro == 'Atestado Médico' %}
+              <span class="status-badge" style="background: #fef3c7; color: #d97706; border: 1px solid #fde68a;">
+                <i class="fa-solid fa-notes-medical"></i> Atestado Médico
+              </span>
+            {% elif r.status_registro == 'Atraso/Falta' %}
+              <span class="status-badge" style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Atraso / Falta
               </span>
             {% else %}
-              <span class="status-badge open">{{ r.status_registro or 'Normal' }}</span>
+              <span class="status-badge open" style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ r.status_registro or 'Incompleto' }}
+              </span>
             {% endif %}
           </td>
-          <td>
-            {% if r.custo_hora_extra and r.custo_hora_extra > 0 %}
-              <strong style="color: #7c3aed; font-size: 12.5px;">+ R$ {{ r.custo_hora_extra|moeda }}</strong>
-            {% elif r.desconto_falta and r.desconto_falta > 0 %}
-              <strong style="color: #ef4444; font-size: 12.5px;">- R$ {{ r.desconto_falta|moeda }}</strong>
-            {% else %}
-              <span style="color: #64748b; font-size: 12px;">R$ 0,00</span>
-            {% endif %}
-          </td>
-          <td>
-            <button onclick="abrirAjuste('{{ r.id }}', '{{ r.nome }}', '{{ r.horas_extras }}')" style="color: var(--primary); font-size: 11.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-              <i class="fa-solid fa-pen-to-square"></i> Ajustar
+
+          <!-- BOTÃO AJUSTE RH -->
+          <td style="text-align: center;">
+            <button type="button" class="btn-ajuste-rh" onclick="abrirModalAjusteRH({
+              id: '{{ r.id }}',
+              nome: '{{ r.nome }}',
+              matricula: '{{ r.matricula }}',
+              departamento: '{{ r.departamento }}',
+              cargo: '{{ r.cargo }}',
+              entrada_1: '{{ r.entrada_1 or "" }}',
+              saida_1: '{{ r.saida_1 or "" }}',
+              entrada_2: '{{ r.entrada_2 or "" }}',
+              saida_2: '{{ r.saida_2 or "" }}',
+              total_horas: '{{ r.total_horas_trabalhadas|default(8.0) }}',
+              horas_extras: '{{ r.horas_extras|default(0.0) }}',
+              horas_falta: '{{ r.horas_falta|default(0.0) }}',
+              status_registro: '{{ r.status_registro or "Normal" }}',
+              observacao_rh: '{{ r.observacao_rh or "" }}'
+            })">
+              <i class="fa-solid fa-pen-to-square"></i> Ajustar RH
             </button>
           </td>
         </tr>
@@ -176,20 +379,141 @@
   </div>
 </div>
 
+<!-- MODAL PROFISSIONAL DE AJUSTE DE PONTO PELO RH -->
+<div class="modal-backdrop" id="modalAjusteRH">
+  <div class="modal-box" style="max-width: 580px;">
+    <div class="modal-header">
+      <h3 style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-user-pen" style="color: var(--primary);"></i>
+        Ajuste de Ponto Biométrico (Recursos Humanos)
+      </h3>
+      <button style="font-size: 22px; color: #94a3b8; border: none; background: none; cursor: pointer;" onclick="fecharModalAjusteRH()">&times;</button>
+    </div>
+
+    <form action="{{ url_for('api_ajustar_ponto') }}" method="POST">
+      <input type="hidden" name="ponto_id" id="modalPontoId">
+
+      <div class="modal-body" style="padding: 20px;">
+        <!-- INFO DO COLABORADOR -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px;">
+          <div style="font-size: 14px; font-weight: 800; color: #0f172a;" id="modalColabNome">--</div>
+          <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+            Matrícula: <strong id="modalColabMatricula" style="font-family: monospace; color: #334155;">--</strong> &bull;
+            Setor: <strong id="modalColabDepto" style="color: #334155;">--</strong> &bull;
+            Cargo: <span id="modalColabCargo">--</span>
+          </div>
+        </div>
+
+        <!-- 4 MARCAÇÕES DE HORÁRIO -->
+        <p style="font-size: 11.5px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+          <i class="fa-solid fa-clock"></i> Marcações de Batida (Horários no Formato HH:MM)
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
+          <div>
+            <label class="form-label" style="font-size: 11px;">Entrada 1</label>
+            <input type="text" name="entrada_1" id="modalEntrada1" class="form-input" style="text-align: center; font-weight: 700;" placeholder="08:00">
+          </div>
+          <div>
+            <label class="form-label" style="font-size: 11px;">Saída 1 (Alm.)</label>
+            <input type="text" name="saida_1" id="modalSaida1" class="form-input" style="text-align: center; font-weight: 700;" placeholder="12:00">
+          </div>
+          <div>
+            <label class="form-label" style="font-size: 11px;">Entrada 2 (Ret.)</label>
+            <input type="text" name="entrada_2" id="modalEntrada2" class="form-input" style="text-align: center; font-weight: 700;" placeholder="13:00">
+          </div>
+          <div>
+            <label class="form-label" style="font-size: 11px;">Saída 2</label>
+            <input type="text" name="saida_2" id="modalSaida2" class="form-input" style="text-align: center; font-weight: 700;" placeholder="17:00">
+          </div>
+        </div>
+
+        <!-- CÁLCULO DE HORAS E STATUS -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+          <div>
+            <label class="form-label" style="font-size: 11px;">Total de Horas</label>
+            <input type="number" step="0.1" name="total_horas" id="modalTotalHoras" class="form-input" style="font-weight: 700;">
+          </div>
+          <div>
+            <label class="form-label" style="font-size: 11px;">Horas Extras (h)</label>
+            <input type="number" step="0.5" name="horas_extras" id="modalHorasExtras" class="form-input" style="font-weight: 700; color: #7c3aed;">
+          </div>
+          <div>
+            <label class="form-label" style="font-size: 11px;">Horas Falta / Atraso</label>
+            <input type="number" step="0.5" name="horas_falta" id="modalHorasFalta" class="form-input" style="font-weight: 700; color: #dc2626;">
+          </div>
+        </div>
+
+        <!-- STATUS DO REGISTRO -->
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" style="font-size: 11px;">Status / Parecer do Ponto</label>
+          <select name="status_registro" id="modalStatusRegistro" class="form-select">
+            <option value="Normal">Normal (Jornada Regular Cumprida)</option>
+            <option value="Hora Extra">Hora Extra (Autorizada pela Gestão)</option>
+            <option value="Atestado Médico">Atestado Médico (Abonado)</option>
+            <option value="Atraso/Falta">Atraso / Falta Injustificada</option>
+            <option value="Incompleto">Incompleto / Sem Registro</option>
+          </select>
+        </div>
+
+        <!-- MOTIVO / OBSERVAÇÃO DO RH -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-size: 11px;">Justificativa do Ajuste (Auditoria RH)</label>
+          <textarea name="observacao_rh" id="modalObservacaoRH" class="form-textarea" rows="2" placeholder="Ex: Regularização de batida de retorno de almoço conforme solicitação do colaborador e liberação do gestor."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 20px; display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn-limpar-filtros" onclick="fecharModalAjusteRH()">Cancelar</button>
+        <button type="submit" class="btn-primary" style="padding: 8px 18px;">
+          <i class="fa-solid fa-check"></i> Salvar Ajuste do RH
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
-  function filtrarPonto(data, dept) {
-    window.location.href = '/ponto?data=' + data + '&dept=' + encodeURIComponent(dept);
+  // Abre o modal preenchendo todos os dados do colaborador selecionado
+  function abrirModalAjusteRH(dados) {
+    document.getElementById('modalPontoId').value = dados.id;
+    document.getElementById('modalColabNome').textContent = dados.nome;
+    document.getElementById('modalColabMatricula').textContent = dados.matricula;
+    document.getElementById('modalColabDepto').textContent = dados.departamento;
+    document.getElementById('modalColabCargo').textContent = dados.cargo;
+
+    document.getElementById('modalEntrada1').value = (dados.entrada_1 === '--:--' ? '' : dados.entrada_1);
+    document.getElementById('modalSaida1').value = (dados.saida_1 === '--:--' ? '' : dados.saida_1);
+    document.getElementById('modalEntrada2').value = (dados.entrada_2 === '--:--' ? '' : dados.entrada_2);
+    document.getElementById('modalSaida2').value = (dados.saida_2 === '--:--' ? '' : dados.saida_2);
+
+    document.getElementById('modalTotalHoras').value = parseFloat(dados.total_horas || 8.0);
+    document.getElementById('modalHorasExtras').value = parseFloat(dados.horas_extras || 0.0);
+    document.getElementById('modalHorasFalta').value = parseFloat(dados.horas_falta || 0.0);
+    document.getElementById('modalStatusRegistro').value = dados.status_registro || 'Normal';
+    document.getElementById('modalObservacaoRH').value = dados.observacao_rh || '';
+
+    document.getElementById('modalAjusteRH').classList.add('is-open');
   }
 
-  function abrirAjuste(id, nome, he) {
-    const novasHE = prompt('Ajustar Horas Extras para ' + nome + ' (em horas decimais, ex: 2.0):', he);
-    if (novasHE !== null && novasHE.trim() !== '') {
-      fetch('/api/ponto/ajustar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'ponto_id=' + id + '&horas_extras=' + encodeURIComponent(novasHE) + '&observacao=Ajuste manual pelo gestor'
-      }).then(() => window.location.reload());
-    }
+  function fecharModalAjusteRH() {
+    document.getElementById('modalAjusteRH').classList.remove('is-open');
+  }
+
+  // Filtragem rápida ao clicar nos cards KPI
+  function aplicarFiltroRapido(status) {
+    document.getElementById('filtroStatus').value = status;
+    document.getElementById('formFiltrosPonto').submit();
+  }
+
+  // Ordenação rápida
+  function alterarOrdenacao(criterio) {
+    document.getElementById('filtroOrdenar').value = criterio;
+    document.getElementById('formFiltrosPonto').submit();
+  }
+
+  function aplicarOrdenacaoRapida(criterio) {
+    document.getElementById('filtroOrdenar').value = criterio;
+    document.getElementById('formFiltrosPonto').submit();
   }
 </script>
 {% endblock %}

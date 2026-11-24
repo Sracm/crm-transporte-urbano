@@ -188,37 +188,112 @@ def chamados_view():
 
 @app.route("/ponto")
 def ponto_view():
-    data_sel = request.args.get("data", datetime.now().strftime("%Y-%m-%d"))
+    ano_sel = request.args.get("ano", "2026")
+    mes_sel = request.args.get("mes", "11")
+    dia_sel = request.args.get("dia", "24")
     dept_sel = request.args.get("dept", "Todos")
+    status_filtro = request.args.get("status_filtro", "todos")  # todos, irregular, regular
+    ordenar_sel = request.args.get("ordenar", "nome_asc")      # nome_asc, nome_desc, horas_desc, horas_asc, extras_desc
     
     conn = get_db()
     cursor = conn.cursor()
     
-    query = "SELECT * FROM ponto_eletronico WHERE data_ponto = ?"
-    params = [data_sel]
-    
+    # Determina filtro de data
+    if dia_sel != "Todos":
+        data_sel = f"{ano_sel}-{int(mes_sel):02d}-{int(dia_sel):02d}"
+        query = "SELECT * FROM ponto_eletronico WHERE data_ponto = ?"
+        params = [data_sel]
+    else:
+        data_sel = f"{ano_sel}-{int(mes_sel):02d}"
+        query = "SELECT * FROM ponto_eletronico WHERE data_ponto LIKE ?"
+        params = [f"{data_sel}%"]
+        
     if dept_sel != "Todos":
         query += " AND departamento = ?"
         params.append(dept_sel)
         
-    query += " ORDER BY departamento ASC, nome ASC"
     cursor.execute(query, params)
-    registros = cursor.fetchall()
+    raw_rows = cursor.fetchall()
     
-    # Resumo para o Financeiro
-    cursor.execute("""
-    SELECT 
-        SUM(horas_extras) as total_he,
-        SUM(custo_hora_extra) as custo_he,
-        SUM(horas_falta) as total_faltas,
-        SUM(desconto_falta) as total_desconto
-    FROM ponto_eletronico 
-    WHERE data_ponto = ?
-    """, (data_sel,))
-    resumo_financeiro = cursor.fetchone()
+    # Mapeia registros e identifica irregularidades
+    todos_registros = []
+    for r in raw_rows:
+        item = dict(r)
+        
+        # Condições de irregularidade:
+        # 1. Qualquer batida vazia ou '--:--'
+        # 2. Status 'Atraso/Falta', 'Atestado Médico', 'Incompleto'
+        # 3. horas_falta > 0
+        batidas = [item.get('entrada_1'), item.get('saida_1'), item.get('entrada_2'), item.get('saida_2')]
+        falta_batida = any(b in ('--:--', '', None) for b in batidas)
+        tem_falta_status = (item.get('horas_falta') or 0.0) > 0 or item.get('status_registro') in ('Atraso/Falta', 'Atestado Médico', 'Incompleto')
+        
+        item['is_irregular'] = falta_batida or tem_falta_status
+        todos_registros.append(item)
+        
+    total_colab = len(todos_registros)
+    qtd_irregulares = sum(1 for r in todos_registros if r['is_irregular'])
+    qtd_regulares = total_colab - qtd_irregulares
+    perc_irregulares = round((qtd_irregulares / total_colab * 100), 1) if total_colab > 0 else 0.0
+    perc_regulares = round((qtd_regulares / total_colab * 100), 1) if total_colab > 0 else 0.0
+    
+    total_he = sum((r.get('horas_extras') or 0.0) for r in todos_registros)
+    custo_he = sum((r.get('custo_hora_extra') or 0.0) for r in todos_registros)
+    total_faltas = sum((r.get('horas_falta') or 0.0) for r in todos_registros)
+    total_desconto = sum((r.get('desconto_falta') or 0.0) for r in todos_registros)
+    
+    # Aplica filtro de status rápido
+    if status_filtro == 'irregular':
+        registros_exibir = [r for r in todos_registros if r['is_irregular']]
+    elif status_filtro == 'regular':
+        registros_exibir = [r for r in todos_registros if not r['is_irregular']]
+    else:
+        registros_exibir = todos_registros
+        
+    # Aplica ordenação
+    if ordenar_sel == 'horas_desc':
+        registros_exibir.sort(key=lambda x: (x.get('total_horas_trabalhadas') or 0.0), reverse=True)
+    elif ordenar_sel == 'horas_asc':
+        registros_exibir.sort(key=lambda x: (x.get('total_horas_trabalhadas') or 0.0))
+    elif ordenar_sel == 'extras_desc':
+        registros_exibir.sort(key=lambda x: (x.get('horas_extras') or 0.0), reverse=True)
+    elif ordenar_sel == 'nome_desc':
+        registros_exibir.sort(key=lambda x: x.get('nome', '').lower(), reverse=True)
+    else: # nome_asc
+        registros_exibir.sort(key=lambda x: x.get('nome', '').lower())
+        
+    resumo = {
+        'total_colab': total_colab,
+        'qtd_irregulares': qtd_irregulares,
+        'perc_irregulares': perc_irregulares,
+        'qtd_regulares': qtd_regulares,
+        'perc_regulares': perc_regulares,
+        'total_he': total_he,
+        'custo_he': custo_he,
+        'total_faltas': total_faltas,
+        'total_desconto': total_desconto
+    }
+    
+    # Lista de departamentos únicos
+    cursor.execute("SELECT DISTINCT departamento FROM usuarios ORDER BY departamento ASC")
+    departamentos = [row[0] for row in cursor.fetchall() if row[0]]
     
     conn.close()
-    return render_template("ponto.html", registros=registros, data_sel=data_sel, dept_sel=dept_sel, resumo=resumo_financeiro)
+    
+    return render_template(
+        "ponto.html",
+        registros=registros_exibir,
+        total_exibido=len(registros_exibir),
+        resumo=resumo,
+        ano_sel=ano_sel,
+        mes_sel=mes_sel,
+        dia_sel=dia_sel,
+        dept_sel=dept_sel,
+        status_filtro=status_filtro,
+        ordenar_sel=ordenar_sel,
+        departamentos=departamentos,
+        data_sel=data_sel
+    )
 
 @app.route("/portaria")
 def portaria_view():
@@ -423,23 +498,48 @@ def api_fechar_chamado():
 def api_ajustar_ponto():
     data = request.form
     ponto_id = data.get("ponto_id")
-    status_reg = data.get("status_registro")
-    he = float(data.get("horas_extras", 0.0) or 0.0)
-    obs = data.get("observacao_rh")
+    e1 = (data.get("entrada_1") or "").strip() or "--:--"
+    s1 = (data.get("saida_1") or "").strip() or "--:--"
+    e2 = (data.get("entrada_2") or "").strip() or "--:--"
+    s2 = (data.get("saida_2") or "").strip() or "--:--"
+    status_reg = data.get("status_registro", "Normal")
     
+    try:
+        total_horas = float(data.get("total_horas", 8.0) or 8.0)
+    except:
+        total_horas = 8.0
+        
+    try:
+        he = float(data.get("horas_extras", 0.0) or 0.0)
+    except:
+        he = 0.0
+        
+    try:
+        faltas = float(data.get("horas_falta", 0.0) or 0.0)
+    except:
+        faltas = 0.0
+        
+    obs = data.get("observacao_rh", "")
     custo_he = round(he * 38.50, 2)
+    desconto_falta = round(faltas * 25.00, 2)
     
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
     UPDATE ponto_eletronico
-    SET status_registro = ?, horas_extras = ?, custo_hora_extra = ?, observacao_rh = ?
+    SET entrada_1 = ?, saida_1 = ?, entrada_2 = ?, saida_2 = ?,
+        total_horas_trabalhadas = ?, horas_extras = ?, horas_falta = ?,
+        status_registro = ?, custo_hora_extra = ?, desconto_falta = ?,
+        observacao_rh = ?
     WHERE id = ?
-    """, (status_reg, he, custo_he, obs, ponto_id))
+    """, (e1, s1, e2, s2, total_horas, he, faltas, status_reg, custo_he, desconto_falta, obs, ponto_id))
     
     conn.commit()
     conn.close()
-    return redirect(url_for("ponto_view"))
+    
+    # Redireciona de volta para a mesma URL com os filtros ativos
+    redirect_url = request.referrer or url_for("ponto_view")
+    return redirect(redirect_url)
 
 @app.route("/api/portaria/registrar", methods=["POST"])
 def api_portaria_registrar():
