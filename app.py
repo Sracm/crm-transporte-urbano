@@ -23,27 +23,14 @@ def get_db():
 def manifest():
     return send_from_directory("static", "manifest.json")
 
+@app.route("/service-worker.js")
+def service_worker():
+    return send_from_directory("static", "service-worker.js")
+
 @app.route("/mobile")
 @app.route("/app")
 def mobile_view():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM chamados WHERE status != 'Concluído'")
-    chamados_abertos = cursor.fetchone()[0]
-    cursor.execute("SELECT COUNT(*) FROM chamados WHERE prioridade = 'Crítica' AND status != 'Concluído'")
-    chamados_criticos = cursor.fetchone()[0]
-    cursor.execute("SELECT SUM(custo_hora_extra) FROM ponto_eletronico WHERE strftime('%Y-%m', data_ponto) = strftime('%Y-%m', 'now')")
-    total_horas_extras = cursor.fetchone()[0] or 0.0
-    cursor.execute("SELECT * FROM chamados ORDER BY data_abertura DESC LIMIT 15")
-    chamados_recentes = cursor.fetchall()
-    conn.close()
-    return render_template(
-        "app_mobile.html",
-        chamados_abertos=chamados_abertos,
-        chamados_criticos=chamados_criticos,
-        total_horas_extras=total_horas_extras,
-        chamados_recentes=chamados_recentes
-    )
+    return redirect(url_for("dashboard"))
 
 def send_simulated_email(tipo_evento, protocolo_ref, dest_nome, dest_email, assunto, corpo_html):
     """Registra disparo de e-mail no banco de dados e simula envio automático"""

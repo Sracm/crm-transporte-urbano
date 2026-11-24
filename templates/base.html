@@ -2,12 +2,14 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>{% block title %}Central de Operações{% endblock %} | CCO & CRM Transporte Urbano</title>
 
-  <!-- PWA & Favicon -->
+  <!-- PWA & Mobile Web App -->
   <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
   <meta name="theme-color" content="#101d30">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
 
   <!-- Google Fonts: Inter & Montserrat -->
@@ -55,36 +57,36 @@
     <!-- SEÇÃO OPERAÇÃO -->
     <p class="nav-section">OPERAÇÃO</p>
     <nav aria-label="Navegação principal">
-      <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.path == '/' %}active{% endif %}">
+      <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.path == '/' %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-table-cells-large"></i>
         <span>Visão geral</span>
       </a>
-      <a href="{{ url_for('chamados_view') }}" class="nav-item {% if '/chamados' in request.path %}active{% endif %}">
+      <a href="{{ url_for('chamados_view') }}" class="nav-item {% if '/chamados' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-headset"></i>
         <span>Chamados & OS</span>
         <span class="nav-count">{{ chamados_abertos|default(9) }}</span>
       </a>
-      <a href="{{ url_for('ponto_view') }}" class="nav-item {% if '/ponto' in request.path %}active{% endif %}">
+      <a href="{{ url_for('ponto_view') }}" class="nav-item {% if '/ponto' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-fingerprint"></i>
         <span>Ponto Eletrônico</span>
       </a>
-      <a href="http://10.11.1.100:5600" target="_blank" class="nav-item">
+      <a href="http://10.11.1.100:5600" target="_blank" class="nav-item" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-tower-broadcast"></i>
         <span>Frota CCO (5600)</span>
       </a>
-      <a href="{{ url_for('portaria_view') }}" class="nav-item {% if '/portaria' in request.path %}active{% endif %}">
+      <a href="{{ url_for('portaria_view') }}" class="nav-item {% if '/portaria' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-bus"></i>
         <span>Portaria & Garagem</span>
       </a>
-      <a href="{{ url_for('financeiro_view') }}" class="nav-item {% if '/financeiro' in request.path %}active{% endif %}">
+      <a href="{{ url_for('financeiro_view') }}" class="nav-item {% if '/financeiro' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-wallet"></i>
         <span>Financeiro Integrado</span>
       </a>
-      <a href="{{ url_for('colaboradores_view') }}" class="nav-item {% if '/colaboradores' in request.path %}active{% endif %}">
+      <a href="{{ url_for('colaboradores_view') }}" class="nav-item {% if '/colaboradores' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-users"></i>
         <span>Colaboradores (60)</span>
       </a>
-      <a href="{{ url_for('emails_view') }}" class="nav-item {% if '/emails' in request.path %}active{% endif %}">
+      <a href="{{ url_for('emails_view') }}" class="nav-item {% if '/emails' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-envelope"></i>
         <span>Histórico E-mails</span>
       </a>
@@ -93,13 +95,13 @@
     <!-- SEÇÃO CONFIGURAÇÃO -->
     <p class="nav-section" style="margin-top: 18px;">CONFIGURAÇÃO</p>
     <nav aria-label="Configurações">
-      <a href="#" class="nav-item" onclick="alert('Regras de SLA e Validação ativas no Servidor.')">
+      <a href="#" class="nav-item" onclick="alert('Regras operacionais e SLA ativos no servidor.')">
         <i class="fa-solid fa-sliders"></i>
         <span>Regras Operacionais</span>
       </a>
-      <a href="{{ url_for('mobile_view') }}" class="nav-item {% if '/mobile' in request.path %}active{% endif %}">
-        <i class="fa-solid fa-mobile-screen-button"></i>
-        <span>Modo App Celular</span>
+      <a href="{{ url_for('dashboard') }}" class="nav-item" onclick="closeSidebarOnMobile()">
+        <i class="fa-solid fa-rotate"></i>
+        <span>Atualizar Dados</span>
       </a>
     </nav>
 
@@ -139,9 +141,6 @@
       </div>
 
       <div class="topbar-actions">
-        <a href="{{ url_for('mobile_view') }}" class="btn-mobile-badge" title="Abrir interface mobile PWA">
-          <i class="fa-solid fa-mobile-screen"></i> App Celular
-        </a>
         <button class="btn-primary" onclick="openModalNovaOS()">
           <i class="fa-solid fa-plus"></i> Nova OS
         </button>
@@ -159,6 +158,35 @@
   </div>
 </div>
 
+<!-- FLOATING ACTION BUTTON (APARECE NO CELULAR) -->
+<button class="fab" onclick="openModalNovaOS()" title="Nova Ordem de Serviço">
+  <i class="fa-solid fa-plus"></i>
+</button>
+
+<!-- BOTTOM NAVIGATION BAR (TOUCH - APARECE NO CELULAR) -->
+<nav class="bottom-nav">
+  <a href="{{ url_for('dashboard') }}" class="nav-btn {% if request.path == '/' %}active{% endif %}">
+    <i class="fa-solid fa-table-cells-large"></i>
+    <span>Geral</span>
+  </a>
+  <a href="{{ url_for('chamados_view') }}" class="nav-btn {% if '/chamados' in request.path %}active{% endif %}">
+    <i class="fa-solid fa-headset"></i>
+    <span>Chamados</span>
+  </a>
+  <a href="{{ url_for('ponto_view') }}" class="nav-btn {% if '/ponto' in request.path %}active{% endif %}">
+    <i class="fa-solid fa-fingerprint"></i>
+    <span>Ponto</span>
+  </a>
+  <a href="http://10.11.1.100:5600" target="_blank" class="nav-btn">
+    <i class="fa-solid fa-bus"></i>
+    <span>Frota CCO</span>
+  </a>
+  <a href="{{ url_for('portaria_view') }}" class="nav-btn {% if '/portaria' in request.path %}active{% endif %}">
+    <i class="fa-solid fa-warehouse"></i>
+    <span>Portaria</span>
+  </a>
+</nav>
+
 <!-- MODAL: ABERTURA DE NOVA ORDEM DE SERVIÇO / CHAMADO -->
 <div class="modal-backdrop" id="modalNovaOS">
   <div class="modal-box">
@@ -168,7 +196,7 @@
     </div>
     <form action="{{ url_for('api_abrir_chamado') }}" method="POST">
       <input type="hidden" name="solicitante_id" value="1">
-      <input type="hidden" name="departamento_origem" value="Gerente Operacional">
+      <input type="hidden" name="departamento_origem" value="Operação">
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label">Título do Chamado / OS</label>
@@ -231,6 +259,15 @@
     const scrim = document.getElementById('sidebarScrim');
     sidebar.classList.toggle('is-open');
     scrim.style.display = sidebar.classList.contains('is-open') ? 'block' : 'none';
+  }
+
+  function closeSidebarOnMobile() {
+    const sidebar = document.getElementById('sidebar');
+    const scrim = document.getElementById('sidebarScrim');
+    if (window.innerWidth <= 900) {
+      sidebar.classList.remove('is-open');
+      scrim.style.display = 'none';
+    }
   }
 
   function openModalNovaOS() {
