@@ -229,6 +229,14 @@
           </button>
           {% endblock %}
 
+          <!-- BOTÃO TELA CHEIA (FULLSCREEN) GLOBAL VISÍVEL EM TODAS AS GUIAS -->
+          <button type="button" class="btn-fullscreen" onclick="toggleFullScreen()" title="Modo Tela Cheia (F11)"
+            style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: #ffffff; color: #475569; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.2s; font-size: 14px;"
+            onmouseover="this.style.background='#f1f5f9'; this.style.color='#0f172a'; this.style.borderColor='#94a3b8';"
+            onmouseout="this.style.background='#ffffff'; this.style.color='#475569'; this.style.borderColor='#cbd5e1';">
+            <i class="fa-solid fa-expand"></i>
+          </button>
+
           <!-- BADGE DO USUÁRIO LOGADO COM AVATAR E BOTÃO SAIR -->
           <div class="topbar-user-profile" style="display: flex; align-items: center; gap: 8px;">
             <span class="private-label" title="{{ current_user.cargo if current_user else 'Usuário Conectado' }}"
@@ -390,72 +398,113 @@
   </div>
 
   <script>
-  funct    n toggleDesktopSidebar() {
-    if       dow.innerWidth <= 900) {
-      t        idebar();
-    } e      {
-      c        hell = document.querySelector('.app-shell');
-      s        lassList.toggle('sidebar-collapsed');
-      c        sCollapsed = shell.classList.contains('sidebar-collapsed');
-      l        orage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
+  function toggleDesktopSidebar() {
+    if (window.innerWidth <= 900) {
+      toggleSidebar();
+      return;
     }
-              Re    aura estado da sidebar se salvo anteriormente
-  funct    n toggleDesktopSidebar() {
-    if       dow.innerWidth <= 900) {
-      t        idebar();
-      r        
+    const shell = document.querySelector('.app-shell');
+    if (!shell) return;
+    shell.classList.toggle('sidebar-collapsed');
+    const isCollapsed = shell.classList.contains('sidebar-collapsed');
+    try {
+      localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
+    } catch (e) {}
+
+    // Atualiza icones e tooltips do botao
+    const btn = document.getElementById('btnToggleSidebar');
+    const icon = document.getElementById('iconSidebarToggle');
+    if (icon) {
+      icon.className = isCollapsed ? 'fa-solid fa-bars' : 'fa-solid fa-bars-staggered';
     }
-       on      hell = document.querySelector('.app-shell');
-    if       ell) return;
-    she      lassList.toggle('sidebar-collapsed');
-    con      sCollapsed = shell.classList.contains('sidebar-collapsed');
-    try           l        orage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
-    } c      (e) {}
-     
-          liza ícones e tooltips do botão
-    con      tn = document.getElementById('btnToggleSidebar');
-    con      con = document.getElementById('iconSidebarToggle');
-    if       n) {
-      i        assName = isCollapsed ? 'fa-solid fa-bars' : 'fa-solid fa-bars-staggered';
+    if (btn) {
+      btn.title = isCollapsed ? 'Mostrar menu lateral' : 'Esconder menu lateral';
     }
-       f       ) {
-      b        le = isCollapsed ? 'Mostrar menu lateral' : 'Esconder menu lateral';
-    }
-              Re    aura estado retrátil imediatamente ao carregar
-  (func    on() {
-     try           i        alStorage.getItem('sidebar_collapsed') === '1' && window.innerWidth > 900) {
-                 t.querySelector('.app-shell')?.classList.add('sidebar-collapsed');
-                 con = document.getElementById('iconSidebarToggle');
-                 n) icon.className = 'fa-solid fa-bars';
-                 tn = document.getElementById('btnToggleSidebar');
-                 ) btn.title = 'Mostrar menu lateral';
-      }         c      (e) {}
-   })( );      funct    n toggleSidebar() {
-    con      idebar = document.getElementById('sidebar');
-    con      crim = document.getElementById('sidebarScrim');
-    sid      .classList.toggle('is-open');
-    scr      tyle.display = sidebar.classList.contains('is-open') ? 'block' : 'none';
   }
 
-      nct    n closeSidebarOnMobile() {
-    con      idebar = document.getElementById('sidebar');
-    con      crim = document.getElementById('sidebarScrim');
-    if       dow.innerWidth <= 900) {
-      s        .classList.remove('is-open');
-      s        tyle.display = 'none';
+  // Restaura estado retratil imediatamente ao carregar
+  (function() {
+    try {
+      if (localStorage.getItem('sidebar_collapsed') === '1' && window.innerWidth > 900) {
+        document.querySelector('.app-shell')?.classList.add('sidebar-collapsed');
+        const icon = document.getElementById('iconSidebarToggle');
+        if (icon) icon.className = 'fa-solid fa-bars';
+        const btn = document.getElementById('btnToggleSidebar');
+        if (btn) btn.title = 'Mostrar menu lateral';
+      }
+    } catch (e) {}
+  })();
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const scrim = document.getElementById('sidebarScrim');
+    if (sidebar) sidebar.classList.toggle('is-open');
+    if (scrim) scrim.style.display = sidebar && sidebar.classList.contains('is-open') ? 'block' : 'none';
+  }
+
+  function closeSidebarOnMobile() {
+    const sidebar = document.getElementById('sidebar');
+    const scrim = document.getElementById('sidebarScrim');
+    if (window.innerWidth <= 900) {
+      if (sidebar) sidebar.classList.remove('is-open');
+      if (scrim) scrim.style.display = 'none';
     }
-             nct    n openModalNovaOS() {
-    doc      t.getElementById('modalNovaOS').classList.add('is-open');
   }
 
-      nct    n closeModalNovaOS() {
-    doc      t.getElementById('modalNovaOS').classList.remove('is-open');
+  function openModalNovaOS() {
+    const m = document.getElementById('modalNovaOS');
+    if (m) m.classList.add('is-open');
   }
 
-       Re    stra Service Worker se suportado
-  if ('    rviceWorker' in navigator) {
-    nav      or.serviceWorker.register('/static/service-worker.js').catch(function() {}); 
-  } 
+  function closeModalNovaOS() {
+    const m = document.getElementById('modalNovaOS');
+    if (m) m.classList.remove('is-open');
+  }
+
+  // CONTROLE GLOBAL DE TELA CHEIA (FULLSCREEN)
+  function toggleFullScreen() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+      } else if (document.documentElement.webkitRequestFullscreen) {
+        document.documentElement.webkitRequestFullscreen();
+      } else if (document.documentElement.mozRequestFullScreen) {
+        document.documentElement.mozRequestFullScreen();
+      } else if (document.documentElement.msRequestFullscreen) {
+        document.documentElement.msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+  }
+
+  function updateFullscreenIcons() {
+    const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+    document.querySelectorAll('.btn-fullscreen i').forEach(icon => {
+      icon.className = isFS ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+    });
+    document.querySelectorAll('.btn-fullscreen').forEach(btn => {
+      btn.setAttribute('title', isFS ? 'Sair da Tela Cheia (Esc)' : 'Modo Tela Cheia (F11)');
+    });
+  }
+
+  document.addEventListener('fullscreenchange', updateFullscreenIcons);
+  document.addEventListener('webkitfullscreenchange', updateFullscreenIcons);
+  document.addEventListener('mozfullscreenchange', updateFullscreenIcons);
+  document.addEventListener('MSFullscreenChange', updateFullscreenIcons);
+
+  // Registra Service Worker se suportado
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/static/service-worker.js').catch(function() {}); 
+  }
   </script>
 
   {% block extra_scripts %}{% endblock %}

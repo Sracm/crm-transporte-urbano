@@ -483,6 +483,9 @@
   </div>
 
   <div class="header-right">
+    <button type="button" class="btn-fullscreen" onclick="toggleFullScreen()" title="Modo Tela Cheia" style="background: rgba(255,255,255,0.9); color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+      <i class="fa-solid fa-expand"></i>
+    </button>
     <button onclick="openModalNovaOS()" style="background: var(--primary); color: #fff; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
       <i class="fa-solid fa-plus"></i> OS
     </button>
@@ -926,6 +929,43 @@
   function closeModalNovaOS() {
     document.getElementById('modalNovaOSMobile').classList.remove('open');
   }
+
+  // CONTROLE GLOBAL DE TELA CHEIA (FULLSCREEN)
+  function toggleFullScreen() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+      } else if (document.documentElement.webkitRequestFullscreen) {
+        document.documentElement.webkitRequestFullscreen();
+      } else if (document.documentElement.mozRequestFullScreen) {
+        document.documentElement.mozRequestFullScreen();
+      } else if (document.documentElement.msRequestFullscreen) {
+        document.documentElement.msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+  }
+
+  function updateFullscreenIcons() {
+    const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+    document.querySelectorAll('.btn-fullscreen i').forEach(icon => {
+      icon.className = isFS ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+    });
+  }
+
+  document.addEventListener('fullscreenchange', updateFullscreenIcons);
+  document.addEventListener('webkitfullscreenchange', updateFullscreenIcons);
+  document.addEventListener('mozfullscreenchange', updateFullscreenIcons);
+  document.addEventListener('MSFullscreenChange', updateFullscreenIcons);
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/static/service-worker.js').catch(function() {});
