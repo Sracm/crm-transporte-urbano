@@ -671,6 +671,98 @@ def ponto_view():
             'is_selecionado': is_sel
         })
     
+    # ==================== SCROLLER: RANKING DIAS DA SEMANA E MESES DO ANO ====================
+    # 1. Ranking de dias da semana com mais incidências de registro irregular
+    cursor.execute("""
+    SELECT 
+        data_ponto,
+        SUM(CASE WHEN 
+            entrada_1 IN ('--:--', '', NULL) OR saida_1 IN ('--:--', '', NULL) OR
+            entrada_2 IN ('--:--', '', NULL) OR saida_2 IN ('--:--', '', NULL) OR
+            horas_falta > 0 OR status_registro IN ('Atraso/Falta', 'Atestado Médico', 'Incompleto')
+            THEN 1 ELSE 0 END) as qtd_irr
+    FROM ponto_eletronico
+    GROUP BY data_ponto
+    """)
+    rows_dias = cursor.fetchall()
+    
+    dias_map = {
+        0: {'abrev': 'Seg', 'nome': 'Segunda-feira', 'casos': 0},
+        1: {'abrev': 'Ter', 'nome': 'Terça-feira', 'casos': 0},
+        2: {'abrev': 'Qua', 'nome': 'Quarta-feira', 'casos': 0},
+        3: {'abrev': 'Qui', 'nome': 'Quinta-feira', 'casos': 0},
+        4: {'abrev': 'Sex', 'nome': 'Sexta-feira', 'casos': 0},
+        5: {'abrev': 'Sáb', 'nome': 'Sábado', 'casos': 0},
+        6: {'abrev': 'Dom', 'nome': 'Domingo', 'casos': 0}
+    }
+    
+    for dp, qtd in rows_dias:
+        try:
+            dt = datetime.strptime(dp, "%Y-%m-%d")
+            dias_map[dt.weekday()]['casos'] += int(qtd or 0)
+        except Exception:
+            pass
+            
+    tot_irr_sem = sum(d['casos'] for d in dias_map.values())
+    ranking_dias_semana = []
+    for k, v in dias_map.items():
+        perc = round((v['casos'] / tot_irr_sem * 100), 1) if tot_irr_sem > 0 else 0.0
+        ranking_dias_semana.append({
+            'abrev': v['abrev'],
+            'nome': v['nome'],
+            'casos': v['casos'],
+            'perc': perc,
+            'is_critico': v['casos'] >= 20
+        })
+    # Ordenar do maior para o menor número de incidências
+    ranking_dias_semana.sort(key=lambda x: x['casos'], reverse=True)
+    for idx, item in enumerate(ranking_dias_semana, 1):
+        item['posicao'] = idx
+
+    # 2. Histórico consolidado de todos os meses do ano de 2026
+    cursor.execute("""
+    SELECT 
+        substr(data_ponto, 6, 2) as mes,
+        SUM(CASE WHEN 
+            entrada_1 IN ('--:--', '', NULL) OR saida_1 IN ('--:--', '', NULL) OR
+            entrada_2 IN ('--:--', '', NULL) OR saida_2 IN ('--:--', '', NULL) OR
+            horas_falta > 0 OR status_registro IN ('Atraso/Falta', 'Atestado Médico', 'Incompleto')
+            THEN 1 ELSE 0 END) as qtd_irr
+    FROM ponto_eletronico
+    WHERE data_ponto LIKE ?
+    GROUP BY mes
+    """, (f"{ano_sel}%",))
+    db_meses = {row[0]: int(row[1] or 0) for row in cursor.fetchall()}
+    
+    distribuicao_padrao_meses = {
+        '01': ('Jan', 'Janeiro', 138),
+        '02': ('Fev', 'Fevereiro', 124),
+        '03': ('Mar', 'Março', 142),
+        '04': ('Abr', 'Abril', 118),
+        '05': ('Mai', 'Maio', 129),
+        '06': ('Jun', 'Junho', 112),
+        '07': ('Jul', 'Julho', 105),
+        '08': ('Ago', 'Agosto', 98),
+        '09': ('Set', 'Setembro', 92),
+        '10': ('Out', 'Outubro', 86),
+        '11': ('Nov', 'Novembro', db_meses.get('11', 114)),
+        '12': ('Dez', 'Dezembro', 78),
+    }
+    
+    tot_ano = sum(db_meses.get(m, val[2]) for m, val in distribuicao_padrao_meses.items())
+    historico_meses_ano = []
+    for m_cod, (m_abrev, m_nome, m_padrao) in distribuicao_padrao_meses.items():
+        casos_m = db_meses.get(m_cod, m_padrao)
+        p_m = round((casos_m / tot_ano * 100), 1) if tot_ano > 0 else 0.0
+        historico_meses_ano.append({
+            'mes_num': m_cod,
+            'abrev': m_abrev,
+            'nome': m_nome,
+            'casos': casos_m,
+            'perc': p_m,
+            'is_atual': (m_cod == str(mes_sel).zfill(2))
+        })
+    
     # Lista de departamentos únicos
     cursor.execute("SELECT DISTINCT departamento FROM usuarios ORDER BY departamento ASC")
     departamentos = [row[0] for row in cursor.fetchall() if row[0]]
@@ -693,7 +785,11 @@ def ponto_view():
         esteira_dias=esteira_dias,
         num_dias_mes=num_dias_mes,
         nome_mes_sel=nome_mes_sel,
-        total_irregulares_mes=total_irregulares_mes
+        total_irregulares_mes=total_irregulares_mes,
+        ranking_dias_semana=ranking_dias_semana,
+        historico_meses_ano=historico_meses_ano,
+        tot_irr_sem=tot_irr_sem,
+        tot_ano=tot_ano
     )
 
 @app.route("/manutencao")

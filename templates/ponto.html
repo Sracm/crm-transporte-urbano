@@ -3,6 +3,229 @@
 {% block title %}Ponto Eletrônico & Banco de Horas{% endblock %}
 {% block page_breadcrumb %}Ponto Eletrônico & Jornada{% endblock %}
 
+{% block extra_head %}
+<style>
+  /* ==========================================================================
+     SCROLLER / TICKER CORPORATIVO DE INCIDÊNCIAS DE PONTO
+     ========================================================================== */
+  .ponto-ticker-card {
+    display: flex;
+    align-items: center;
+    background: #0f172a; /* Navy profundo executivo */
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    height: 48px;
+    position: relative;
+  }
+
+  /* BADGE FIXO À ESQUERDA */
+  .ponto-ticker-badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #00867d 0%, #005f58 100%);
+    color: #ffffff;
+    padding: 0 16px;
+    height: 100%;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    z-index: 5;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .ticker-pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ef4444;
+    box-shadow: 0 0 8px #ef4444, 0 0 14px #ef4444;
+    animation: tickerPulse 1.8s infinite ease-in-out;
+  }
+
+  @keyframes tickerPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.8); opacity: 0.5; }
+  }
+
+  /* VIEWPORT & TRILHA DO SCROLLER */
+  .ponto-ticker-viewport {
+    flex-grow: 1;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    mask-image: linear-gradient(to right, transparent 0, black 20px, black calc(100% - 20px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 20px, black calc(100% - 20px), transparent 100%);
+  }
+
+  .ponto-ticker-track {
+    display: flex;
+    width: max-content;
+    animation: tickerMarquee 50s linear infinite;
+  }
+
+  .ponto-ticker-track:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes tickerMarquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .ponto-ticker-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-right: 14px;
+  }
+
+  /* SEPARADORES E TÍTULOS DE SEÇÃO DENTRO DO SCROLLER */
+  .ticker-section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .tag-semana {
+    background: rgba(239, 68, 68, 0.16);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+  }
+
+  .tag-meses {
+    background: rgba(14, 165, 233, 0.16);
+    color: #7dd3fc;
+    border: 1px solid rgba(14, 165, 233, 0.35);
+  }
+
+  .ticker-separator {
+    width: 1px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.16);
+    margin: 0 4px;
+  }
+
+  /* PILS / CHIPS DE DADOS INDIVIDUAIS */
+  .ticker-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    color: #e2e8f0;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+
+  .ticker-chip:hover {
+    background: rgba(255, 255, 255, 0.14);
+    transform: translateY(-1px);
+    cursor: default;
+  }
+
+  .chip-rank-badge {
+    font-size: 9.5px;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.14);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: #cbd5e1;
+  }
+
+  .chip-name {
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .chip-count {
+    font-weight: 600;
+    color: #94a3b8;
+  }
+
+  .chip-percent {
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 10.5px;
+    background: rgba(0, 134, 125, 0.25);
+    color: #5eead4;
+  }
+
+  /* DESTAQUE DO CAMPEÃO DE INCIDÊNCIAS */
+  .chip-top1 {
+    background: rgba(239, 68, 68, 0.20);
+    border-color: rgba(239, 68, 68, 0.5);
+  }
+  .chip-top1 .chip-rank-badge {
+    background: #ef4444;
+    color: #ffffff;
+  }
+  .chip-top1 .chip-percent {
+    background: #ef4444;
+    color: #ffffff;
+  }
+
+  /* DESTAQUE DE DIAS COM ALERTA */
+  .chip-warning {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.45);
+  }
+  .chip-warning .chip-percent {
+    background: rgba(245, 158, 11, 0.25);
+    color: #fcd34d;
+  }
+
+  /* MÊS ATUAL */
+  .chip-month-current {
+    background: rgba(0, 134, 125, 0.22);
+    border-color: #00867d;
+  }
+  .chip-current-badge {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    background: #00867d;
+    color: #ffffff;
+    padding: 1px 5px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 768px) {
+    .ponto-ticker-card {
+      height: 44px;
+    }
+    .ponto-ticker-badge {
+      padding: 0 10px;
+      font-size: 10px;
+    }
+    .ponto-ticker-badge span.badge-text-full {
+      display: none;
+    }
+  }
+</style>
+{% endblock %}
+
 {# REMOVE O BOTÃO DE NOVA OS NESTA TELA, CONFORME SOLICITADO PELO USUÁRIO #}
 {% block topbar_actions %}
 <span class="private-label" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #10b981; background: #ecfdf5; padding: 6px 12px; border-radius: 8px; border: 1px solid #a7f3d0;">
@@ -17,6 +240,86 @@
     <div class="eyebrow"><i class="fa-solid fa-users-gear"></i> RECURSOS HUMANOS & CONTROLE OPERACIONAL</div>
     <h1>Acompanhamento de Ponto Eletrônico & Jornada</h1>
     <p>Auditoria em tempo real de marcações biométricas, detecção automática de irregularidades e cálculo integrado de horas extras.</p>
+  </div>
+</div>
+
+<!-- SCROLLER CONTÍNUO: DIAS DA SEMANA COM MAIS INCIDÊNCIAS + HISTÓRICO MENSAL DO ANO -->
+<div class="ponto-ticker-card">
+  <!-- BADGE FIXO COM PULSO AO VIVO -->
+  <div class="ponto-ticker-badge">
+    <span class="ticker-pulse-dot"></span>
+    <i class="fa-solid fa-chart-line"></i>
+    <span class="badge-text-full">INCIDÊNCIAS:</span>
+  </div>
+
+  <!-- CONTAINER EM ROLAGEM INFINITA -->
+  <div class="ponto-ticker-viewport">
+    <div class="ponto-ticker-track">
+      <!-- BLOCO 1 DE DADOS -->
+      <div class="ponto-ticker-group">
+        <!-- 1. RANKING DOS DIAS DA SEMANA -->
+        <span class="ticker-section-tag tag-semana">
+          <i class="fa-solid fa-calendar-week"></i> Ranking Dias da Semana:
+        </span>
+        {% for dia in ranking_dias_semana %}
+          <div class="ticker-chip {% if dia.posicao == 1 %}chip-top1{% elif dia.is_critico %}chip-warning{% endif %}" title="{{ dia.nome }}: {{ dia.casos }} registros irregulares apurados ({{ dia.perc }}% do total semanal)">
+            <span class="chip-rank-badge">#{{ dia.posicao }}</span>
+            <span class="chip-name">{{ dia.abrev }}</span>
+            <span class="chip-count">{{ dia.casos }} casos</span>
+            <span class="chip-percent">{{ dia.perc }}%</span>
+          </div>
+        {% endfor %}
+
+        <!-- DIVISOR ELEGANTE -->
+        <span class="ticker-separator"></span>
+
+        <!-- 2. HISTÓRICO MÊS A MÊS DO ANO -->
+        <span class="ticker-section-tag tag-meses">
+          <i class="fa-solid fa-calendar-days"></i> Histórico Mensal {{ ano_sel }}:
+        </span>
+        {% for mes in historico_meses_ano %}
+          <div class="ticker-chip {% if mes.is_atual %}chip-month-current{% endif %}" title="{{ mes.nome }}/{{ ano_sel }}: {{ mes.casos }} registros irregulares ({{ mes.perc }}% do consolidado anual)">
+            <span class="chip-name">{{ mes.abrev }}</span>
+            <span class="chip-count">{{ mes.casos }} casos</span>
+            <span class="chip-percent">{{ mes.perc }}%</span>
+            {% if mes.is_atual %}
+              <span class="chip-current-badge">Atual</span>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- BLOCO 2 DE DADOS (CLONE PARA LOOP INFINITO SEM EMENDAS) -->
+      <div class="ponto-ticker-group" aria-hidden="true">
+        <span class="ticker-section-tag tag-semana">
+          <i class="fa-solid fa-calendar-week"></i> Ranking Dias da Semana:
+        </span>
+        {% for dia in ranking_dias_semana %}
+          <div class="ticker-chip {% if dia.posicao == 1 %}chip-top1{% elif dia.is_critico %}chip-warning{% endif %}" title="{{ dia.nome }}: {{ dia.casos }} registros irregulares apurados ({{ dia.perc }}% do total semanal)">
+            <span class="chip-rank-badge">#{{ dia.posicao }}</span>
+            <span class="chip-name">{{ dia.abrev }}</span>
+            <span class="chip-count">{{ dia.casos }} casos</span>
+            <span class="chip-percent">{{ dia.perc }}%</span>
+          </div>
+        {% endfor %}
+
+        <span class="ticker-separator"></span>
+
+        <span class="ticker-section-tag tag-meses">
+          <i class="fa-solid fa-calendar-days"></i> Histórico Mensal {{ ano_sel }}:
+        </span>
+        {% for mes in historico_meses_ano %}
+          <div class="ticker-chip {% if mes.is_atual %}chip-month-current{% endif %}" title="{{ mes.nome }}/{{ ano_sel }}: {{ mes.casos }} registros irregulares ({{ mes.perc }}% do consolidado anual)">
+            <span class="chip-name">{{ mes.abrev }}</span>
+            <span class="chip-count">{{ mes.casos }} casos</span>
+            <span class="chip-percent">{{ mes.perc }}%</span>
+            {% if mes.is_atual %}
+              <span class="chip-current-badge">Atual</span>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
   </div>
 </div>
 
