@@ -36,22 +36,17 @@
     <!-- BRAND / LOGO COM BOTÃO DE ESCONDER/MOSTRAR -->
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
       <a class="brand" href="{{ url_for('dashboard') }}" style="margin-bottom: 0;">
-        <div class="brand-mark" style="background: linear-gradient(135deg, #00867d 0%, #00b4d8 100%);">
+        <div class="brand-mark">
           <i class="fa-solid fa-layer-group"></i>
         </div>
         <div class="brand-text">
-          <strong style="font-size: 13.5px; letter-spacing: -0.2px;">Expresso Planalto</strong>
-          <span style="font-size: 10px; color: #38bdf8; font-weight: 600;">Grupo CSC</span>
+          <strong>Central de</strong>
+          <span>Operações</span>
         </div>
       </a>
       <button type="button" class="sidebar-collapse-btn" onclick="toggleDesktopSidebar()" title="Esconder / Recolher Menu Lateral">
         <i class="fa-solid fa-angles-left"></i>
       </button>
-    </div>
-
-    <!-- LOGO CORPORATIVO OFICIAL EXPANDIDO (EXPRESSO PLANALTO · GRUPO CSC) -->
-    <div class="sidebar-corp-badge">
-      <img src="{{ url_for('static', filename='img/logo_planalto_csc_dark.png') }}" alt="Expresso Planalto - Uma empresa do Grupo CSC" style="height: 32px; width: auto; max-width: 100%; object-fit: contain;">
     </div>
 
     <!-- WORKSPACE / PRIVADO -->
