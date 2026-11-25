@@ -5,27 +5,34 @@
 
 {% block content %}
 <!-- HEADING DA PÁGINA -->
-<div class="page-heading">
+<div class="page-heading" style="align-items: center; justify-content: space-between;">
   <div>
     <div class="eyebrow">CENTRAL DE OPERAÇÕES · TRANSPORTE URBANO</div>
     <h1>Visão geral</h1>
     <p>Processos operacionais unindo Tráfego, Garagem, Manutenção, RH e Financeiro em tempo real.</p>
   </div>
-  <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-    <span style="font-size: 12px; color: #64748b; font-weight: 600;">Filtrar Departamento:</span>
-    <select class="form-select" style="width: auto; padding: 6px 12px; font-size: 12.5px;" onchange="window.location.href='/?dept=' + this.value">
-      <option value="Todos" {% if departamento_atual == 'Todos' %}selected{% endif %}>🏢 Todos os 10 Departamentos</option>
-      <option value="Diretor de Operações" {% if departamento_atual == 'Diretor de Operações' %}selected{% endif %}>👔 Diretor de Operações</option>
-      <option value="Gerente Operacional" {% if departamento_atual == 'Gerente Operacional' %}selected{% endif %}>🚏 Gerente Operacional</option>
-      <option value="Gerente Administrativo" {% if departamento_atual == 'Gerente Administrativo' %}selected{% endif %}>📋 Gerente Administrativo</option>
-      <option value="Manutenção" {% if departamento_atual == 'Manutenção' %}selected{% endif %}>🛠️ Manutenção (Oficina)</option>
-      <option value="RH" {% if departamento_atual == 'RH' %}selected{% endif %}>👥 RH (Recursos Humanos)</option>
-      <option value="Treinamento" {% if departamento_atual == 'Treinamento' %}selected{% endif %}>🎓 Treinamento</option>
-      <option value="Contas a Pagar" {% if departamento_atual == 'Contas a Pagar' %}selected{% endif %}>💳 Contas a Pagar</option>
-      <option value="Contas a Receber" {% if departamento_atual == 'Contas a Receber' %}selected{% endif %}>💰 Contas a Receber</option>
-      <option value="Garagem" {% if departamento_atual == 'Garagem' %}selected{% endif %}>⛽ Garagem (Pátio)</option>
-      <option value="Portaria" {% if departamento_atual == 'Portaria' %}selected{% endif %}>🚪 Portaria (Guarita)</option>
-    </select>
+  <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+    <!-- LOGO CORPORATIVO OFICIAL NO DASHBOARD (EXPRESSO PLANALTO · GRUPO CSC) -->
+    <div style="background: #ffffff; padding: 6px 14px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,0.04); display: flex; align-items: center;" title="Expresso Planalto - Uma empresa do Grupo CSC">
+      <img src="{{ url_for('static', filename='img/logo_planalto_csc_light.png') }}" alt="Expresso Planalto - Grupo CSC" style="height: 42px; width: auto; object-fit: contain;">
+    </div>
+
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <span style="font-size: 12px; color: #64748b; font-weight: 600;">Filtrar:</span>
+      <select class="form-select" style="width: auto; padding: 6px 12px; font-size: 12.5px;" onchange="window.location.href='/?dept=' + this.value">
+        <option value="Todos" {% if departamento_atual == 'Todos' %}selected{% endif %}>🏢 Todos os 10 Departamentos</option>
+        <option value="Diretor de Operações" {% if departamento_atual == 'Diretor de Operações' %}selected{% endif %}>👔 Diretor de Operações</option>
+        <option value="Gerente Operacional" {% if departamento_atual == 'Gerente Operacional' %}selected{% endif %}>🚏 Gerente Operacional</option>
+        <option value="Gerente Administrativo" {% if departamento_atual == 'Gerente Administrativo' %}selected{% endif %}>📋 Gerente Administrativo</option>
+        <option value="Manutenção" {% if departamento_atual == 'Manutenção' %}selected{% endif %}>🛠️ Manutenção (Oficina)</option>
+        <option value="RH" {% if departamento_atual == 'RH' %}selected{% endif %}>👥 RH (Recursos Humanos)</option>
+        <option value="Treinamento" {% if departamento_atual == 'Treinamento' %}selected{% endif %}>🎓 Treinamento</option>
+        <option value="Contas a Pagar" {% if departamento_atual == 'Contas a Pagar' %}selected{% endif %}>💳 Contas a Pagar</option>
+        <option value="Contas a Receber" {% if departamento_atual == 'Contas a Receber' %}selected{% endif %}>💰 Contas a Receber</option>
+        <option value="Garagem" {% if departamento_atual == 'Garagem' %}selected{% endif %}>⛽ Garagem (Pátio)</option>
+        <option value="Portaria" {% if departamento_atual == 'Portaria' %}selected{% endif %}>🚪 Portaria (Guarita)</option>
+      </select>
+    </div>
   </div>
 </div>
 

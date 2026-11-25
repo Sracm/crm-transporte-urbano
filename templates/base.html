@@ -33,16 +33,26 @@
 
   <!-- SIDEBAR (NAVY) -->
   <aside class="sidebar" id="sidebar">
-    <!-- BRAND / LOGO -->
-    <a class="brand" href="{{ url_for('dashboard') }}">
-      <div class="brand-mark">
-        <i class="fa-solid fa-layer-group"></i>
-      </div>
-      <div class="brand-text">
-        <strong>Central de</strong>
-        <span>Operações</span>
-      </div>
-    </a>
+    <!-- BRAND / LOGO COM BOTÃO DE ESCONDER/MOSTRAR -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+      <a class="brand" href="{{ url_for('dashboard') }}" style="margin-bottom: 0;">
+        <div class="brand-mark" style="background: linear-gradient(135deg, #00867d 0%, #00b4d8 100%);">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <div class="brand-text">
+          <strong style="font-size: 13.5px; letter-spacing: -0.2px;">Expresso Planalto</strong>
+          <span style="font-size: 10px; color: #38bdf8; font-weight: 600;">Grupo CSC</span>
+        </div>
+      </a>
+      <button type="button" class="sidebar-collapse-btn" onclick="toggleDesktopSidebar()" title="Esconder / Recolher Menu Lateral">
+        <i class="fa-solid fa-angles-left"></i>
+      </button>
+    </div>
+
+    <!-- LOGO CORPORATIVO OFICIAL EXPANDIDO (EXPRESSO PLANALTO · GRUPO CSC) -->
+    <div class="sidebar-corp-badge">
+      <img src="{{ url_for('static', filename='img/logo_planalto_csc_dark.png') }}" alt="Expresso Planalto - Uma empresa do Grupo CSC" style="height: 32px; width: auto; max-width: 100%; object-fit: contain;">
+    </div>
 
     <!-- WORKSPACE / PRIVADO -->
     <div class="workspace-switch">
@@ -138,8 +148,8 @@
     <header class="topbar">
       <div class="breadcrumb">
         <!-- BOTÃO TOGGLE SIDEBAR (DESKTOP & MOBILE RETRÁTIL) -->
-        <button class="sidebar-toggle-btn" id="btnToggleSidebar" onclick="toggleDesktopSidebar()" title="Recolher / Expandir Menu Lateral">
-          <i class="fa-solid fa-bars-staggered"></i>
+        <button class="sidebar-toggle-btn" id="btnToggleSidebar" onclick="toggleDesktopSidebar()" title="Esconder / Mostrar Menu Lateral">
+          <i class="fa-solid fa-bars-staggered" id="iconSidebarToggle"></i>
         </button>
         <button class="icon-button mobile-toggle" aria-label="Abrir menu mobile" onclick="toggleSidebar()">
           <i class="fa-solid fa-bars"></i>
@@ -147,6 +157,13 @@
         <span class="breadcrumb-root">Central de operações</span>
         <i class="fa-solid fa-chevron-right" style="font-size: 11px; color: #94a3b8;"></i>
         <strong>{% block page_breadcrumb %}Visão geral{% endblock %}</strong>
+      </div>
+
+      <!-- LOGO CORPORATIVO OFICIAL NO TOPBAR (VISÍVEL EM TODAS AS GUIAS) -->
+      <div class="topbar-corp-logo">
+        <a href="{{ url_for('dashboard') }}" title="Expresso Planalto - Uma empresa do Grupo CSC">
+          <img src="{{ url_for('static', filename='img/logo_planalto_csc_light.png') }}" alt="Expresso Planalto - Grupo CSC">
+        </a>
       </div>
 
       <div class="topbar-actions">
@@ -277,10 +294,39 @@
   }
 
   // Restaura estado da sidebar se salvo anteriormente
+  function toggleDesktopSidebar() {
+    if (window.innerWidth <= 900) {
+      toggleSidebar();
+      return;
+    }
+    const shell = document.querySelector('.app-shell');
+    if (!shell) return;
+    shell.classList.toggle('sidebar-collapsed');
+    const isCollapsed = shell.classList.contains('sidebar-collapsed');
+    try {
+      localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
+    } catch(e) {}
+    
+    // Atualiza ícones e tooltips do botão
+    const btn = document.getElementById('btnToggleSidebar');
+    const icon = document.getElementById('iconSidebarToggle');
+    if (icon) {
+      icon.className = isCollapsed ? 'fa-solid fa-bars' : 'fa-solid fa-bars-staggered';
+    }
+    if (btn) {
+      btn.title = isCollapsed ? 'Mostrar menu lateral' : 'Esconder menu lateral';
+    }
+  }
+
+  // Restaura estado retrátil imediatamente ao carregar
   (function() {
     try {
       if (localStorage.getItem('sidebar_collapsed') === '1' && window.innerWidth > 900) {
         document.querySelector('.app-shell')?.classList.add('sidebar-collapsed');
+        const icon = document.getElementById('iconSidebarToggle');
+        if (icon) icon.className = 'fa-solid fa-bars';
+        const btn = document.getElementById('btnToggleSidebar');
+        if (btn) btn.title = 'Mostrar menu lateral';
       }
     } catch(e) {}
   })();

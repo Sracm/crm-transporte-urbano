@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
 
 app = Flask(__name__)
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 @app.template_filter("moeda")
 def moeda_filter(val):
