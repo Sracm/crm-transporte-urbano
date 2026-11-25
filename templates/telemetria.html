@@ -458,25 +458,25 @@
      ========================================================================== */
   @keyframes itinPulseLine {
     0%, 100% {
-      opacity: 0.95;
-      stroke-opacity: 0.95;
-      filter: drop-shadow(0 0 3px currentColor);
+      opacity: 1;
+      stroke-opacity: 1;
+      filter: drop-shadow(0 0 6px currentColor);
     }
     50% {
-      opacity: 0.35;
-      stroke-opacity: 0.35;
-      filter: drop-shadow(0 0 1px currentColor);
+      opacity: 0.60;
+      stroke-opacity: 0.60;
+      filter: drop-shadow(0 0 2px currentColor);
     }
   }
 
   @keyframes itinPulseCasing {
     0%, 100% {
-      opacity: 0.85;
-      stroke-opacity: 0.85;
+      opacity: 0.95;
+      stroke-opacity: 0.95;
     }
     50% {
-      opacity: 0.20;
-      stroke-opacity: 0.20;
+      opacity: 0.45;
+      stroke-opacity: 0.45;
     }
   }
 
@@ -954,23 +954,23 @@
           <button type="button" class="itin-chip active" id="btnItinTodas" onclick="destacarItinerario('Todas', this)" style="border-left: 4px solid var(--primary);">
             <i class="fa-solid fa-network-wired"></i> Todas as Linhas (6)
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 801', this)" style="border-left: 4px solid #059669;">
-            <span class="itin-dot" style="background: #059669;"></span> <strong>801</strong> · Term. Central x Sul
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 801', this)" style="border-left: 4px solid #00d664;">
+            <span class="itin-dot" style="background: #00d664; box-shadow: 0 0 8px rgba(0,214,100,0.6);"></span> <strong>801</strong> · Term. Central x Sul
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 703', this)" style="border-left: 4px solid #2563eb;">
-            <span class="itin-dot" style="background: #2563eb;"></span> <strong>703</strong> · Bairro Alto x Manoel Feio
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 703', this)" style="border-left: 4px solid #0066ff;">
+            <span class="itin-dot" style="background: #0066ff; box-shadow: 0 0 8px rgba(0,102,255,0.6);"></span> <strong>703</strong> · Bairro Alto x Manoel Feio
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 602', this)" style="border-left: 4px solid #7c3aed;">
-            <span class="itin-dot" style="background: #7c3aed;"></span> <strong>602</strong> · Circular Hospitais
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 602', this)" style="border-left: 4px solid #a855f7;">
+            <span class="itin-dot" style="background: #a855f7; box-shadow: 0 0 8px rgba(168,85,247,0.6);"></span> <strong>602</strong> · Circular Hospitais
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 504', this)" style="border-left: 4px solid #d97706;">
-            <span class="itin-dot" style="background: #d97706;"></span> <strong>504</strong> · Vila Progresso x Centro
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 504', this)" style="border-left: 4px solid #ff6b00;">
+            <span class="itin-dot" style="background: #ff6b00; box-shadow: 0 0 8px rgba(255,107,0,0.6);"></span> <strong>504</strong> · Vila Progresso x Centro
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 305', this)" style="border-left: 4px solid #0891b2;">
-            <span class="itin-dot" style="background: #0891b2;"></span> <strong>305</strong> · Expresso Term. Leste
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 305', this)" style="border-left: 4px solid #00c2cb;">
+            <span class="itin-dot" style="background: #00c2cb; box-shadow: 0 0 8px rgba(0,194,203,0.6);"></span> <strong>305</strong> · Expresso Term. Leste
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 412', this)" style="border-left: 4px solid #db2777;">
-            <span class="itin-dot" style="background: #db2777;"></span> <strong>412</strong> · Interbairros Norte x Oeste
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 412', this)" style="border-left: 4px solid #ff007f;">
+            <span class="itin-dot" style="background: #ff007f; box-shadow: 0 0 8px rgba(255,0,127,0.6);"></span> <strong>412</strong> · Interbairros Norte x Oeste
           </button>
         </div>
 
@@ -1334,7 +1334,7 @@
   const itinerariosData = {
     'Linha 801': {
       nome: 'Linha 801 · Term. Central x Term. Sul',
-      cor: '#059669',
+      cor: '#00d664',
       extensao_km: 14.8,
       tempo_ciclo_min: 52,
       headway_min: 4.0,
@@ -1355,7 +1355,7 @@
     },
     'Linha 703': {
       nome: 'Linha 703 · Bairro Alto x Estação Manoel Feio',
-      cor: '#2563eb',
+      cor: '#0066ff',
       extensao_km: 18.2,
       tempo_ciclo_min: 64,
       headway_min: 6.0,
@@ -1376,7 +1376,7 @@
     },
     'Linha 602': {
       nome: 'Linha 602 · Circular Hospitais & Centro',
-      cor: '#7c3aed',
+      cor: '#a855f7',
       extensao_km: 12.5,
       tempo_ciclo_min: 44,
       headway_min: 8.0,
@@ -1398,7 +1398,7 @@
     },
     'Linha 504': {
       nome: 'Linha 504 · Vila Progresso x Centro',
-      cor: '#d97706',
+      cor: '#ff6b00',
       extensao_km: 15.6,
       tempo_ciclo_min: 56,
       headway_min: 5.0,
@@ -1417,7 +1417,7 @@
     },
     'Linha 305': {
       nome: 'Linha 305 · Expresso Terminal Leste x Manoel Feio',
-      cor: '#0891b2',
+      cor: '#00c2cb',
       extensao_km: 16.9,
       tempo_ciclo_min: 58,
       headway_min: 6.0,
@@ -1433,7 +1433,7 @@
     },
     'Linha 412': {
       nome: 'Linha 412 · Interbairros Norte x Oeste',
-      cor: '#db2777',
+      cor: '#ff007f',
       extensao_km: 17.4,
       tempo_ciclo_min: 60,
       headway_min: 7.0,
@@ -1522,19 +1522,19 @@
       // Linha de contorno / brilho inferior com efeito de pulso suave
       const casing = L.polyline(itin.coords, {
         color: '#ffffff',
-        weight: 8,
-        opacity: 0.9,
+        weight: 9,
+        opacity: 0.95,
         lineCap: 'round',
         lineJoin: 'round',
         className: 'itinerario-pulse-casing ' + pulseDelayClass
       });
       itinerariosLayerGroup.addLayer(casing);
 
-      // Linha principal do itinerário com pulso suave e respiração neon
+      // Linha principal do itinerário com pulso suave e respiração neon vibrante
       const poly = L.polyline(itin.coords, {
         color: itin.cor,
-        weight: 5,
-        opacity: 0.88,
+        weight: 6,
+        opacity: 0.96,
         lineCap: 'round',
         lineJoin: 'round',
         className: 'itinerario-pulse-line ' + pulseDelayClass
@@ -1610,8 +1610,8 @@
       // Restaura todas as linhas com a animação de pulso suave defasada
       Object.keys(polylineObjects).forEach(k => {
         const item = polylineObjects[k];
-        item.poly.setStyle({ weight: 5, opacity: 0.88 });
-        item.casing.setStyle({ weight: 8, opacity: 0.9 });
+        item.poly.setStyle({ weight: 6, opacity: 0.96 });
+        item.casing.setStyle({ weight: 9, opacity: 0.95 });
 
         const delayClass = 'itin-pulse-' + (item.index % 6);
         const polyEl = item.poly.getElement();
@@ -1637,8 +1637,8 @@
           const casingEl = item.casing.getElement();
 
           if (k === linhaNome) {
-            item.poly.setStyle({ weight: 8, opacity: 1.0 });
-            item.casing.setStyle({ weight: 12, opacity: 1.0 });
+            item.poly.setStyle({ weight: 9, opacity: 1.0 });
+            item.casing.setStyle({ weight: 13, opacity: 1.0 });
             item.poly.bringToFront();
             if (polyEl) polyEl.setAttribute('class', 'leaflet-interactive itinerario-foco-line');
             if (casingEl) casingEl.setAttribute('class', 'leaflet-interactive itinerario-foco-casing');
