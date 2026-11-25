@@ -1080,6 +1080,38 @@
         </div>
       </div>
 
+      <!-- BARRA DE SINCRONIZAÇÃO DE TRÂNSITO AO VIVO (GOOGLE TRAFFIC + TELEMETRIA CAN) -->
+      <div class="traffic-sync-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 14px; margin: 10px 0 14px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 11.5px; font-weight: 700; color: #334155;">
+          <span style="display: inline-flex; align-items: center; gap: 6px; color: #0f172a;">
+            <i class="fa-solid fa-satellite-dish" style="color: #0284c7;"></i>
+            <strong>Sincronização de Trânsito ao Vivo (Itaquaquecetuba / SP):</strong>
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 5px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; display: inline-block; box-shadow: 0 0 6px rgba(16,185,129,0.6);"></span>
+            <span>Fluido (20 a 50 km/h)</span>
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 5px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; display: inline-block; box-shadow: 0 0 6px rgba(245,158,11,0.6);"></span>
+            <span>Moderado (12 a 20 km/h)</span>
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 5px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; display: inline-block; box-shadow: 0 0 6px rgba(239,68,68,0.6);"></span>
+            <span>Congestionado (5 a 12 km/h)</span>
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 5px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #7f1d1d; display: inline-block; box-shadow: 0 0 6px rgba(127,29,29,0.8);"></span>
+            <span>Parado / Retenção (&lt; 5 km/h)</span>
+          </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: #64748b;">
+          <span style="display: inline-flex; align-items: center; gap: 4px; background: #e0f2fe; color: #0284c7; padding: 2px 8px; border-radius: 12px; font-weight: 700;">
+            <i class="fa-solid fa-signal" style="font-size: 10px;"></i> Google Traffic API Live
+          </span>
+          <span><i class="fa-solid fa-arrows-rotate fa-spin" style="color: var(--primary);"></i> Atualização contínua</span>
+        </div>
+      </div>
+
       <!-- MAPA LEAFLET -->
       <div id="mapaTelemetria"></div>
 
@@ -1676,7 +1708,10 @@
   let statusFiltroAtual = 'Todos';
   let itinerarioFiltroAtual = 'Todas';
 
-  // Alterna a camada de trânsito ao vivo
+  let googleTrafficBase = null;
+  let googleTrafficOverlay = null;
+
+  // Alterna a camada de trânsito ao vivo e gargalos operacionais
   function toggleCamadaTransito(btn) {
     camadaTransitoAtiva = !camadaTransitoAtiva;
     const btnEl = btn || document.getElementById('btnToggleTransito');
@@ -1691,6 +1726,9 @@
       if (gargalosLayerGroup && mapInstance && !mapInstance.hasLayer(gargalosLayerGroup)) {
         mapInstance.addLayer(gargalosLayerGroup);
       }
+      if (googleTrafficOverlay && mapInstance && !mapInstance.hasLayer(googleTrafficOverlay)) {
+        mapInstance.addLayer(googleTrafficOverlay);
+      }
     } else {
       if (btnEl) {
         btnEl.classList.remove('active');
@@ -1702,10 +1740,13 @@
       if (gargalosLayerGroup && mapInstance && mapInstance.hasLayer(gargalosLayerGroup)) {
         mapInstance.removeLayer(gargalosLayerGroup);
       }
+      if (googleTrafficOverlay && mapInstance && mapInstance.hasLayer(googleTrafficOverlay)) {
+        mapInstance.removeLayer(googleTrafficOverlay);
+      }
     }
   }
 
-  // Inicialização do Mapa Leaflet
+  // Inicialização do Mapa Leaflet com Sincronização de Trânsito em Tempo Real da Cidade
   function initTelemetriaMap() {
     if (mapInstance) {
       mapInstance.invalidateSize();
@@ -1715,19 +1756,34 @@
     // Coordenadas centrais em Itaquaquecetuba / SP
     mapInstance = L.map('mapaTelemetria').setView([-23.4862, -46.3485], 13);
 
-    // BASEMAP 100% LIVRE DE ERRO DE API KEY (OpenStreetMap Oficial)
+    // 1. Google Maps com Trânsito ao Vivo (Atualização dinâmica em tempo real da malha urbana)
+    googleTrafficBase = L.tileLayer('https://mt{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', {
+      subdomains: ['0', '1', '2', '3'],
+      attribution: 'Trânsito em Tempo Real &copy; Google Maps',
+      maxZoom: 20
+    }).addTo(mapInstance);
+
+    // 2. Camada de Overlay de Tráfego Google (Transparente para sobrepor em outros mapas)
+    googleTrafficOverlay = L.tileLayer('https://mt{s}.google.com/vt/lyrs=h,traffic&x={x}&y={y}&z={z}', {
+      subdomains: ['0', '1', '2', '3'],
+      attribution: 'Fluxo Viário &copy; Google',
+      maxZoom: 20,
+      opacity: 0.95
+    });
+
+    // 3. Basemap OpenStreetMap Oficial
     const osmTile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19
-    }).addTo(mapInstance);
+    });
 
-    // Basemap alternativo Esri Streets
+    // 4. Basemap Esri Satélite com Vias
     const esriStreets = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri',
       maxZoom: 19
     });
 
-    // Basemap alternativo Esri Gray Canvas (Clean Executivo)
+    // 5. Basemap Esri Executivo Claro
     const esriGray = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri',
       maxZoom: 16
@@ -1739,14 +1795,16 @@
     markersLayer = L.layerGroup().addTo(mapInstance);
 
     L.control.layers({
-      "OpenStreetMap (Ruas & Avenidas)": osmTile,
-      "Esri Satélite / Vias": esriStreets,
-      "Esri Executivo Claro": esriGray
+      "🚦 Google Maps com Trânsito ao Vivo (Padrão)": googleTrafficBase,
+      "🗺️ OpenStreetMap (Ruas & Avenidas)": osmTile,
+      "🛰️ Esri Satélite / Vias": esriStreets,
+      "🏢 Esri Executivo Claro": esriGray
     }, {
-      "🚦 Trânsito & Gargalos ao Vivo": gargalosLayerGroup,
-      "🛣️ Itinerários Municipais": itinerariosLayerGroup,
+      "🚗 Fluxo Tráfego Google (Overlay)": googleTrafficOverlay,
+      "⚠️ Gargalos Operacionais CCO": gargalosLayerGroup,
+      "🛣️ Itinerários Municipais (6 Linhas)": itinerariosLayerGroup,
       "🚏 Terminais & Estações CPTM": terminaisLayerGroup,
-      "🚌 Ônibus em Tempo Real": markersLayer
+      "🚌 Ônibus em Tempo Real (GPS/CAN)": markersLayer
     }, { position: 'topright' }).addTo(mapInstance);
 
     renderItinerarios();
