@@ -45,20 +45,19 @@
     
     .video-container {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 100vw;
-      height: 100vh;
-      transform: translate(-50%, -50%);
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
       pointer-events: none;
     }
     
+    .video-container video,
     .video-container iframe {
       width: 100%;
       height: 100%;
-      border: none;
       object-fit: cover;
-      transform: scale(1.38);
+      border: none;
     }
     
     .video-overlay {
@@ -447,11 +446,9 @@
   <!-- LADO ESQUERDO: VÍDEO BACKDROP INSTITUCIONAL (GARAGEM EXPRESSO PLANALTO ITAQUAQUECETUBA) -->
   <div class="portal-video-pane">
     <div class="video-container">
-      <iframe id="ytVideoFrame"
-              src="https://www.youtube-nocookie.com/embed/HcnDy6qwyYA?autoplay=1&mute=1&loop=1&playlist=HcnDy6qwyYA&controls=0&showinfo=0&modestbranding=1&enablejsapi=1&rel=0" 
-              allow="autoplay; encrypted-media" 
-              allowfullscreen>
-      </iframe>
+      <video id="portalBgVideo" autoplay muted loop playsinline poster="{{ url_for('static', filename='video/thumbnails/thumb_002.jpg') }}" style="width: 100%; height: 100%; object-fit: cover;">
+        <source src="{{ url_for('static', filename='video/expresso_planalto_portal.mp4') }}" type="video/mp4">
+      </video>
     </div>
     
     <div class="video-overlay"></div>
@@ -464,10 +461,10 @@
     
     <!-- BOTÕES PARA TROCAR CÂMERAS DA GARAGEM -->
     <div class="video-switcher">
-      <button class="btn-camera active" onclick="switchVideo('HcnDy6qwyYA', this)">
+      <button class="btn-camera active" onclick="switchVideo('expresso_planalto_portal.mp4', this)">
         <i class="fa-solid fa-video"></i> Câmera 1 (Garagem & Novos Torinos)
       </button>
-      <button class="btn-camera" onclick="switchVideo('SdcVgW078sw', this)">
+      <button class="btn-camera" onclick="switchVideo('saida_frota.mp4', this)">
         <i class="fa-solid fa-bus"></i> Câmera 2 (Saída da Frota)
       </button>
     </div>
@@ -649,10 +646,14 @@
     setTimeout(() => { btn.style.transform = ''; }, 200);
   }
 
-  // Alternar vídeo de fundo
-  function switchVideo(videoId, btn) {
-    const iframe = document.getElementById('ytVideoFrame');
-    iframe.src = 'https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&mute=1&loop=1&playlist=' + videoId + '&controls=0&showinfo=0&modestbranding=1&enablejsapi=1&rel=0';
+  // Alternar vídeo de fundo (vídeos institucionais locais em MP4)
+  function switchVideo(videoFile, btn) {
+    const video = document.getElementById('portalBgVideo');
+    if (video) {
+      video.src = '/static/video/' + videoFile;
+      video.load();
+      video.play().catch(e => console.log('Autoplay:', e));
+    }
     
     document.querySelectorAll('.btn-camera').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');

@@ -7,3 +7,11 @@ ENV/
 .idea/
 .vscode/
 *.log
+
+static/video/raw_*
+static/video/saida_frota.mp4
+static/video/part*
+static/video/check_clean
+static/video/rear_frames
+static/video/test_segments
+static/video/thumbnails*
