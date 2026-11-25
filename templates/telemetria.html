@@ -480,8 +480,29 @@
     }
   }
 
+  /* EFEITO TUBULAR DE ALTO CONTRASTE NOS ITINERÁRIOS (SEPARAÇÃO TOTAL DAS VIAS E TRÂNSITO) */
+  .itinerario-rail-casing {
+    filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.85));
+    stroke-linecap: round;
+  }
+
+  .itinerario-mid-casing {
+    stroke-linecap: round;
+  }
+
   .itinerario-pulse-line {
     animation: itinPulseLine 3s infinite ease-in-out;
+  }
+
+  /* Suavização de saturação do mapa base para os corredores saltarem aos olhos */
+  #mapaTelemetria .leaflet-tile-pane {
+    filter: saturate(0.82) contrast(1.02);
+  }
+
+  /* Badge de identificação da linha flutuante sobre a rota */
+  .route-pill-divicon {
+    background: transparent !important;
+    border: none !important;
   }
 
   .itinerario-pulse-casing {
@@ -1018,8 +1039,8 @@
             <i class="fa-solid fa-network-wired"></i> Todas as Linhas (6)
             <span class="badge-transito-mini moderado" title="Média de tráfego de toda a malha: 51%">51% Médio</span>
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 801', this)" style="border-left: 4px solid #00d664;">
-            <span class="itin-dot" style="background: #00d664; box-shadow: 0 0 8px rgba(0,214,100,0.6);"></span> <strong>801</strong> · Term. Central x Sul
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 801', this)" style="border-left: 4px solid #00f0ff;">
+            <span class="itin-dot" style="background: #00f0ff; box-shadow: 0 0 8px rgba(0,240,255,0.8);"></span> <strong>801</strong> · Term. Central x Sul
             <span class="badge-transito-mini lento" title="Trânsito Intenso na Av. Ítalo Adami: 78% · Atraso +14 min">78% 🔴</span>
           </button>
           <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 703', this)" style="border-left: 4px solid #0066ff;">
@@ -1034,8 +1055,8 @@
             <span class="itin-dot" style="background: #ff6b00; box-shadow: 0 0 8px rgba(255,107,0,0.6);"></span> <strong>504</strong> · Vila Progresso x Centro
             <span class="badge-transito-mini lento" title="Lentidão na Av. Uberaba: 68% · Atraso +11 min">68% 🔴</span>
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 305', this)" style="border-left: 4px solid #00c2cb;">
-            <span class="itin-dot" style="background: #00c2cb; box-shadow: 0 0 8px rgba(0,194,203,0.6);"></span> <strong>305</strong> · Expresso Term. Leste
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 305', this)" style="border-left: 4px solid #ffd600;">
+            <span class="itin-dot" style="background: #ffd600; box-shadow: 0 0 8px rgba(255,214,0,0.8);"></span> <strong>305</strong> · Expresso Term. Leste
             <span class="badge-transito-mini fluido" title="Corredor Rápido Ayrton Senna: 28% · Fluido">28% 🟢</span>
           </button>
           <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 412', this)" style="border-left: 4px solid #ff007f;">
@@ -1448,7 +1469,7 @@
   const itinerariosData = {
     'Linha 801': {
       nome: 'Linha 801 · Term. Central x Term. Sul',
-      cor: '#00d664',
+      cor: '#00f0ff',
       extensao_km: 14.8,
       tempo_ciclo_min: 52,
       headway_min: 4.0,
@@ -1559,7 +1580,7 @@
     },
     'Linha 305': {
       nome: 'Linha 305 · Expresso Terminal Leste x Manoel Feio',
-      cor: '#00c2cb',
+      cor: '#ffd600',
       extensao_km: 16.9,
       tempo_ciclo_min: 58,
       headway_min: 6.0,
@@ -1813,7 +1834,7 @@
     renderMapMarkers();
   }
 
-  // Renderiza as linhas dos itinerários no mapa
+  // Renderiza as linhas dos itinerários no mapa com Estrutura Tubular de Alto Contraste (Trilho Escuro + Contorno Branco + Núcleo Neon + Badge Flutuante)
   function renderItinerarios() {
     if (!itinerariosLayerGroup) return;
     itinerariosLayerGroup.clearLayers();
@@ -1823,22 +1844,33 @@
       const itin = itinerariosData[chave];
       const pulseDelayClass = 'itin-pulse-' + (index % 6);
       
-      // Linha de contorno / brilho inferior com efeito de pulso suave
-      const casing = L.polyline(itin.coords, {
-        color: '#ffffff',
-        weight: 9,
+      // 1. CAMADA 1 (BASE INFERIOR): Trilho escuro de alto relevo (separa do trânsito verde/vermelho do Google)
+      const railCasing = L.polyline(itin.coords, {
+        color: '#0f172a',
+        weight: 12,
         opacity: 0.95,
         lineCap: 'round',
         lineJoin: 'round',
-        className: 'itinerario-pulse-casing ' + pulseDelayClass
+        className: 'itinerario-rail-casing'
       });
-      itinerariosLayerGroup.addLayer(casing);
+      itinerariosLayerGroup.addLayer(railCasing);
 
-      // Linha principal do itinerário com pulso suave e respiração neon vibrante
+      // 2. CAMADA 2 (CAMADA INTERMEDIÁRIA): Moldura branca luminosa
+      const midCasing = L.polyline(itin.coords, {
+        color: '#ffffff',
+        weight: 8,
+        opacity: 1.0,
+        lineCap: 'round',
+        lineJoin: 'round',
+        className: 'itinerario-mid-casing'
+      });
+      itinerariosLayerGroup.addLayer(midCasing);
+
+      // 3. CAMADA 3 (NÚCLEO NEON DA LINHA): Cor da linha com pulso suave vibrante
       const poly = L.polyline(itin.coords, {
         color: itin.cor,
-        weight: 6,
-        opacity: 0.96,
+        weight: 4.5,
+        opacity: 1.0,
         lineCap: 'round',
         lineJoin: 'round',
         className: 'itinerario-pulse-line ' + pulseDelayClass
@@ -1855,7 +1887,49 @@
       });
 
       itinerariosLayerGroup.addLayer(poly);
-      polylineObjects[chave] = { poly: poly, casing: casing, data: itin, index: index };
+
+      // 4. CAMADA 4: Badge Flutuante com Ícone de Ônibus e Número da Linha no Meio do Corredor
+      const midIdx = Math.floor(itin.coords.length / 2);
+      const midCoord = itin.coords[midIdx];
+      const pillIcon = L.divIcon({
+        className: 'route-pill-divicon',
+        html: `<div class="route-pill-marker" style="
+          background: #0f172a;
+          color: #ffffff;
+          border: 2px solid ${itin.cor};
+          box-shadow: 0 4px 12px rgba(0,0,0,0.65);
+          padding: 2px 8px;
+          border-radius: 12px;
+          font-size: 11px;
+          font-weight: 800;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          white-space: nowrap;
+          cursor: pointer;
+          transform: translate(-50%, -50%);
+        ">
+          <i class="fa-solid fa-bus" style="color: ${itin.cor}; font-size: 10px;"></i>
+          <span>${chave.replace('Linha ', '')}</span>
+        </div>`,
+        iconSize: [46, 22],
+        iconAnchor: [23, 11]
+      });
+      const pillMarker = L.marker(midCoord, { icon: pillIcon, zIndexOffset: 700 });
+      pillMarker.on('click', () => {
+        const btn = Array.from(document.querySelectorAll('.itin-chip')).find(b => b.innerText.includes(chave.replace('Linha ', '')));
+        destacarItinerario(chave, btn);
+      });
+      itinerariosLayerGroup.addLayer(pillMarker);
+
+      polylineObjects[chave] = {
+        poly: poly,
+        midCasing: midCasing,
+        railCasing: railCasing,
+        pillMarker: pillMarker,
+        data: itin,
+        index: index
+      };
     });
   }
 
@@ -1990,17 +2064,19 @@
     const bannerGargalo = document.getElementById('itinGargalo');
 
     if (linhaNome === 'Todas') {
-      // Restaura todas as linhas com a animação de pulso suave defasada
+      // Restaura todas as linhas no formato tubular normal
       Object.keys(polylineObjects).forEach(k => {
         const item = polylineObjects[k];
-        item.poly.setStyle({ weight: 6, opacity: 0.96 });
-        item.casing.setStyle({ weight: 9, opacity: 0.95 });
+        item.railCasing.setStyle({ weight: 12, opacity: 0.95 });
+        item.midCasing.setStyle({ weight: 8, opacity: 1.0 });
+        item.poly.setStyle({ weight: 4.5, opacity: 1.0 });
 
         const delayClass = 'itin-pulse-' + (item.index % 6);
         const polyEl = item.poly.getElement();
-        const casingEl = item.casing.getElement();
         if (polyEl) polyEl.setAttribute('class', 'leaflet-interactive itinerario-pulse-line ' + delayClass);
-        if (casingEl) casingEl.setAttribute('class', 'leaflet-interactive itinerario-pulse-casing ' + delayClass);
+        if (item.pillMarker && item.pillMarker.getElement()) {
+          item.pillMarker.getElement().style.opacity = '1.0';
+        }
       });
 
       if (bannerTitulo) bannerTitulo.innerText = 'Todas as Linhas Operacionais da Malha Municipal';
@@ -2020,19 +2096,27 @@
         Object.keys(polylineObjects).forEach(k => {
           const item = polylineObjects[k];
           const polyEl = item.poly.getElement();
-          const casingEl = item.casing.getElement();
 
           if (k === linhaNome) {
-            item.poly.setStyle({ weight: 9, opacity: 1.0 });
-            item.casing.setStyle({ weight: 13, opacity: 1.0 });
+            item.railCasing.setStyle({ weight: 17, opacity: 1.0 });
+            item.midCasing.setStyle({ weight: 12, opacity: 1.0 });
+            item.poly.setStyle({ weight: 7.5, opacity: 1.0 });
+            item.railCasing.bringToFront();
+            item.midCasing.bringToFront();
             item.poly.bringToFront();
             if (polyEl) polyEl.setAttribute('class', 'leaflet-interactive itinerario-foco-line');
-            if (casingEl) casingEl.setAttribute('class', 'leaflet-interactive itinerario-foco-casing');
+            if (item.pillMarker && item.pillMarker.getElement()) {
+              item.pillMarker.getElement().style.opacity = '1.0';
+              item.pillMarker.setZIndexOffset(900);
+            }
           } else {
-            item.poly.setStyle({ weight: 2.5, opacity: 0.25 });
-            item.casing.setStyle({ weight: 4, opacity: 0.25 });
+            item.railCasing.setStyle({ weight: 4, opacity: 0.15 });
+            item.midCasing.setStyle({ weight: 2.5, opacity: 0.15 });
+            item.poly.setStyle({ weight: 2, opacity: 0.15 });
             if (polyEl) polyEl.setAttribute('class', 'leaflet-interactive itinerario-dimmed');
-            if (casingEl) casingEl.setAttribute('class', 'leaflet-interactive itinerario-dimmed');
+            if (item.pillMarker && item.pillMarker.getElement()) {
+              item.pillMarker.getElement().style.opacity = '0.25';
+            }
           }
         });
 
