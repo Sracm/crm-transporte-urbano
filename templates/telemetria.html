@@ -664,105 +664,128 @@
   }
 
   /* ==========================================================================
-     ANIMAÇÃO DE PULSO SUAVE NAS LINHAS DE ITINERÁRIO (EFEITO RESPIRAÇÃO / NEON)
+     ANIMAÇÃO ULTRA VISÍVEL: NEON GLOW PULSE + FLUXO ATIVO DE FIBRA ÓPTICA (CCO)
      ========================================================================== */
-  @keyframes itinPulseLine {
-    0%, 100% {
-      opacity: 1;
-      stroke-opacity: 1;
-      filter: drop-shadow(0 0 6px currentColor);
-    }
-    50% {
-      opacity: 0.60;
-      stroke-opacity: 0.60;
-      filter: drop-shadow(0 0 2px currentColor);
-    }
+
+  /* 1. HALO NEON VIBRANTE: PISCA COM ALTA INTENSIDADE E EXPANSÃO DE ESPESSURA */
+  .itinerario-neon-glow {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+    animation: itinNeonFlash 1.3s infinite ease-in-out;
   }
 
-  @keyframes itinPulseCasing {
+  @keyframes itinNeonFlash {
     0%, 100% {
-      opacity: 0.95;
       stroke-opacity: 0.95;
+      opacity: 0.95;
+      filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 18px currentColor);
     }
     50% {
-      opacity: 0.45;
-      stroke-opacity: 0.45;
+      stroke-opacity: 0.10;
+      opacity: 0.10;
+      filter: none;
     }
   }
 
-  /* EFEITO TUBULAR DE ALTO CONTRASTE NOS ITINERÁRIOS (SEPARAÇÃO TOTAL DAS VIAS E TRÂNSITO) */
+  /* Defasagem elegante para dinamismo orgânico entre os 6 corredores */
+  .itin-pulse-glow-0 { animation-delay: 0s; }
+  .itin-pulse-glow-1 { animation-delay: 0.22s; }
+  .itin-pulse-glow-2 { animation-delay: 0.44s; }
+  .itin-pulse-glow-3 { animation-delay: 0.66s; }
+  .itin-pulse-glow-4 { animation-delay: 0.88s; }
+  .itin-pulse-glow-5 { animation-delay: 1.10s; }
+
+  /* 2. ESTEIRA DE FLUXO ATIVO (LINHA PONTILHADA CORRENDO EM TEMPO REAL) */
+  .itinerario-flow-stream {
+    stroke-dasharray: 8 16;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+    animation: itinFlowDash 1.0s linear infinite;
+  }
+
+  @keyframes itinFlowDash {
+    from {
+      stroke-dashoffset: 24;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .itin-stream-0 { animation-duration: 1.0s; }
+  .itin-stream-1 { animation-duration: 1.1s; }
+  .itin-stream-2 { animation-duration: 0.95s; }
+  .itin-stream-3 { animation-duration: 1.05s; }
+  .itin-stream-4 { animation-duration: 1.15s; }
+  .itin-stream-5 { animation-duration: 0.9s; }
+
+  /* 3. TRILHO ESCURO BASE DE ALTO RELEVO */
   .itinerario-rail-casing {
-    filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.85));
+    filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.9));
     stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
-  .itinerario-mid-casing {
+  /* 4. NÚCLEO BRANCO CENTRAL */
+  .itinerario-core-line {
     stroke-linecap: round;
+    stroke-linejoin: round;
+    cursor: pointer;
+    filter: drop-shadow(0 0 3px #ffffff);
   }
 
-  .itinerario-pulse-line {
-    animation: itinPulseLine 3s infinite ease-in-out;
+  /* 5. LINHA EM DESTAQUE SELECIONADA: PULSO ULTRA VIBRANTE */
+  .itinerario-foco-glow {
+    animation: itinFocoNeon 0.85s infinite ease-in-out !important;
   }
-
-  /* Suavização de saturação do mapa base para os corredores saltarem aos olhos */
-  #mapaTelemetria .leaflet-tile-pane {
-    filter: saturate(0.82) contrast(1.02);
-  }
-
-  /* Badge de identificação da linha flutuante sobre a rota */
-  .route-pill-divicon {
-    background: transparent !important;
-    border: none !important;
-  }
-
-  .itinerario-pulse-casing {
-    animation: itinPulseCasing 3s infinite ease-in-out;
-  }
-
-  /* Defasagem elegante para que cada itinerário pulse de forma suave e orgânica */
-  .itin-pulse-0 { animation-delay: 0s; }
-  .itin-pulse-1 { animation-delay: 0.5s; }
-  .itin-pulse-2 { animation-delay: 1.0s; }
-  .itin-pulse-3 { animation-delay: 1.5s; }
-  .itin-pulse-4 { animation-delay: 2.0s; }
-  .itin-pulse-5 { animation-delay: 2.5s; }
-
-  /* LINHA EM DESTAQUE SELECIONADA: PULSO MAIS VIBRANTE */
-  .itinerario-foco-line {
-    animation: itinFocoPulse 1.6s infinite ease-in-out !important;
-  }
-  @keyframes itinFocoPulse {
+  @keyframes itinFocoNeon {
     0%, 100% {
-      opacity: 1;
-      stroke-opacity: 1;
-      filter: drop-shadow(0 0 7px currentColor);
+      stroke-opacity: 1.0;
+      opacity: 1.0;
+      filter: drop-shadow(0 0 14px currentColor) drop-shadow(0 0 28px currentColor);
     }
     50% {
-      opacity: 0.55;
-      stroke-opacity: 0.55;
-      filter: drop-shadow(0 0 2px currentColor);
-    }
-  }
-
-  .itinerario-foco-casing {
-    animation: itinFocoCasing 1.6s infinite ease-in-out !important;
-  }
-  @keyframes itinFocoCasing {
-    0%, 100% {
-      opacity: 0.95;
-      stroke-opacity: 0.95;
-    }
-    50% {
-      opacity: 0.35;
-      stroke-opacity: 0.35;
+      stroke-opacity: 0.20;
+      opacity: 0.20;
+      filter: none;
     }
   }
 
   .itinerario-dimmed {
     animation: none !important;
-    opacity: 0.18 !important;
-    stroke-opacity: 0.18 !important;
+    opacity: 0.15 !important;
+    stroke-opacity: 0.15 !important;
     filter: none !important;
+  }
+
+  /* 6. RADAR PULSE NO BADGE / PILL FLUTUANTE DE IDENTIFICAÇÃO DA LINHA */
+  .route-pill-divicon {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  .route-pill-marker {
+    position: relative;
+    animation: pillRadarGlow 1.8s infinite ease-in-out;
+    transition: transform 0.2s ease;
+  }
+
+  @keyframes pillRadarGlow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(0,0,0,0.7);
+      transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+      box-shadow: 0 0 0 6px rgba(255, 255, 255, 0), 0 6px 18px rgba(0,0,0,0.85);
+      transform: translate(-50%, -50%) scale(1.08);
+    }
+  }
+
+  /* Suavização de saturação do mapa base para os corredores saltarem aos olhos */
+  #mapaTelemetria .leaflet-tile-pane {
+    filter: saturate(0.80) contrast(1.03);
   }
 
   /* ==========================================================================
@@ -2168,7 +2191,7 @@
     renderMapMarkers();
   }
 
-  // Renderiza as linhas dos itinerários no mapa com Estrutura Tubular de Alto Contraste (Trilho Escuro + Contorno Branco + Núcleo Neon + Badge Flutuante)
+  // Renderiza as linhas dos itinerários no mapa com Estrutura de Alta Visibilidade (Glow Neon Pisca-Pisca + Trilho + Núcleo + Esteira de Fluxo + Badge Radar)
   function renderItinerarios() {
     if (!itinerariosLayerGroup) return;
     itinerariosLayerGroup.clearLayers();
@@ -2176,12 +2199,13 @@
 
     Object.keys(itinerariosData).forEach((chave, index) => {
       const itin = itinerariosData[chave];
-      const pulseDelayClass = 'itin-pulse-' + (index % 6);
+      const pulseDelayClass = 'itin-pulse-glow-' + (index % 6);
+      const streamClass = 'itin-stream-' + (index % 6);
       
-      // 1. CAMADA 1 (BASE INFERIOR): Trilho escuro de alto relevo (separa do trânsito verde/vermelho do Google)
+      // 1. CAMADA 1 (BASE INFERIOR): Trilho escuro de alto contraste
       const railCasing = L.polyline(itin.coords, {
-        color: '#0f172a',
-        weight: 12,
+        color: '#0b0f19',
+        weight: 9,
         opacity: 0.95,
         lineCap: 'round',
         lineJoin: 'round',
@@ -2189,65 +2213,81 @@
       });
       itinerariosLayerGroup.addLayer(railCasing);
 
-      // 2. CAMADA 2 (CAMADA INTERMEDIÁRIA): Moldura branca luminosa
-      const midCasing = L.polyline(itin.coords, {
+      // 2. CAMADA 2 (AURA NEON PISCANTE): Halo largo da cor da linha que pisca intensamente
+      const glowPoly = L.polyline(itin.coords, {
+        color: itin.cor,
+        weight: 16,
+        opacity: 0.95,
+        lineCap: 'round',
+        lineJoin: 'round',
+        className: 'itinerario-neon-glow ' + pulseDelayClass
+      });
+      itinerariosLayerGroup.addLayer(glowPoly);
+
+      // 3. CAMADA 3 (NÚCLEO CENTRAL LUMINOSO): Linha branca fina para nitidez do traçado
+      const corePoly = L.polyline(itin.coords, {
         color: '#ffffff',
-        weight: 8,
+        weight: 3.5,
         opacity: 1.0,
         lineCap: 'round',
         lineJoin: 'round',
-        className: 'itinerario-mid-casing'
+        className: 'itinerario-core-line'
       });
-      itinerariosLayerGroup.addLayer(midCasing);
+      itinerariosLayerGroup.addLayer(corePoly);
 
-      // 3. CAMADA 3 (NÚCLEO NEON DA LINHA): Cor da linha com pulso suave vibrante
-      const poly = L.polyline(itin.coords, {
+      // 4. CAMADA 4 (ESTEIRA DE FLUXO / FIBRA ÓPTICA): Traços luminosos correndo sem parar
+      const flowStream = L.polyline(itin.coords, {
         color: itin.cor,
         weight: 4.5,
         opacity: 1.0,
         lineCap: 'round',
         lineJoin: 'round',
-        className: 'itinerario-pulse-line ' + pulseDelayClass
+        className: 'itinerario-flow-stream ' + streamClass
       });
 
-      poly.bindTooltip(`<strong>${itin.nome}</strong><br><span style="font-size:11px;">${itin.itinerario} · ${itin.extensao_km} km</span><br><span style="font-size:11px; color:${itin.transito_cor}; font-weight:700;">🚦 Trânsito: ${itin.transito_indice}% (${itin.transito_status})</span>`, {
+      flowStream.bindTooltip(`<strong>${itin.nome}</strong><br><span style="font-size:11px;">${itin.itinerario} · ${itin.extensao_km} km</span><br><span style="font-size:11px; color:${itin.transito_cor}; font-weight:700;">🚦 Trânsito: ${itin.transito_indice}% (${itin.transito_status})</span>`, {
         sticky: true,
         className: 'itin-map-tooltip'
       });
 
-      poly.on('click', function() {
+      flowStream.on('click', function() {
         const btn = Array.from(document.querySelectorAll('.itin-chip')).find(b => b.innerText.includes(chave.replace('Linha ', '')));
         destacarItinerario(chave, btn);
       });
 
-      itinerariosLayerGroup.addLayer(poly);
+      corePoly.on('click', function() {
+        const btn = Array.from(document.querySelectorAll('.itin-chip')).find(b => b.innerText.includes(chave.replace('Linha ', '')));
+        destacarItinerario(chave, btn);
+      });
 
-      // 4. CAMADA 4: Badge Flutuante com Ícone de Ônibus e Número da Linha no Meio do Corredor
+      itinerariosLayerGroup.addLayer(flowStream);
+
+      // 5. CAMADA 5: Badge Flutuante com Radar Pulse no Meio do Corredor
       const midIdx = Math.floor(itin.coords.length / 2);
       const midCoord = itin.coords[midIdx];
       const pillIcon = L.divIcon({
         className: 'route-pill-divicon',
         html: `<div class="route-pill-marker" style="
-          background: #0f172a;
+          background: #0b0f19;
           color: #ffffff;
           border: 2px solid ${itin.cor};
-          box-shadow: 0 4px 12px rgba(0,0,0,0.65);
-          padding: 2px 8px;
-          border-radius: 12px;
-          font-size: 11px;
+          padding: 3px 9px;
+          border-radius: 14px;
+          font-size: 11.5px;
           font-weight: 800;
           display: inline-flex;
           align-items: center;
-          gap: 5px;
+          gap: 6px;
           white-space: nowrap;
           cursor: pointer;
           transform: translate(-50%, -50%);
         ">
-          <i class="fa-solid fa-bus" style="color: ${itin.cor}; font-size: 10px;"></i>
+          <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:${itin.cor}; box-shadow:0 0 6px ${itin.cor};"></span>
+          <i class="fa-solid fa-bus" style="color: ${itin.cor}; font-size: 10.5px;"></i>
           <span>${chave.replace('Linha ', '')}</span>
         </div>`,
-        iconSize: [46, 22],
-        iconAnchor: [23, 11]
+        iconSize: [52, 24],
+        iconAnchor: [26, 12]
       });
       const pillMarker = L.marker(midCoord, { icon: pillIcon, zIndexOffset: 700 });
       pillMarker.on('click', () => {
@@ -2256,10 +2296,17 @@
       });
       itinerariosLayerGroup.addLayer(pillMarker);
 
+      // Define color nos elementos SVG após serem adicionados para brilho real
+      setTimeout(() => {
+        const el = glowPoly.getElement();
+        if (el) el.style.color = itin.cor;
+      }, 50);
+
       polylineObjects[chave] = {
-        poly: poly,
-        midCasing: midCasing,
+        glowPoly: glowPoly,
+        corePoly: corePoly,
         railCasing: railCasing,
+        flowStream: flowStream,
         pillMarker: pillMarker,
         data: itin,
         index: index
@@ -2398,16 +2445,23 @@
     const bannerGargalo = document.getElementById('itinGargalo');
 
     if (linhaNome === 'Todas') {
-      // Restaura todas as linhas no formato tubular normal
+      // Restaura todas as linhas no formato pulsante e brilhante
       Object.keys(polylineObjects).forEach(k => {
         const item = polylineObjects[k];
-        item.railCasing.setStyle({ weight: 12, opacity: 0.95 });
-        item.midCasing.setStyle({ weight: 8, opacity: 1.0 });
-        item.poly.setStyle({ weight: 4.5, opacity: 1.0 });
+        item.railCasing.setStyle({ weight: 9, opacity: 0.95 });
+        item.glowPoly.setStyle({ weight: 16, opacity: 0.95 });
+        item.corePoly.setStyle({ weight: 3.5, opacity: 1.0 });
+        item.flowStream.setStyle({ weight: 4.5, opacity: 1.0 });
 
-        const delayClass = 'itin-pulse-' + (item.index % 6);
-        const polyEl = item.poly.getElement();
-        if (polyEl) polyEl.setAttribute('class', 'leaflet-interactive itinerario-pulse-line ' + delayClass);
+        const glowEl = item.glowPoly.getElement();
+        if (glowEl) {
+          glowEl.setAttribute('class', 'leaflet-interactive itinerario-neon-glow itin-pulse-glow-' + (item.index % 6));
+          glowEl.style.color = item.data.cor;
+        }
+        const flowEl = item.flowStream.getElement();
+        if (flowEl) {
+          flowEl.setAttribute('class', 'leaflet-interactive itinerario-flow-stream itin-stream-' + (item.index % 6));
+        }
         if (item.pillMarker && item.pillMarker.getElement()) {
           item.pillMarker.getElement().style.opacity = '1.0';
         }
@@ -2429,27 +2483,41 @@
         // Destaca a linha selecionada e atenua as demais
         Object.keys(polylineObjects).forEach(k => {
           const item = polylineObjects[k];
-          const polyEl = item.poly.getElement();
+          const glowEl = item.glowPoly.getElement();
+          const flowEl = item.flowStream.getElement();
 
           if (k === linhaNome) {
-            item.railCasing.setStyle({ weight: 17, opacity: 1.0 });
-            item.midCasing.setStyle({ weight: 12, opacity: 1.0 });
-            item.poly.setStyle({ weight: 7.5, opacity: 1.0 });
+            item.railCasing.setStyle({ weight: 12, opacity: 1.0 });
+            item.glowPoly.setStyle({ weight: 24, opacity: 1.0 });
+            item.corePoly.setStyle({ weight: 5.5, opacity: 1.0 });
+            item.flowStream.setStyle({ weight: 6.5, opacity: 1.0 });
+
             item.railCasing.bringToFront();
-            item.midCasing.bringToFront();
-            item.poly.bringToFront();
-            if (polyEl) polyEl.setAttribute('class', 'leaflet-interactive itinerario-foco-line');
+            item.glowPoly.bringToFront();
+            item.corePoly.bringToFront();
+            item.flowStream.bringToFront();
+
+            if (glowEl) {
+              glowEl.setAttribute('class', 'leaflet-interactive itinerario-foco-glow');
+              glowEl.style.color = item.data.cor;
+            }
+            if (flowEl) {
+              flowEl.setAttribute('class', 'leaflet-interactive itinerario-flow-stream');
+            }
             if (item.pillMarker && item.pillMarker.getElement()) {
               item.pillMarker.getElement().style.opacity = '1.0';
               item.pillMarker.setZIndexOffset(900);
             }
           } else {
-            item.railCasing.setStyle({ weight: 4, opacity: 0.15 });
-            item.midCasing.setStyle({ weight: 2.5, opacity: 0.15 });
-            item.poly.setStyle({ weight: 2, opacity: 0.15 });
-            if (polyEl) polyEl.setAttribute('class', 'leaflet-interactive itinerario-dimmed');
+            item.railCasing.setStyle({ weight: 4, opacity: 0.12 });
+            item.glowPoly.setStyle({ weight: 4, opacity: 0.08 });
+            item.corePoly.setStyle({ weight: 1.5, opacity: 0.12 });
+            item.flowStream.setStyle({ weight: 1.5, opacity: 0.12 });
+
+            if (glowEl) glowEl.setAttribute('class', 'leaflet-interactive itinerario-dimmed');
+            if (flowEl) flowEl.setAttribute('class', 'leaflet-interactive itinerario-dimmed');
             if (item.pillMarker && item.pillMarker.getElement()) {
-              item.pillMarker.getElement().style.opacity = '0.25';
+              item.pillMarker.getElement().style.opacity = '0.2';
             }
           }
         });
@@ -2464,7 +2532,7 @@
         if (bannerGargalo) bannerGargalo.innerText = selItin.gargalo_principal;
 
         // Zoom automático para os limites da rota
-        const bounds = polylineObjects[linhaNome].poly.getBounds();
+        const bounds = polylineObjects[linhaNome].flowStream.getBounds();
         mapInstance.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
       }
     }
