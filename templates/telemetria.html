@@ -1,0 +1,1285 @@
+{% extends "base.html" %}
+
+{% block title %}Telemetria Avançada & Gestão de Frota{% endblock %}
+{% block page_breadcrumb %}Telemetria Avançada{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js para gráficos executivos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Leaflet para o Mapa Georreferenciado ao Vivo -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  /* DESIGN SYSTEM TELEMETRIA EXECUTIVA */
+  .telemetria-container {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* BARRA DE NAVEGAÇÃO DE ABAS */
+  .telemetria-nav-tabs {
+    display: flex;
+    gap: 8px;
+    background: #e2e8f0;
+    padding: 6px;
+    border-radius: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .tele-tab-btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .tele-tab-btn:hover {
+    background: rgba(255, 255, 255, 0.6);
+    color: #0f172a;
+  }
+
+  .tele-tab-btn.active {
+    background: #ffffff;
+    color: var(--primary);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+
+  .tele-tab-btn .badge-pill {
+    font-size: 10.5px;
+    padding: 2px 7px;
+    border-radius: 12px;
+    background: rgba(13, 148, 136, 0.12);
+    color: var(--primary);
+  }
+
+  /* GRID PRINCIPAL DO COCKPIT (BASEADO NA IMAGEM DE REFERÊNCIA) */
+  .cockpit-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 1200px) {
+    .cockpit-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .cockpit-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* CARD EXECUTIVO */
+  .tele-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .tele-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  }
+
+  .tele-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .tele-card-header h3 {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tele-card-header .info-icon {
+    color: #94a3b8;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  /* GAUGE SEMICÍRCULO SVG */
+  .gauge-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0 4px;
+  }
+
+  .gauge-svg {
+    width: 190px;
+    height: 105px;
+  }
+
+  .gauge-value {
+    font-size: 34px;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1;
+    margin-top: -10px;
+  }
+
+  .gauge-subtext {
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    margin-top: 4px;
+  }
+
+  .gauge-trend {
+    font-size: 11.5px;
+    font-weight: 700;
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .gauge-trend.up {
+    color: #10b981;
+  }
+
+  .gauge-trend.down {
+    color: #10b981; /* Para ociosidade ou consumo queda é positivo */
+  }
+
+  /* BARRAS DE CATEGORIAS DE SEGURANÇA */
+  .safety-cat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
+    flex: 1;
+  }
+
+  .safety-cat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #334155;
+  }
+
+  .safety-cat-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .safety-icon-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #ffffff;
+  }
+
+  .safety-cat-item strong {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  /* CONSUMO DESTAQUE */
+  .fuel-hero {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .fuel-hero i {
+    font-size: 36px;
+    color: #10b981;
+  }
+
+  .fuel-hero-info strong {
+    font-size: 28px;
+    font-weight: 900;
+    color: #0f172a;
+    display: block;
+    line-height: 1.1;
+  }
+
+  .fuel-hero-info span {
+    font-size: 12px;
+    font-weight: 700;
+    color: #10b981;
+  }
+
+  .fuel-stat-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 12px;
+  }
+
+  .fuel-stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    color: #64748b;
+  }
+
+  .fuel-stat-row strong {
+    color: #0f172a;
+    font-weight: 700;
+  }
+
+  /* RODAPÉ EM FAIXA (KPI STRIP) */
+  .tele-strip {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px 24px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .tele-strip {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 500px) {
+    .tele-strip {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .strip-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .strip-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(13, 148, 136, 0.1);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .strip-content span {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    display: block;
+  }
+
+  .strip-content strong {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    display: block;
+  }
+
+  .strip-content small {
+    font-size: 11px;
+    font-weight: 700;
+    color: #10b981;
+  }
+
+  /* MAPA AO VIVO */
+  #mapaTelemetria {
+    height: 540px;
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .map-filter-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .map-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+
+  .map-chip.active {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+  }
+
+  /* ESTEIRA DE HEADWAY / COMBOIO */
+  .headway-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 16px;
+  }
+
+  .headway-alert {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .headway-alert.comboio {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+  }
+
+  .headway-alert.buraco {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    color: #b45309;
+  }
+
+  /* TABELAS EXECUTIVAS */
+  .tele-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+
+  .tele-table th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+  }
+
+  .tele-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+  }
+
+  .tele-table tr:hover td {
+    background: #f8fafc;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="telemetria-container">
+
+  <!-- HEADING DA PÁGINA -->
+  <div class="page-heading">
+    <div>
+      <div class="eyebrow">SISTEMA INTEGRADO DE TELEMETRIA CAN-BUS J1939 & DMS · EXPRESSO PLANALTO (GRUPO CSC)</div>
+      <h1 style="font-size: 26px; font-weight: 900; color: #0f172a; margin: 4px 0;">Painel de Gestão de Frota</h1>
+      <p style="color: #64748b; font-size: 13.5px; margin: 0;">Visão geral de segurança, eficiência e uso da frota em tempo real com auditoria preditiva.</p>
+    </div>
+
+    <!-- CONTROLES E FILTROS EXECUTIVOS -->
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <!-- SELETOR DE PERÍODO (DO MODELO DE REFERÊNCIA) -->
+      <select class="form-select" style="font-size: 12.5px; padding: 7px 12px; font-weight: 700; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff;" onchange="window.location.href='/telemetria?periodo=' + this.value">
+        <option value="7d" {% if periodo_selecionado == '7d' %}selected{% endif %}>📅 Últimos 7 dias</option>
+        <option value="hoje" {% if periodo_selecionado == 'hoje' %}selected{% endif %}>📅 Hoje (Turno Operacional)</option>
+        <option value="ontem" {% if periodo_selecionado == 'ontem' %}selected{% endif %}>📅 Ontem</option>
+        <option value="mes" {% if periodo_selecionado == 'mes' %}selected{% endif %}>📅 Mês Atual (Novembro/2026)</option>
+        <option value="30d" {% if periodo_selecionado == '30d' %}selected{% endif %}>📅 Últimos 30 dias</option>
+      </select>
+
+      <!-- SELETOR DE LINHA -->
+      <select class="form-select" style="font-size: 12.5px; padding: 7px 12px; font-weight: 700; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff;" onchange="window.location.href='/telemetria?linha=' + this.value">
+        <option value="Todas" {% if linha_selecionada == 'Todas' %}selected{% endif %}>🚏 Todas as 6 Linhas</option>
+        <option value="Linha 801" {% if linha_selecionada == 'Linha 801' %}selected{% endif %}>Linha 801 - Central x Term. Sul</option>
+        <option value="Linha 703" {% if linha_selecionada == 'Linha 703' %}selected{% endif %}>Linha 703 - Bairro Alto x Metrô</option>
+        <option value="Linha 602" {% if linha_selecionada == 'Linha 602' %}selected{% endif %}>Linha 602 - Circular Hospitais</option>
+        <option value="Linha 504" {% if linha_selecionada == 'Linha 504' %}selected{% endif %}>Linha 504 - Vila Progresso x Centro</option>
+        <option value="Linha 305" {% if linha_selecionada == 'Linha 305' %}selected{% endif %}>Linha 305 - Expresso Term. Leste</option>
+        <option value="Linha 412" {% if linha_selecionada == 'Linha 412' %}selected{% endif %}>Linha 412 - Interbairros</option>
+      </select>
+
+      <button class="btn-primary" style="padding: 7px 14px; font-size: 12.5px;" onclick="window.print()">
+        <i class="fa-solid fa-file-pdf"></i> Relatório Diretoria
+      </button>
+
+      <button class="btn-primary" style="padding: 7px 12px; font-size: 12.5px; background: #0f172a;" onclick="window.location.reload()" title="Atualizar telemetria">
+        <i class="fa-solid fa-arrows-rotate"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- NAVEGAÇÃO POR ABAS -->
+  <div class="telemetria-nav-tabs">
+    <button class="tele-tab-btn active" onclick="switchTeleTab('cockpit', this)">
+      <i class="fa-solid fa-chart-pie"></i> Cockpit Executivo & Segurança
+    </button>
+    <button class="tele-tab-btn" onclick="switchTeleTab('mapa', this)">
+      <i class="fa-solid fa-map-location-dot"></i> Monitoramento & Mapa ao Vivo
+      <span class="badge-pill">142 Ônibus</span>
+    </button>
+    <button class="tele-tab-btn" onclick="switchTeleTab('mecanica', this)">
+      <i class="fa-solid fa-microchip"></i> Saúde Mecânica & Códigos DTC
+      <span class="badge-pill" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">4 Alertas CAN</span>
+    </button>
+    <button class="tele-tab-btn" onclick="switchTeleTab('ranking', this)">
+      <i class="fa-solid fa-award"></i> Ranking Eco-Driving
+    </button>
+    <button class="tele-tab-btn" onclick="switchTeleTab('governanca', this)">
+      <i class="fa-solid fa-hand-holding-dollar"></i> Governança, Contratos & ESG
+    </button>
+  </div>
+
+  <!-- =========================================================================
+       ABA 1: COCKPIT EXECUTIVO & SEGURANÇA (IDÊNTICO AO MODELO DA IMAGEM)
+       ========================================================================= -->
+  <div id="tab-cockpit" class="tele-tab-content">
+    
+    <!-- GRID SUPERIOR DE 4 CARDS -->
+    <div class="cockpit-grid">
+      
+      <!-- CARD 1: PONTUAÇÃO DE SEGURANÇA -->
+      <div class="tele-card">
+        <div class="tele-card-header">
+          <h3>Pontuação de Segurança</h3>
+          <i class="fa-solid fa-circle-info info-icon" title="Cálculo consolidado com base em frenagens, acelerações, excesso de velocidade e uso de cinto/celular."></i>
+        </div>
+        <div class="gauge-box">
+          <!-- GAUGE SEMICIRCULAR SVG -->
+          <svg class="gauge-svg" viewBox="0 0 100 55">
+            <!-- Arco de fundo cinza -->
+            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#f1f5f9" stroke-width="8" stroke-linecap="round"/>
+            <!-- Arco Vermelho (0 a 30) -->
+            <path d="M 10 50 A 40 40 0 0 1 25 21" fill="none" stroke="#ef4444" stroke-width="8" stroke-linecap="round"/>
+            <!-- Arco Amarelo (30 a 70) -->
+            <path d="M 25 21 A 40 40 0 0 1 65 14" fill="none" stroke="#f59e0b" stroke-width="8"/>
+            <!-- Arco Verde (70 a 100) -->
+            <path d="M 65 14 A 40 40 0 0 1 90 50" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round"/>
+            <!-- Agulha / Indicador aponta para 87 -->
+            <circle cx="50" cy="50" r="4" fill="#0f172a" />
+            <line x1="50" y1="50" x2="77" y2="24" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+          </svg>
+          <div class="gauge-value">{{ kpis.score_seguranca }}</div>
+          <div class="gauge-subtext">{{ kpis.score_status }}</div>
+          <div class="gauge-trend up">
+            <i class="fa-solid fa-arrow-up"></i> {{ kpis.score_diff }}
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 2: CATEGORIAS DE SEGURANÇA -->
+      <div class="tele-card">
+        <div class="tele-card-header">
+          <h3>Categorias de Segurança</h3>
+          <i class="fa-solid fa-circle-info info-icon" title="Índice de conformidade operacional por tipo de comportamento de direção."></i>
+        </div>
+        <div class="safety-cat-list">
+          {% for cat in kpis.categorias_seguranca %}
+          <div class="safety-cat-item">
+            <div class="safety-cat-left">
+              <span class="safety-icon-circle" style="background: {{ cat.cor }};">
+                <i class="fa-solid {{ cat.icone }}"></i>
+              </span>
+              <span>{{ cat.nome }}</span>
+            </div>
+            <strong>{{ cat.perc }}%</strong>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- CARD 3: HISTÓRICO DA PONTUAÇÃO -->
+      <div class="tele-card">
+        <div class="tele-card-header">
+          <h3>Histórico da Pontuação</h3>
+          <i class="fa-solid fa-circle-info info-icon" title="Evolução diária da nota média de condução da frota nos últimos 7 dias."></i>
+        </div>
+        <div style="flex: 1; min-height: 140px; position: relative;">
+          <canvas id="chartHistoricoPontuacao"></canvas>
+        </div>
+      </div>
+
+      <!-- CARD 4: DISTRIBUIÇÃO DO NÍVEL DE SEGURANÇA -->
+      <div class="tele-card">
+        <div class="tele-card-header">
+          <h3>Distribuição do Nível de Segurança</h3>
+          <i class="fa-solid fa-circle-info info-icon" title="Proporção da frota classificada em nível Alto, Médio e Baixo risco."></i>
+        </div>
+        <div style="flex: 1; min-height: 140px; position: relative;">
+          <canvas id="chartDistribuicaoSeguranca"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- GRID INTERMEDIÁRIO DE 4 CARDS (EFICIÊNCIA, TENDÊNCIA, CONSUMO, OCIOSIDADE) -->
+    <div class="cockpit-grid">
+
+      <!-- CARD 5: EFICIÊNCIA DE COMBUSTÍVEL -->
+      <div class="tele-card">
+        <div class="tele-card-header">
+          <h3>Eficiência de Combustível</h3>
+          <i class="fa-solid fa-circle-info info-icon" title="Média de consumo em km/L da frota urbana a diesel S-10. Meta: 2,30 km/L."></i>
+        </div>
+        <div class="gauge-box">
+          <svg class="gauge-svg" viewBox="0 0 100 55">
+            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#f1f5f9" stroke-width="8" stroke-linecap="round"/>
+            <path d="M 10 50 A 40 40 0 0 1 32 17" fill="none" stroke="#ef4444" stroke-width="8" stroke-linecap="round"/>
+            <path d="M 32 17 A 40 40 0 0 1 60 12" fill="none" stroke="#f59e0b" stroke-width="8"/>
+            <path d="M 60 12 A 40 40 0 0 1 90 50" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="4" fill="#0f172a" />
+            <line x1="50" y1="50" x2="68" y2="18" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+          </svg>
+          <div class="gauge-value" style="color: #0f172a;">{{ kpis.eficiencia_combustivel.valor|dec1 }}</div>
+          <div class="gauge-subtext">km/L (Diesel S-10)</div>
+          <div class="gauge-trend up">
+            <i class="fa-solid fa-arrow-up"></i> {{ kpis.eficiencia_combustivel.diff_perc }}
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 6: TENDÊNCIA DE EFICIÊNCIA -->
+      <div class="tele-card">
+        <div class="tele-card-header">
+          <h3>Tendência de Eficiência</h3>
+          <i class="fa-solid fa-circle-info info-icon" title="Evolução do rendimento de diesel dia a dia."></i>
+        </div>
+        <div style="flex: 1; min-height: 140px; position: relative;">
+          <canvas id="chartTendenciaEficiencia"></canvas>
+        </div>
+      </div>
+
+      <!-- CARD 7: CONSUMO DE COMBUSTÍVEL -->
+      <div class="tele-card">
+        <div class="tele-card-header">
+          <h3>Consumo de Combustível</h3>
+          <i class="fa-solid fa-circle-info info-icon" title="Volume total consumido nos últimos 7 dias e custo financeiro projetado."></i>
+        </div>
+        <div class="fuel-hero">
+          <i class="fa-solid fa-gas-pump"></i>
+          <div class="fuel-hero-info">
+            <strong>{{ kpis.consumo.volume_total_l|intformat }} L</strong>
+            <span><i class="fa-solid fa-arrow-down"></i> {{ kpis.consumo.diff_perc }}</span>
+          </div>
+        </div>
+        <div class="fuel-stat-rows">
+          <div class="fuel-stat-row">
+            <span>Consumo médio</span>
+            <strong>{{ kpis.consumo.consumo_medio_dia|intformat }} L/dia</strong>
+          </div>
+          <div class="fuel-stat-row">
+            <span>Distância total</span>
+            <strong>{{ kpis.consumo.distancia_total_km|intformat }} km</strong>
+          </div>
+          <div class="fuel-stat-row">
+            <span>Custo estimado</span>
+            <strong>R$ {{ kpis.consumo.custo_estimado_rs|moeda }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 8: TAXA DE OCIOSIDADE (MARCHA LENTA) -->
+      <div class="tele-card">
+        <div class="tele-card-header">
+          <h3>Taxa de Ociosidade</h3>
+          <i class="fa-solid fa-circle-info info-icon" title="Percentual do tempo de motor ligado com o veículo parado (marcha lenta improdutiva)."></i>
+        </div>
+        <div class="gauge-box">
+          <svg class="gauge-svg" viewBox="0 0 100 55">
+            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#f1f5f9" stroke-width="8" stroke-linecap="round"/>
+            <path d="M 10 50 A 40 40 0 0 1 42 12" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round"/>
+            <path d="M 42 12 A 40 40 0 0 1 70 18" fill="none" stroke="#f59e0b" stroke-width="8"/>
+            <path d="M 70 18 A 40 40 0 0 1 90 50" fill="none" stroke="#ef4444" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="4" fill="#0f172a" />
+            <line x1="50" y1="50" x2="38" y2="16" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+          </svg>
+          <div class="gauge-value">{{ kpis.taxa_ociosidade.perc }}%</div>
+          <div class="gauge-subtext">Marcha Lenta</div>
+          <div class="gauge-trend down">
+            <i class="fa-solid fa-arrow-down"></i> {{ kpis.taxa_ociosidade.diff_pp }}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RODAPÉ EXECUTIVO EM FAIXA (KPI STRIP DO MODELO) -->
+    <div class="tele-strip">
+      <div class="strip-item">
+        <div class="strip-icon"><i class="fa-solid fa-bus"></i></div>
+        <div class="strip-content">
+          <span>Veículos ativos</span>
+          <strong>{{ kpis.faixa_rodape.veiculos_ativos }}</strong>
+          <small><i class="fa-solid fa-arrow-up"></i> {{ kpis.faixa_rodape.veiculos_diff }}</small>
+        </div>
+      </div>
+
+      <div class="strip-item">
+        <div class="strip-icon"><i class="fa-solid fa-route"></i></div>
+        <div class="strip-content">
+          <span>Distância total</span>
+          <strong>{{ kpis.faixa_rodape.distancia_total }}</strong>
+          <small><i class="fa-solid fa-arrow-up"></i> {{ kpis.faixa_rodape.distancia_diff }}</small>
+        </div>
+      </div>
+
+      <div class="strip-item">
+        <div class="strip-icon"><i class="fa-solid fa-gauge"></i></div>
+        <div class="strip-content">
+          <span>Eficiência média da frota</span>
+          <strong>{{ kpis.faixa_rodape.eficiencia_media }}</strong>
+          <small><i class="fa-solid fa-arrow-up"></i> {{ kpis.faixa_rodape.eficiencia_diff }}</small>
+        </div>
+      </div>
+
+      <div class="strip-item">
+        <div class="strip-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="strip-content">
+          <span>Eventos de segurança</span>
+          <strong>{{ kpis.faixa_rodape.eventos_seguranca }}</strong>
+          <small><i class="fa-solid fa-arrow-down"></i> {{ kpis.faixa_rodape.eventos_diff }}</small>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =========================================================================
+       ABA 2: MAPA GEORREFERENCIADO AO VIVO & HEADWAY
+       ========================================================================= -->
+  <div id="tab-mapa" class="tele-tab-content" style="display: none;">
+    <div class="tele-card" style="padding: 16px 20px; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0;">
+            <i class="fa-solid fa-tower-broadcast" style="color: var(--primary);"></i> Mapa Tático CCO ao Vivo · Itaquaquecetuba / SP
+          </h3>
+          <p style="font-size: 12px; color: #64748b; margin: 2px 0 0;">Telemetria GPS georreferenciada atualizada a cada 10 segundos com telemetria CAN embarcada.</p>
+        </div>
+        
+        <!-- CHIPS DE FILTRO DO MAPA -->
+        <div class="map-filter-bar" style="margin-bottom: 0;">
+          <span class="map-chip active" onclick="filtrarMapa('Todos', this)">
+            <i class="fa-solid fa-layer-group"></i> Todos (142)
+          </span>
+          <span class="map-chip" onclick="filtrarMapa('No Horário', this)">
+            <span style="color: #10b981;">●</span> No Horário (128)
+          </span>
+          <span class="map-chip" onclick="filtrarMapa('Adiantado', this)">
+            <span style="color: #f59e0b;">●</span> Adiantados (6)
+          </span>
+          <span class="map-chip" onclick="filtrarMapa('Atrasado', this)">
+            <span style="color: #ef4444;">●</span> Atrasados (8)
+          </span>
+          <span class="map-chip" onclick="filtrarMapa('Garagem', this)">
+            <span style="color: #3b82f6;">●</span> Garagem (4)
+          </span>
+          <span class="map-chip" onclick="filtrarMapa('Oficina', this)">
+            <span style="color: #f97316;">●</span> Oficina (4)
+          </span>
+        </div>
+      </div>
+
+      <!-- MAPA LEAFLET -->
+      <div id="mapaTelemetria"></div>
+
+      <!-- ALERTAS DE HEADWAY & EFEITO COMBOIO -->
+      <div class="headway-card">
+        <h4 style="font-size: 13.5px; font-weight: 800; color: #0f172a; margin: 0 0 10px; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-arrows-left-right-to-line" style="color: #6366f1;"></i> Monitoramento de Intervalo (Headway) & Prevenção de Comboio
+        </h4>
+        
+        <div class="headway-alert comboio">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size: 16px;"></i>
+          <div style="flex: 1;">
+            <strong>Alerta de Efeito Comboio na Linha 801 (Central x Term. Sul)</strong>
+            <p style="margin: 2px 0 0; font-size: 11.5px;">Carro 5014 e Carro 5022 estão distanciados por apenas 1,5 minuto (tolerância mínima: 4,0 min). Risco de canibalização de passageiros no Corredor Sul.</p>
+          </div>
+          <button class="btn-primary" style="padding: 4px 10px; font-size: 11px; background: #b91c1c;" onclick="alert('Instrução de retenção de 2.5 min transmitida via rádio/CCO ao Carro 5022.')">
+            Segurar no Terminal
+          </button>
+        </div>
+
+        <div class="headway-alert buraco">
+          <i class="fa-solid fa-circle-exclamation" style="font-size: 16px;"></i>
+          <div style="flex: 1;">
+            <strong>Alerta de Buraco Operacional na Linha 703 (Bairro Alto x Metrô)</strong>
+            <p style="margin: 2px 0 0; font-size: 11.5px;">Intervalo entre o Carro 5028 e o Carro 5035 atingiu 14 minutos (programado: 6,0 min) devido à lentidão na Radial Leste.</p>
+          </div>
+          <button class="btn-primary" style="padding: 4px 10px; font-size: 11px; background: #d97706;" onclick="alert('Carro Reserva 5099 liberado da garagem para cobrir partida extra.')">
+            Injetar Carro Reserva
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       ABA 3: SAÚDE MECÂNICA & CÓDIGOS DTC DA REDE CAN-BUS
+       ========================================================================= -->
+  <div id="tab-mecanica" class="tele-tab-content" style="display: none;">
+    
+    <!-- 4 KPI CARDS DE SENSORES CRÍTICOS -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px;">
+      <div class="tele-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12px; font-weight: 700; color: #64748b;">Temp. Média Arrefecimento</span>
+          <i class="fa-solid fa-temperature-half" style="color: #10b981;"></i>
+        </div>
+        <strong style="font-size: 26px; font-weight: 900; color: #0f172a; margin-top: 6px;">88,2 °C</strong>
+        <span style="font-size: 11.5px; color: #10b981; font-weight: 600;">Faixa Ideal (80°C - 95°C)</span>
+      </div>
+
+      <div class="tele-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12px; font-weight: 700; color: #64748b;">Pressão Pneumática (Freios)</span>
+          <i class="fa-solid fa-gauge-high" style="color: #10b981;"></i>
+        </div>
+        <strong style="font-size: 26px; font-weight: 900; color: #0f172a; margin-top: 6px;">8,5 bar</strong>
+        <span style="font-size: 11.5px; color: #10b981; font-weight: 600;">Conforme norma ABNT (≥ 8.0 bar)</span>
+      </div>
+
+      <div class="tele-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12px; font-weight: 700; color: #64748b;">Nível Médio de Arla 32</span>
+          <i class="fa-solid fa-droplet" style="color: #0ea5e9;"></i>
+        </div>
+        <strong style="font-size: 26px; font-weight: 900; color: #0f172a; margin-top: 6px;">74,5%</strong>
+        <span style="font-size: 11.5px; color: #0ea5e9; font-weight: 600;">Euro 6 / Proconve P-8 Ok</span>
+      </div>
+
+      <div class="tele-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12px; font-weight: 700; color: #64748b;">Tensão Alternador/Baterias</span>
+          <i class="fa-solid fa-bolt" style="color: #6366f1;"></i>
+        </div>
+        <strong style="font-size: 26px; font-weight: 900; color: #0f172a; margin-top: 6px;">27,8 V</strong>
+        <span style="font-size: 11.5px; color: #10b981; font-weight: 600;">Carga 24V Estabilizada</span>
+      </div>
+    </div>
+
+    <!-- TABELA DE ALERTAS ATIVOS CAN-BUS -->
+    <div class="tele-card" style="padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <h3 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0;">
+            <i class="fa-solid fa-microchip" style="color: #ef4444;"></i> Alertas Preditivos da Injeção Eletrônica (Códigos DTC J1939)
+          </h3>
+          <p style="font-size: 12px; color: #64748b; margin: 2px 0 0;">Falhas capturadas diretamente do barramento CAN dos chassis Mercedes-Benz e Caio/Marcopolo.</p>
+        </div>
+        <span class="badge-pill" style="background: #fee2e2; color: #b91c1c; font-weight: 700;">4 Alertas Requerem Ação</span>
+      </div>
+
+      <table class="tele-table">
+        <thead>
+          <tr>
+            <th>PROTOCOLO</th>
+            <th>VEÍCULO / LINHA</th>
+            <th>CÓDIGO DTC (SPN/FMI)</th>
+            <th>SISTEMA / DESCRIÇÃO</th>
+            <th>SEVERIDADE</th>
+            <th>TEMP.</th>
+            <th>AÇÃO PREVENTIVA</th>
+            <th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for alt in alertas %}
+          <tr>
+            <td><strong>{{ alt.protocolo }}</strong></td>
+            <td>
+              <span class="badge-pill" style="background: #e0f2fe; color: #0369a1; font-weight: 700;">
+                <i class="fa-solid fa-bus"></i> Carro {{ alt.prefixo }}
+              </span>
+              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">{{ alt.linha }}</div>
+            </td>
+            <td>
+              <span style="font-family: monospace; font-weight: 700; background: #f1f5f9; padding: 3px 6px; border-radius: 4px; color: #0f172a;">
+                {{ alt.spn_fmi }}
+              </span>
+            </td>
+            <td>
+              <strong style="color: #0f172a; display: block;">{{ alt.sistema }}</strong>
+              <span style="font-size: 11.5px; color: #64748b;">{{ alt.descricao }}</span>
+            </td>
+            <td>
+              {% if alt.severidade == 'Crítica' %}
+              <span class="badge-pill" style="background: #fde8e8; color: #b91c1c; font-weight: 700;">
+                <i class="fa-solid fa-bolt"></i> Crítica
+              </span>
+              {% elif alt.severidade == 'Alta' %}
+              <span class="badge-pill" style="background: #fff4df; color: #b45309; font-weight: 700;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Alta
+              </span>
+              {% else %}
+              <span class="badge-pill" style="background: #f1f5f9; color: #475569; font-weight: 700;">
+                {{ alt.severidade }}
+              </span>
+              {% endif %}
+            </td>
+            <td><strong>{{ alt.temp }}</strong></td>
+            <td><span style="font-size: 11.5px; color: #334155;">{{ alt.acao }}</span></td>
+            <td>
+              <a href="{{ url_for('oficina_view') }}" class="btn-primary" style="padding: 4px 8px; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                <i class="fa-solid fa-screwdriver-wrench"></i> Ver Oficina
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- =========================================================================
+       ABA 4: RANKING DE MOTORISTAS & ECO-DRIVING
+       ========================================================================= -->
+  <div id="tab-ranking" class="tele-tab-content" style="display: none;">
+    <div class="tele-card" style="padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0;">
+            <i class="fa-solid fa-trophy" style="color: #f59e0b;"></i> Ranking de Condução Segura e Econômica (Eco-Driving)
+          </h3>
+          <p style="font-size: 12px; color: #64748b; margin: 2px 0 0;">Classificação dos 60 condutores da empresa com base em suavidade, consumo de diesel e telemetria DMS.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <span class="badge-pill" style="background: #ecfdf5; color: #047857; font-weight: 700;">Top Condutores (Prêmio Trimestral)</span>
+          <span class="badge-pill" style="background: #fef2f2; color: #b91c1c; font-weight: 700;">Programa de Reciclagem</span>
+        </div>
+      </div>
+
+      <table class="tele-table">
+        <thead>
+          <tr>
+            <th style="width: 60px;">POS.</th>
+            <th>MOTORISTA / MATRÍCULA</th>
+            <th>LINHA PRINCIPAL</th>
+            <th>SCORE ECO-DRIVE</th>
+            <th>FRENAGENS / 100 KM</th>
+            <th>ACELERAÇÕES BRUSCAS</th>
+            <th>MÉDIA KM/L</th>
+            <th>STATUS OPERACIONAL</th>
+            <th>AÇÃO DA GESTÃO</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rk in ranking %}
+          <tr {% if rk.classe == 'danger' %}style="background: #fff8f8;"{% endif %}>
+            <td>
+              {% if rk.pos == 1 %}
+              <span style="font-size: 16px;">🥇</span>
+              {% elif rk.pos == 2 %}
+              <span style="font-size: 16px;">🥈</span>
+              {% elif rk.pos == 3 %}
+              <span style="font-size: 16px;">🥉</span>
+              {% else %}
+              <strong style="color: #64748b;">#{{ rk.pos }}</strong>
+              {% endif %}
+            </td>
+            <td>
+              <strong style="color: #0f172a; font-size: 13px; display: block;">{{ rk.nome }}</strong>
+              <span style="font-size: 11px; color: #94a3b8;">Matrícula: {{ rk.matricula }}</span>
+            </td>
+            <td><strong>{{ rk.linha }}</strong></td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <strong style="font-size: 14px; color: {% if rk.score >= 90 %}#10b981{% elif rk.score >= 80 %}#f59e0b{% else %}#ef4444{% endif %};">
+                  {{ rk.score }}/100
+                </strong>
+                <div style="width: 50px; height: 6px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
+                  <div style="width: {{ rk.score }}%; height: 100%; background: {% if rk.score >= 90 %}#10b981{% elif rk.score >= 80 %}#f59e0b{% else %}#ef4444{% endif %};"></div>
+                </div>
+              </div>
+            </td>
+            <td>{{ rk.freadas_100km }} / 100km</td>
+            <td>{{ rk.acel_agressiva }} / 100km</td>
+            <td><strong style="color: #0f172a;">{{ rk.km_l }} km/L</strong></td>
+            <td>
+              <span class="badge-pill" style="{% if rk.classe == 'top' %}background: #ecfdf5; color: #047857;{% elif rk.classe == 'warn' %}background: #fffbeb; color: #b45309;{% else %}background: #fef2f2; color: #b91c1c;{% endif %} font-weight: 700;">
+                {{ rk.status }}
+              </span>
+            </td>
+            <td>
+              {% if rk.classe == 'top' %}
+              <button class="btn-primary" style="padding: 3px 8px; font-size: 11px; background: #047857;" onclick="alert('Bonificação de R$ 350,00 lançada para {{ rk.nome }}.')">
+                <i class="fa-solid fa-gift"></i> Bonificar
+              </button>
+              {% else %}
+              <button class="btn-primary" style="padding: 3px 8px; font-size: 11px; background: #b91c1c;" onclick="alert('Reciclagem em simulador e direção defensiva agendada para {{ rk.nome }}.')">
+                <i class="fa-solid fa-graduation-cap"></i> Treinamento
+              </button>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       ABA 5: GOVERNANÇA, CONTRATOS & ESG (DIRETOR DE OPERAÇÕES)
+       ========================================================================= -->
+  <div id="tab-governanca" class="tele-tab-content" style="display: none;">
+    
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px;">
+      <!-- ECONOMIA DE DIESEL -->
+      <div class="tele-card">
+        <span style="font-size: 12px; font-weight: 700; color: #64748b;">Economia Gerada (Eco-Driving)</span>
+        <strong style="font-size: 26px; font-weight: 900; color: #10b981; margin: 4px 0;">+ R$ {{ kpis.impacto_financeiro.economia_diesel_mes|moeda }}</strong>
+        <span style="font-size: 11.5px; color: #64748b;">Economia vs meta contratual no mês</span>
+      </div>
+
+      <!-- CUMPRIMENTO DE VIAGENS ICV -->
+      <div class="tele-card">
+        <span style="font-size: 12px; font-weight: 700; color: #64748b;">Índice Cumprimento Viagens (ICV)</span>
+        <strong style="font-size: 26px; font-weight: 900; color: #0f172a; margin: 4px 0;">{{ kpis.qualidade_contratual.icv }}%</strong>
+        <span style="font-size: 11.5px; color: #10b981; font-weight: 600;">942 / 955 viagens realizadas</span>
+      </div>
+
+      <!-- PONTUALIDADE OTP -->
+      <div class="tele-card">
+        <span style="font-size: 12px; font-weight: 700; color: #64748b;">Pontualidade na Faixa (OTP)</span>
+        <strong style="font-size: 26px; font-weight: 900; color: #0f172a; margin: 4px 0;">{{ kpis.qualidade_contratual.otp_pontualidade }}%</strong>
+        <span style="font-size: 11.5px; color: #10b981; font-weight: 600;">Tolerância -1 min / +3 min</span>
+      </div>
+
+      <!-- SUSTENTABILIDADE ESG -->
+      <div class="tele-card">
+        <span style="font-size: 12px; font-weight: 700; color: #64748b;">Emissões de CO₂ Evitadas</span>
+        <strong style="font-size: 26px; font-weight: 900; color: #0ea5e9; margin: 4px 0;">{{ kpis.qualidade_contratual.co2_evitado_ton }} ton</strong>
+        <span style="font-size: 11.5px; color: #0ea5e9; font-weight: 600;">Crédito de carbono & ESG</span>
+      </div>
+    </div>
+
+    <!-- DETALHAMENTO DE CUSTO POR QUILÔMETRO (CPK) -->
+    <div class="tele-card" style="padding: 22px;">
+      <h3 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0 0 16px;">
+        <i class="fa-solid fa-coins" style="color: var(--primary);"></i> Matriz de Custo por Quilômetro Rodado (CPK Operacional)
+      </h3>
+      
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
+        <div style="padding: 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;">
+          <span style="font-size: 12px; color: #64748b; font-weight: 600;">CPK de Combustível</span>
+          <strong style="font-size: 22px; font-weight: 800; color: #0f172a; display: block; margin: 4px 0;">R$ {{ kpis.impacto_financeiro.cpk_combustivel|moeda }} / km</strong>
+          <p style="font-size: 11.5px; color: #64748b; margin: 0;">Calculado com Diesel S-10 a R$ 6,00/litro.</p>
+        </div>
+
+        <div style="padding: 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;">
+          <span style="font-size: 12px; color: #64748b; font-weight: 600;">CPK de Manutenção Preditiva</span>
+          <strong style="font-size: 22px; font-weight: 800; color: #0f172a; display: block; margin: 4px 0;">R$ {{ kpis.impacto_financeiro.cpk_manutencao|moeda }} / km</strong>
+          <p style="font-size: 11.5px; color: #64748b; margin: 0;">Oficina, peças trocadas e filtros.</p>
+        </div>
+
+        <div style="padding: 16px; background: #f0fdf4; border-radius: 10px; border: 1px solid #bbf7d0;">
+          <span style="font-size: 12px; color: #166534; font-weight: 700;">CPK Total Consolidado</span>
+          <strong style="font-size: 22px; font-weight: 900; color: #15803d; display: block; margin: 4px 0;">R$ {{ kpis.impacto_financeiro.cpk_total|moeda }} / km</strong>
+          <p style="font-size: 11.5px; color: #166534; margin: 0;">Performance 4,2% melhor que o benchmark do setor.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- DADOS DOS VEÍCULOS PARA O MAPA LEAFLET -->
+<script>
+  const veiculosData = {{ veiculos|tojson }};
+  let mapInstance = null;
+  let markersLayer = null;
+
+  // Alternador de Abas do Cockpit
+  function switchTeleTab(tabId, btn) {
+    document.querySelectorAll('.tele-tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.tele-tab-btn').forEach(b => b.classList.remove('active'));
+
+    const targetTab = document.getElementById('tab-' + tabId);
+    if (targetTab) {
+      targetTab.style.display = 'block';
+    }
+    if (btn) {
+      btn.classList.add('active');
+    }
+
+    if (tabId === 'mapa') {
+      setTimeout(() => {
+        initTelemetriaMap();
+      }, 150);
+    }
+  }
+
+  // Inicialização do Mapa Leaflet
+  function initTelemetriaMap() {
+    if (mapInstance) {
+      mapInstance.invalidateSize();
+      return;
+    }
+
+    // Coordenadas centrais em Itaquaquecetuba / SP
+    mapInstance = L.map('mapaTelemetria').setView([-23.4862, -46.3485], 13);
+
+    // Camada de mapa CartoDB Positron (Visual limpo e profissional de telemetria)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+      maxZoom: 19
+    }).addTo(mapInstance);
+
+    markersLayer = L.layerGroup().addTo(mapInstance);
+    renderMapMarkers('Todos');
+  }
+
+  function renderMapMarkers(filtroStatus) {
+    if (!markersLayer) return;
+    markersLayer.clearLayers();
+
+    veiculosData.forEach(v => {
+      if (filtroStatus !== 'Todos' && v.status !== filtroStatus) {
+        return;
+      }
+
+      // Marcador personalizado de ônibus com cor de acordo com status
+      const customIcon = L.divIcon({
+        className: 'bus-marker-icon',
+        html: `<div style="
+          background: ${v.cor};
+          color: #ffffff;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 800;
+          font-size: 13px;
+          box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+          border: 2px solid #ffffff;
+        ">
+          <i class="fa-solid fa-bus"></i>
+        </div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      });
+
+      const marker = L.marker([v.lat, v.lng], { icon: customIcon });
+
+      // Popup rico com dados de telemetria CAN
+      const popupContent = `
+        <div style="font-family: Montserrat, Inter, sans-serif; min-width: 230px; padding: 4px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px;">
+            <strong style="font-size: 14px; color: #0f172a;">Carro ${v.prefixo} · ${v.placa}</strong>
+            <span style="font-size: 10.5px; padding: 2px 6px; border-radius: 4px; background: ${v.cor}; color: #fff; font-weight: 700;">${v.status}</span>
+          </div>
+          <div style="font-size: 12px; color: #475569; margin-bottom: 4px;"><strong>Linha:</strong> ${v.linha} (${v.rota})</div>
+          <div style="font-size: 12px; color: #475569; margin-bottom: 4px;"><strong>Motorista:</strong> ${v.motorista}</div>
+          <div style="font-size: 12px; color: #475569; margin-bottom: 4px;"><strong>Modelo:</strong> ${v.modelo}</div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #f8fafc; padding: 8px; border-radius: 6px; margin-top: 8px; font-size: 11px;">
+            <div>Velocidade: <strong style="color: #0f172a;">${v.velocidade} km/h</strong></div>
+            <div>Rotação: <strong style="color: #0f172a;">${v.rpm} RPM</strong></div>
+            <div>Temp. Motor: <strong style="color: #0f172a;">${v.temp_motor} °C</strong></div>
+            <div>Pressão Freio: <strong style="color: #0f172a;">${v.pressao_ar} bar</strong></div>
+          </div>
+          
+          ${v.dtc ? `<div style="background: #fee2e2; color: #b91c1c; font-size: 10.5px; font-weight: 700; padding: 4px 6px; border-radius: 4px; margin-top: 6px;">⚠️ Falha CAN: ${v.dtc}</div>` : ''}
+          ${v.alerta_comboio ? `<div style="background: #fef3c7; color: #b45309; font-size: 10.5px; font-weight: 700; padding: 4px 6px; border-radius: 4px; margin-top: 6px;">⚠️ Efeito Comboio detectado</div>` : ''}
+        </div>
+      `;
+
+      marker.bindPopup(popupContent);
+      markersLayer.addLayer(marker);
+    });
+  }
+
+  function filtrarMapa(status, btn) {
+    document.querySelectorAll('.map-chip').forEach(c => c.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderMapMarkers(status);
+  }
+
+  // Inicialização dos Gráficos Chart.js (Idênticos ao modelo do print)
+  document.addEventListener('DOMContentLoaded', function() {
+    
+    // 1. Gráfico Histórico da Pontuação (Colunas Verdes)
+    const ctxHist = document.getElementById('chartHistoricoPontuacao');
+    if (ctxHist) {
+      new Chart(ctxHist, {
+        type: 'bar',
+        data: {
+          labels: {{ kpis.historico_pontuacao.dias|tojson }},
+          datasets: [{
+            data: {{ kpis.historico_pontuacao.valores|tojson }},
+            backgroundColor: '#10b981',
+            borderRadius: 6,
+            barThickness: 16
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(c) { return c.raw + ' pontos'; }
+              }
+            }
+          },
+          scales: {
+            y: {
+              min: 50,
+              max: 100,
+              ticks: { stepSize: 10, font: { size: 10 } },
+              grid: { color: '#f1f5f9' }
+            },
+            x: {
+              ticks: { font: { size: 10, weight: '600' } },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    // 2. Gráfico Distribuição do Nível de Segurança (Donut)
+    const ctxDist = document.getElementById('chartDistribuicaoSeguranca');
+    if (ctxDist) {
+      new Chart(ctxDist, {
+        type: 'doughnut',
+        data: {
+          labels: ['Alto (72%)', 'Médio (18%)', 'Baixo (10%)'],
+          datasets: [{
+            data: [72, 18, 10],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 12,
+                font: { size: 11, weight: '700' },
+                color: '#475569'
+              }
+            }
+          },
+          cutout: '65%'
+        }
+      });
+    }
+
+    // 3. Gráfico Tendência de Eficiência (Linha Verde)
+    const ctxTend = document.getElementById('chartTendenciaEficiencia');
+    if (ctxTend) {
+      new Chart(ctxTend, {
+        type: 'line',
+        data: {
+          labels: {{ kpis.tendencia_eficiencia.dias|tojson }},
+          datasets: [{
+            data: {{ kpis.tendencia_eficiencia.valores|tojson }},
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderWidth: 2.5,
+            pointBackgroundColor: '#10b981',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            tension: 0.35,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(c) { return c.raw.toFixed(2) + ' km/L'; }
+              }
+            }
+          },
+          scales: {
+            y: {
+              min: 2.1,
+              max: 2.6,
+              ticks: { stepSize: 0.1, font: { size: 10 } },
+              grid: { color: '#f1f5f9' }
+            },
+            x: {
+              ticks: { font: { size: 10, weight: '600' } },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+  });
+</script>
+{% endblock %}

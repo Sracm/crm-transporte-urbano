@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -15,7 +16,9 @@
   <!-- Google Fonts: Inter & Montserrat -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap"
+    rel="stylesheet">
 
   <!-- FontAwesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -25,405 +28,438 @@
 
   {% block extra_head %}{% endblock %}
 </head>
+
 <body>
 
-<div class="app-shell">
-  <!-- SCRIM PARA FECHAR SIDEBAR NO CELULAR -->
-  <div class="sidebar-scrim" id="sidebarScrim" onclick="toggleSidebar()"></div>
+  <div class="app-shell">
+    <!-- SCRIM PARA FECHAR SIDEBAR NO CELULAR -->
+    <div class="sidebar-scrim" id="sidebarScrim" onclick="toggleSidebar()"></div>
 
-  <!-- SIDEBAR (NAVY) -->
-  <aside class="sidebar" id="sidebar">
-    <!-- BRAND / LOGO COM BOTÃO DE ESCONDER/MOSTRAR -->
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-      <a class="brand" href="{{ url_for('dashboard') }}" style="margin-bottom: 0;">
-        <div class="brand-mark">
-          <i class="fa-solid fa-layer-group"></i>
-        </div>
-        <div class="brand-text">
-          <strong>Central de</strong>
-          <span>Operações</span>
-        </div>
-      </a>
-      <button type="button" class="sidebar-collapse-btn" onclick="toggleDesktopSidebar()" title="Esconder / Recolher Menu Lateral">
-        <i class="fa-solid fa-angles-left"></i>
-      </button>
-    </div>
-
-    <!-- WORKSPACE / PRIVADO -->
-    <div class="workspace-switch">
-      <div class="workspace-avatar">CO</div>
-      <div class="workspace-info">
-        <strong>Operações</strong>
-        <span>Ambiente privado</span>
-      </div>
-      <i class="fa-solid fa-lock"></i>
-    </div>
-
-    <!-- SEÇÃO OPERAÇÃO (FILTRADA POR PERMISSÃO) -->
-    <p class="nav-section">OPERAÇÃO</p>
-    <nav aria-label="Navegação principal">
-      {% if current_user.is_admin or 'dashboard' in current_user.allowed_routes %}
-      <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.path == '/' %}active{% endif %}" onclick="closeSidebarOnMobile()">
-        <i class="fa-solid fa-table-cells-large"></i>
-        <span>Visão geral</span>
-      </a>
-      {% endif %}
-
-      {% if current_user.is_admin or 'chamados' in current_user.allowed_routes %}
-      <a href="{{ url_for('chamados_view') }}" class="nav-item {% if '/chamados' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
-        <i class="fa-solid fa-headset"></i>
-        <span>Chamados & OS</span>
-        <span class="nav-count">{{ chamados_abertos|default(9) }}</span>
-      </a>
-      {% endif %}
-
-      {% if current_user.is_admin or 'ponto' in current_user.allowed_routes %}
-      <a href="{{ url_for('ponto_view') }}" class="nav-item {% if '/ponto' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
-        <i class="fa-solid fa-fingerprint"></i>
-        <span>Ponto Eletrônico</span>
-      </a>
-      {% endif %}
-
-      {% if current_user.is_admin or 'cco' in current_user.allowed_routes %}
-      <a href="{{ url_for('cco_view') }}" class="nav-item {% if '/cco' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
-        <i class="fa-solid fa-tower-broadcast"></i>
-        <span>Frota CCO</span>
-      </a>
-      {% endif %}
-
-      {% if current_user.is_admin or 'oficina' in current_user.allowed_routes %}
-      <a href="{{ url_for('oficina_view') }}" class="nav-item {% if '/oficina' in request.path or '/manutencao' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
-        <i class="fa-solid fa-screwdriver-wrench"></i>
-        <span>Manutenção / Oficina</span>
-        <span class="nav-count" style="background: #f59e0b; color: #fff;">{{ carros_manutencao_count|default(13) }}</span>
-      </a>
-      {% endif %}
-
-      {% if current_user.is_admin or 'portaria' in current_user.allowed_routes %}
-      <a href="{{ url_for('portaria_view') }}" class="nav-item {% if '/portaria' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
-        <i class="fa-solid fa-bus"></i>
-        <span>Portaria & Garagem</span>
-      </a>
-      {% endif %}
-
-      {% if current_user.is_admin or 'financeiro' in current_user.allowed_routes %}
-      <a href="{{ url_for('financeiro_view') }}" class="nav-item {% if '/financeiro' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
-        <i class="fa-solid fa-wallet"></i>
-        <span>Financeiro Integrado</span>
-      </a>
-      {% endif %}
-
-      {% if current_user.is_admin or 'colaboradores' in current_user.allowed_routes %}
-      <a href="{{ url_for('colaboradores_view') }}" class="nav-item {% if '/colaboradores' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
-        <i class="fa-solid fa-users"></i>
-        <span>Colaboradores (60)</span>
-      </a>
-      {% endif %}
-
-      {% if current_user.is_admin or 'emails' in current_user.allowed_routes %}
-      <a href="{{ url_for('emails_view') }}" class="nav-item {% if '/emails' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
-        <i class="fa-solid fa-envelope"></i>
-        <span>Histórico E-mails</span>
-      </a>
-      {% endif %}
-    </nav>
-
-    <!-- SEÇÃO CONFIGURAÇÃO -->
-    <p class="nav-section" style="margin-top: 18px;">CONFIGURAÇÃO</p>
-    <nav aria-label="Configurações">
-      {% if current_user.is_admin %}
-      <a href="#" class="nav-item" onclick="alert('Regras operacionais e SLA ativos no servidor.')">
-        <i class="fa-solid fa-sliders"></i>
-        <span>Regras Operacionais</span>
-      </a>
-      {% endif %}
-      <a href="javascript:window.location.reload()" class="nav-item" onclick="closeSidebarOnMobile()">
-        <i class="fa-solid fa-rotate"></i>
-        <span>Atualizar Dados</span>
-      </a>
-    </nav>
-
-    <!-- FOOTER DA SIDEBAR -->
-    <div class="sidebar-bottom">
-      <div class="dot-card">
-        <div class="dot-symbol">
-          <span></span><span></span><span></span>
-        </div>
-        <strong>CCO Transporte Urbano</strong>
-        <p>150 Ônibus monitorados ao vivo em 4 corredores principais.</p>
-        <a href="http://10.11.1.100:5600" target="_blank">Ver mapa de telemetria &rarr;</a>
-      </div>
-
-      <div class="sidebar-user" style="display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-          <div class="avatar">{{ current_user.nome[:2].upper() if current_user.nome else 'US' }}</div>
-          <div class="sidebar-user-info">
-            <strong>{{ current_user.nome }}</strong>
-            <span>{{ current_user.cargo }}</span>
+    <!-- SIDEBAR (NAVY) -->
+    <aside class="sidebar" id="sidebar">
+      <!-- BRAND / LOGO COM BOTÃO DE ESCONDER/MOSTRAR -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+        <a class="brand" href="{{ url_for('dashboard') }}" style="margin-bottom: 0;">
+          <div class="brand-mark">
+            <i class="fa-solid fa-layer-group"></i>
           </div>
-        </div>
-        <a href="{{ url_for('logout_view') }}" title="Sair do Portal" style="color: #ef4444; font-size: 15px; margin-left: 6px; padding: 6px; border-radius: 6px; text-decoration: none; display: flex; align-items: center;" onmouseover="this.style.background='rgba(239,68,68,0.15)'" onmouseout="this.style.background='none'">
-          <i class="fa-solid fa-right-from-bracket"></i>
-        </a>
-      </div>
-    </div>
-  </aside>
-
-  <!-- MAIN SHELL (ÁREA CENTRAL) -->
-  <div class="main-shell">
-    <!-- TOPBAR -->
-    <header class="topbar">
-      <div class="breadcrumb">
-        <!-- BOTÃO TOGGLE SIDEBAR (DESKTOP & MOBILE RETRÁTIL) -->
-        <button class="sidebar-toggle-btn" id="btnToggleSidebar" onclick="toggleDesktopSidebar()" title="Esconder / Mostrar Menu Lateral">
-          <i class="fa-solid fa-bars-staggered" id="iconSidebarToggle"></i>
-        </button>
-        <button class="icon-button mobile-toggle" aria-label="Abrir menu mobile" onclick="toggleSidebar()">
-          <i class="fa-solid fa-bars"></i>
-        </button>
-        <span class="breadcrumb-root">Central de operações</span>
-        <i class="fa-solid fa-chevron-right" style="font-size: 11px; color: #94a3b8;"></i>
-        <strong>{% block page_breadcrumb %}Visão geral{% endblock %}</strong>
-      </div>
-
-      <!-- LOGO CORPORATIVO OFICIAL NO TOPBAR (VISÍVEL EM TODAS AS GUIAS) -->
-      <div class="topbar-corp-logo">
-        <a href="{{ url_for('dashboard') }}" title="Expresso Planalto - Uma empresa do Grupo CSC">
-          <img src="{{ url_for('static', filename='img/logo_planalto_csc_light.png') }}" alt="Expresso Planalto - Grupo CSC">
-        </a>
-      </div>
-
-      <div class="topbar-actions">
-        {% block topbar_actions %}
-        <button class="btn-primary" onclick="openModalNovaOS()">
-          <i class="fa-solid fa-plus"></i> Nova OS
-        </button>
-        {% endblock %}
-        
-        <!-- BADGE DO USUÁRIO LOGADO COM AVATAR E BOTÃO SAIR -->
-        <div class="topbar-user-profile" style="display: flex; align-items: center; gap: 8px;">
-          <span class="private-label" title="{{ current_user.cargo if current_user else 'Usuário Conectado' }}" style="display: flex; align-items: center; gap: 6px;">
-            <i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i>
-            <span>{{ (current_user.nome.split()[0] if current_user and current_user.nome else 'Operador') }}</span>
-            <span style="font-size: 10px; background: rgba(13,148,136,0.15); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 2px;">
-              {{ (current_user.perfil if current_user and current_user.perfil else 'ACESSO')|upper }}
-            </span>
-          </span>
-          <div class="top-avatar" title="{{ current_user.nome if current_user else 'Usuário' }}" style="cursor: default;">
-            {{ (current_user.nome[:2] if current_user and current_user.nome else 'EP')|upper }}
+          <div class="brand-text">
+            <strong>Central de</strong>
+            <span>Operações</span>
           </div>
-          <a href="{{ url_for('logout_view') }}" class="btn-logout" title="Sair do Sistema / Desconectar" style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); text-decoration: none; transition: all 0.2s; font-size: 13px;">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </a>
+        <button type="button" class="sidebar-collapse-btn" onclick="toggleDesktopSidebar()"
+          title="Esconder / Recolher Menu Lateral">
+          <i class="fa-solid fa-angles-left"></i>
+        </button>
+      </div>
+
+      <!-- WORKSPACE / PRIVADO -->
+      <div class="workspace-switch">
+        <div class="workspace-avatar">CO</div>
+        <div class="workspace-info">
+          <strong>Operações</strong>
+          <span>Ambiente privado</span>
+        </div>
+        <i class="fa-solid fa-lock"></i>
+      </div>
+
+      <!-- SEÇÃO OPERAÇÃO (FILTRADA POR PERMISSÃO) -->
+      <p class="nav-section">OPERAÇÃO</p>
+      <nav aria-label="Navegação principal">
+        {% if current_user.is_admin or 'dashboard' in current_user.allowed_routes %}
+        <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.path == '/' %}active{% endif %}"
+          onclick="closeSidebarOnMobile()">
+          <i class="fa-solid fa-table-cells-large"></i>
+          <span>Visão geral</span>
+        </a>
+        {% endif %}
+
+        {% if current_user.is_admin or 'chamados' in current_user.allowed_routes %}
+        <a href="{{ url_for('chamados_view') }}" class="nav-item {% if '/chamados' in request.path %}active{% endif %}"
+          onclick="closeSidebarOnMobile()">
+          <i class="fa-solid fa-headset"></i>
+          <span>Chamados & OS</span>
+          <span class="nav-count">{{ chamados_abertos|default(9) }}</span>
+        </a>
+        {% endif %}
+
+        {% if current_user.is_admin or 'ponto' in current_user.allowed_routes %}
+        <a href="{{ url_for('ponto_view') }}" class="nav-item {% if '/ponto' in request.path %}active{% endif %}"
+          onclick="closeSidebarOnMobile()">
+          <i class="fa-solid fa-fingerprint"></i>
+          <span>Ponto Eletrônico</span>
+        </a>
+        {% endif %}
+
+        {% if current_user.is_admin or 'cco' in current_user.allowed_routes %}
+        <a href="{{ url_for('cco_view') }}" class="nav-item {% if '/cco' in request.path %}active{% endif %}"
+          onclick="closeSidebarOnMobile()">
+          <i class="fa-solid fa-tower-broadcast"></i>
+          <span>Frota CCO</span>
+        </a>
+        {% endif %}
+
+        {% if current_user.is_admin or 'telemetria' in current_user.allowed_routes or 'cco' in current_user.allowed_routes %}
+        <a href="{{ url_for('telemetria_view') }}" class="nav-item {% if '/telemetria' in request.path %}active{% endif %}"
+          onclick="closeSidebarOnMobile()">
+          <i class="fa-solid fa-gauge-high"></i>
+          <span>Telemetria Avançada</span>
+          <span class="nav-count" style="background: #0ea5e9; color: #fff;">CAN</span>
+        </a>
+        {% endif %}
+
+        {% if current_user.is_admin or 'oficina' in current_user.allowed_routes %}
+        <a href="{{ url_for('oficina_view') }}"
+          class="nav-item {% if '/oficina' in request.path or '/manutencao' in request.path %}active{% endif %}"
+          onclick="closeSidebarOnMobile()">
+          <i class="fa-solid fa-screwdriver-wrench"></i>
+          <span>Manutenção / Oficina</span>
+          <span class="nav-count" style="background: #f59e0b; color: #fff;">{{ carros_manutencao_count|default(13)
+            }}</span>
+        </a>
+        {% endif %}
+
+        {% if current_user.is_admin or 'portaria' in current_user.allowed_routes %}
+        <a href="{{ url_for('portaria_view') }}" class="nav-item {% if '/portaria' in request.path %}active{% endif %}"
+          onclick="closeSidebarOnMobile()">
+          <i class="fa-solid fa-bus"></i>
+          <span>Portaria & Garagem</span>
+        </a>
+        {% endif %}
+
+        {% if current_user.is_admin or 'financeiro' in current_user.allowed_routes %}
+        <a href="{{ url_for('financeiro_view') }}"
+          class="nav-item {% if '/financeiro' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
+          <i class="fa-solid fa-wallet"></i>
+          <span>Financeiro Integrado</span>
+        </a>
+        {% endif %}
+
+        {% if current_user.is_admin or 'colaboradores' in current_user.allowed_routes %}
+        <a href="{{ url_for('colaboradores_view') }}"
+          class="nav-item {% if '/colaboradores' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
+          <i class="fa-solid fa-users"></i>
+          <span>Colaboradores (60)</span>
+        </a>
+        {% endif %}
+
+        {% if current_user.is_admin or 'emails' in current_user.allowed_routes %}
+        <a href="{{ url_for('emails_view') }}" class="nav-item {% if '/emails' in request.path %}active{% endif %}"
+          onclick="closeSidebarOnMobile()">
+          <i class="fa-solid fa-envelope"></i>
+          <span>Histórico E-mails</span>
+        </a>
+        {% endif %}
+      </nav>
+
+      <!-- SEÇÃO CONFIGURAÇÃO -->
+      <p class="nav-section" style="margin-top: 18px;">CONFIGURAÇÃO</p>
+      <nav aria-label="Configurações">
+        {% if current_user.is_admin %}
+        <a href="#" class="nav-item" onclick="alert('Regras operacionais e SLA ativos no servidor.')">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Regras Operacionais</span>
+        </a>
+        {% endif %}
+        <a href="javascript:window.location.reload()" class="nav-item" onclick="closeSidebarOnMobile()">
+          <i class="fa-solid fa-rotate"></i>
+          <span>Atualizar Dados</span>
+        </a>
+      </nav>
+
+      <!-- FOOTER DA SIDEBAR -->
+      <div class="sidebar-bottom">
+        <div class="dot-card">
+          <div class="dot-symbol">
+            <span></span><span></span><span></span>
+          </div>
+          <strong>CCO Transporte Urbano</strong>
+          <p>150 Ônibus monitorados ao vivo em 4 corredores principais.</p>
+          <a href="http://10.11.1.100:5600" target="_blank">Ver mapa de telemetria &rarr;</a>
+        </div>
+
+        <div class="sidebar-user" style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+            <div class="avatar">{{ current_user.nome[:2].upper() if current_user.nome else 'US' }}</div>
+            <div class="sidebar-user-info">
+              <strong>{{ current_user.nome }}</strong>
+              <span>{{ current_user.cargo }}</span>
+            </div>
+          </div>
+          <a href="{{ url_for('logout_view') }}" title="Sair do Portal"
+            style="color: #ef4444; font-size: 15px; margin-left: 6px; padding: 6px; border-radius: 6px; text-decoration: none; display: flex; align-items: center;"
+            onmouseover="this.style.background='rgba(239,68,68,0.15)'" onmouseout="this.style.background='none'">
+            <i class="fa-solid fa-right-from-bracket"></i>
           </a>
         </div>
       </div>
-    </header>
+    </aside>
 
-    <!-- CONTEÚDO DA PÁGINA -->
-    <main class="main-content">
-      {% block content %}{% endblock %}
-    </main>
-  </div>
-</div>
+    <!-- MAIN SHELL (ÁREA CENTRAL) -->
+    <div class="main-shell">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="breadcrumb">
+          <!-- BOTÃO TOGGLE SIDEBAR (DESKTOP & MOBILE RETRÁTIL) -->
+          <button class="sidebar-toggle-btn" id="btnToggleSidebar" onclick="toggleDesktopSidebar()"
+            title="Esconder / Mostrar Menu Lateral">
+            <i class="fa-solid fa-bars-staggered" id="iconSidebarToggle"></i>
+          </button>
+          <button class="icon-button mobile-toggle" aria-label="Abrir menu mobile" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <span class="breadcrumb-root">Central de operações</span>
+          <i class="fa-solid fa-chevron-right" style="font-size: 11px; color: #94a3b8;"></i>
+          <strong>{% block page_breadcrumb %}Visão geral{% endblock %}</strong>
+        </div>
 
-<!-- FLOATING ACTION BUTTON (APARECE NO CELULAR) -->
-<button class="fab" onclick="openModalNovaOS()" title="Nova Ordem de Serviço">
-  <i class="fa-solid fa-plus"></i>
-</button>
+        <!-- LOGO CORPORATIVO OFICIAL NO TOPBAR (VISÍVEL EM TODAS AS GUIAS) -->
+        <div class="topbar-corp-logo">
+          <a href="{{ url_for('dashboard') }}" title="Expresso Planalto - Uma empresa do Grupo CSC">
+            <img src="{{ url_for('static', filename='img/logo_planalto_csc_light.png') }}"
+              alt="Expresso Planalto - Grupo CSC">
+          </a>
+        </div>
 
-<!-- BOTTOM NAVIGATION BAR (TOUCH - APARECE NO CELULAR) -->
-<nav class="bottom-nav">
-  {% if current_user.is_admin or 'dashboard' in current_user.allowed_routes %}
-  <a href="{{ url_for('dashboard') }}" class="nav-btn {% if request.path == '/' %}active{% endif %}">
-    <i class="fa-solid fa-table-cells-large"></i>
-    <span>Geral</span>
-  </a>
-  {% endif %}
-  {% if current_user.is_admin or 'chamados' in current_user.allowed_routes %}
-  <a href="{{ url_for('chamados_view') }}" class="nav-btn {% if '/chamados' in request.path %}active{% endif %}">
-    <i class="fa-solid fa-headset"></i>
-    <span>Chamados</span>
-  </a>
-  {% endif %}
-  {% if current_user.is_admin or 'ponto' in current_user.allowed_routes %}
-  <a href="{{ url_for('ponto_view') }}" class="nav-btn {% if '/ponto' in request.path %}active{% endif %}">
-    <i class="fa-solid fa-fingerprint"></i>
-    <span>Ponto</span>
-  </a>
-  {% endif %}
-  {% if current_user.is_admin or 'oficina' in current_user.allowed_routes %}
-  <a href="{{ url_for('oficina_view') }}" class="nav-btn {% if '/oficina' in request.path %}active{% endif %}">
-    <i class="fa-solid fa-wrench"></i>
-    <span>Oficina</span>
-  </a>
-  {% endif %}
-  {% if current_user.is_admin or 'cco' in current_user.allowed_routes %}
-  <a href="{{ url_for('cco_view') }}" class="nav-btn {% if '/cco' in request.path %}active{% endif %}">
-    <i class="fa-solid fa-bus"></i>
-    <span>Frota CCO</span>
-  </a>
-  {% endif %}
-  {% if current_user.is_admin or 'portaria' in current_user.allowed_routes %}
-  <a href="{{ url_for('portaria_view') }}" class="nav-btn {% if '/portaria' in request.path %}active{% endif %}">
-    <i class="fa-solid fa-warehouse"></i>
-    <span>Portaria</span>
-  </a>
-  {% endif %}
-  {% if current_user.is_admin or 'financeiro' in current_user.allowed_routes %}
-  <a href="{{ url_for('financeiro_view') }}" class="nav-btn {% if '/financeiro' in request.path %}active{% endif %}">
-    <i class="fa-solid fa-wallet"></i>
-    <span>Financeiro</span>
-  </a>
-  {% endif %}
-</nav>
+        <div class="topbar-actions">
+          {% block topbar_actions %}
+          <button class="btn-primary" onclick="openModalNovaOS()">
+            <i class="fa-solid fa-plus"></i> Nova OS
+          </button>
+          {% endblock %}
 
-<!-- MODAL: ABERTURA DE NOVA ORDEM DE SERVIÇO / CHAMADO -->
-<div class="modal-backdrop" id="modalNovaOS">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h3><i class="fa-solid fa-screwdriver-wrench" style="color: var(--primary);"></i> Abertura de Ordem de Serviço</h3>
-      <button style="font-size: 20px; color: #94a3b8;" onclick="closeModalNovaOS()">&times;</button>
+          <!-- BADGE DO USUÁRIO LOGADO COM AVATAR E BOTÃO SAIR -->
+          <div class="topbar-user-profile" style="display: flex; align-items: center; gap: 8px;">
+            <span class="private-label" title="{{ current_user.cargo if current_user else 'Usuário Conectado' }}"
+              style="display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i>
+              <span>{{ (current_user.nome.split()[0] if current_user and current_user.nome else 'Operador') }}</span>
+              <span
+                style="font-size: 10px; background: rgba(13,148,136,0.15); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 2px;">
+                {{ (current_user.perfil if current_user and current_user.perfil else 'ACESSO')|upper }}
+              </span>
+            </span>
+            <div class="top-avatar" title="{{ current_user.nome if current_user else 'Usuário' }}"
+              style="cursor: default;">
+              {{ (current_user.nome[:2] if current_user and current_user.nome else 'EP')|upper }}
+            </div>
+            <a href="{{ url_for('logout_view') }}" class="btn-logout" title="Sair do Sistema / Desconectar"
+              style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); text-decoration: none; transition: all 0.2s; font-size: 13px;">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTEÚDO DA PÁGINA -->
+      <main class="main-content">
+        {% block content %}{% endblock %}
+      </main>
     </div>
-    <form action="{{ url_for('api_abrir_chamado') }}" method="POST">
-      <input type="hidden" name="solicitante_id" value="1">
-      <input type="hidden" name="departamento_origem" value="Operação">
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">Título do Chamado / OS</label>
-          <input type="text" name="titulo" class="form-input" placeholder="Ex: Freio com ruído anormal no Prefixo 1012" required>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div class="form-group">
-            <label class="form-label">Departamento de Destino</label>
-            <select name="departamento_destino" class="form-select" required>
-              <option value="Manutenção">Manutenção (Oficina)</option>
-              <option value="Garagem">Garagem (Pátio)</option>
-              <option value="Gerente Operacional">Gerente Operacional</option>
-              <option value="Portaria">Portaria (Guarita)</option>
-              <option value="RH">RH</option>
-              <option value="Treinamento">Treinamento</option>
-              <option value="Contas a Pagar">Contas a Pagar</option>
-              <option value="Contas a Receber">Contas a Receber</option>
-              <option value="Diretor de Operações">Diretor de Operações</option>
-              <option value="Gerente Administrativo">Gerente Administrativo</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Prioridade</label>
-            <select name="prioridade" class="form-select">
-              <option value="Normal">Normal (SLA 48h)</option>
-              <option value="Alta">Alta (SLA 12h)</option>
-              <option value="Crítica">Crítica / Carro Baixado (SLA 4h)</option>
-            </select>
-          </div>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div class="form-group">
-            <label class="form-label">Prefixo do Veículo (Opcional)</label>
-            <input type="text" name="prefixo_veiculo" class="form-input" placeholder="Ex: 1012">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Linha de Operação (Opcional)</label>
-            <input type="text" name="linha" class="form-input" placeholder="Ex: Linha 801">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Descrição do Problema & Causa Raiz</label>
-          <textarea name="descricao" class="form-textarea" rows="3" placeholder="Descreva os detalhes operacionais..." required></textarea>
-        </div>
-        <p style="font-size: 11.5px; color: #64748b; background: #f8fafc; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
-          <i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> Ao cadastrar, um e-mail de notificação de abertura será disparado automaticamente para o gestor e registrado na auditoria.
-        </p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-mobile-badge" style="background:#fff; color:#64748b; border:1px solid #cbd5e1;" onclick="closeModalNovaOS()">Cancelar</button>
-        <button type="submit" class="btn-primary">Criar & Notificar por E-mail</button>
-      </div>
-    </form>
   </div>
-</div>
 
-<script>
-  function toggleDesktopSidebar() {
-    if (window.innerWidth <= 900) {
-      toggleSidebar();
-    } else {
-      const shell = document.querySelector('.app-shell');
-      shell.classList.toggle('sidebar-collapsed');
-      const isCollapsed = shell.classList.contains('sidebar-collapsed');
-      localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
+  <!-- FLOATING ACTION BUTTON (APARECE NO CELULAR) -->
+  <button class="fab" onclick="openModalNovaOS()" title="Nova Ordem de Serviço">
+    <i class="fa-solid fa-plus"></i>
+  </button>
+
+  <!-- BOTTOM NAVIGATION BAR (TOUCH - APARECE NO CELULAR) -->
+  <nav class="bottom-nav">
+    {% if current_user.is_admin or 'dashboard' in current_user.allowed_routes %}
+    <a href="{{ url_for('dashboard') }}" class="nav-btn {% if request.path == '/' %}active{% endif %}">
+      <i class="fa-solid fa-table-cells-large"></i>
+      <span>Geral</span>
+    </a>
+    {% endif %}
+    {% if current_user.is_admin or 'chamados' in current_user.allowed_routes %}
+    <a href="{{ url_for('chamados_view') }}" class="nav-btn {% if '/chamados' in request.path %}active{% endif %}">
+      <i class="fa-solid fa-headset"></i>
+      <span>Chamados</span>
+    </a>
+    {% endif %}
+    {% if current_user.is_admin or 'ponto' in current_user.allowed_routes %}
+    <a href="{{ url_for('ponto_view') }}" class="nav-btn {% if '/ponto' in request.path %}active{% endif %}">
+      <i class="fa-solid fa-fingerprint"></i>
+      <span>Ponto</span>
+    </a>
+    {% endif %}
+    {% if current_user.is_admin or 'oficina' in current_user.allowed_routes %}
+    <a href="{{ url_for('oficina_view') }}" class="nav-btn {% if '/oficina' in request.path %}active{% endif %}">
+      <i class="fa-solid fa-wrench"></i>
+      <span>Oficina</span>
+    </a>
+    {% endif %}
+    {% if current_user.is_admin or 'cco' in current_user.allowed_routes %}
+    <a href="{{ url_for('cco_view') }}" class="nav-btn {% if '/cco' in request.path %}active{% endif %}">
+      <i class="fa-solid fa-bus"></i>
+      <span>Frota CCO</span>
+    </a>
+    {% endif %}
+    {% if current_user.is_admin or 'telemetria' in current_user.allowed_routes or 'cco' in current_user.allowed_routes %}
+    <a href="{{ url_for('telemetria_view') }}" class="nav-btn {% if '/telemetria' in request.path %}active{% endif %}">
+      <i class="fa-solid fa-gauge-high"></i>
+      <span>Telemetria</span>
+    </a>
+    {% endif %}
+    {% if current_user.is_admin or 'portaria' in current_user.allowed_routes %}
+    <a href="{{ url_for('portaria_view') }}" class="nav-btn {% if '/portaria' in request.path %}active{% endif %}">
+      <i class="fa-solid fa-warehouse"></i>
+      <span>Portaria</span>
+    </a>
+    {% endif %}
+    {% if current_user.is_admin or 'financeiro' in current_user.allowed_routes %}
+    <a href="{{ url_for('financeiro_view') }}" class="nav-btn {% if '/financeiro' in request.path %}active{% endif %}">
+      <i class="fa-solid fa-wallet"></i>
+      <span>Financeiro</span>
+    </a>
+    {% endif %}
+  </nav>
+
+  <!-- MODAL: ABERTURA DE NOVA ORDEM DE SERVIÇO / CHAMADO -->
+  <div class="modal-backdrop" id="modalNovaOS">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-screwdriver-wrench" style="color: var(--primary);"></i> Abertura de Ordem de Serviço
+        </h3>
+        <button style="font-size: 20px; color: #94a3b8;" onclick="closeModalNovaOS()">&times;</button>
+      </div>
+      <form action="{{ url_for('api_abrir_chamado') }}" method="POST">
+        <input type="hidden" name="solicitante_id" value="1">
+        <input type="hidden" name="departamento_origem" value="Operação">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Título do Chamado / OS</label>
+            <input type="text" name="titulo" class="form-input"
+              placeholder="Ex: Freio com ruído anormal no Prefixo 1012" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Departamento de Destino</label>
+              <select name="departamento_destino" class="form-select" required>
+                <option value="Manutenção">Manutenção (Oficina)</option>
+                <option value="Garagem">Garagem (Pátio)</option>
+                <option value="Gerente Operacional">Gerente Operacional</option>
+                <option value="Portaria">Portaria (Guarita)</option>
+                <option value="RH">RH</option>
+                <option value="Treinamento">Treinamento</option>
+                <option value="Contas a Pagar">Contas a Pagar</option>
+                <option value="Contas a Receber">Contas a Receber</option>
+                <option value="Diretor de Operações">Diretor de Operações</option>
+                <option value="Gerente Administrativo">Gerente Administrativo</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Prioridade</label>
+              <select name="prioridade" class="form-select">
+                <option value="Normal">Normal (SLA 48h)</option>
+                <option value="Alta">Alta (SLA 12h)</option>
+                <option value="Crítica">Crítica / Carro Baixado (SLA 4h)</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Prefixo do Veículo (Opcional)</label>
+              <input type="text" name="prefixo_veiculo" class="form-input" placeholder="Ex: 1012">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Linha de Operação (Opcional)</label>
+              <input type="text" name="linha" class="form-input" placeholder="Ex: Linha 801">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descrição do Problema & Causa Raiz</label>
+            <textarea name="descricao" class="form-textarea" rows="3" placeholder="Descreva os detalhes operacionais..."
+              required></textarea>
+          </div>
+          <p
+            style="font-size: 11.5px; color: #64748b; background: #f8fafc; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+            <i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> Ao cadastrar, um e-mail de
+            notificação de abertura será disparado automaticamente para o gestor e registrado na auditoria.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-mobile-badge"
+            style="background:#fff; color:#64748b; border:1px solid #cbd5e1;"
+            onclick="closeModalNovaOS()">Cancelar</button>
+          <button type="submit" class="btn-primary">Criar & Notificar por E-mail</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+  funct    n toggleDesktopSidebar() {
+    if       dow.innerWidth <= 900) {
+      t        idebar();
+    } e      {
+      c        hell = document.querySelector('.app-shell');
+      s        lassList.toggle('sidebar-collapsed');
+      c        sCollapsed = shell.classList.contains('sidebar-collapsed');
+      l        orage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
     }
-  }
-
-  // Restaura estado da sidebar se salvo anteriormente
-  function toggleDesktopSidebar() {
-    if (window.innerWidth <= 900) {
-      toggleSidebar();
-      return;
+              Re    aura estado da sidebar se salvo anteriormente
+  funct    n toggleDesktopSidebar() {
+    if       dow.innerWidth <= 900) {
+      t        idebar();
+      r        
     }
-    const shell = document.querySelector('.app-shell');
-    if (!shell) return;
-    shell.classList.toggle('sidebar-collapsed');
-    const isCollapsed = shell.classList.contains('sidebar-collapsed');
-    try {
-      localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
-    } catch(e) {}
-    
-    // Atualiza ícones e tooltips do botão
-    const btn = document.getElementById('btnToggleSidebar');
-    const icon = document.getElementById('iconSidebarToggle');
-    if (icon) {
-      icon.className = isCollapsed ? 'fa-solid fa-bars' : 'fa-solid fa-bars-staggered';
+       on      hell = document.querySelector('.app-shell');
+    if       ell) return;
+    she      lassList.toggle('sidebar-collapsed');
+    con      sCollapsed = shell.classList.contains('sidebar-collapsed');
+    try           l        orage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
+    } c      (e) {}
+     
+          liza ícones e tooltips do botão
+    con      tn = document.getElementById('btnToggleSidebar');
+    con      con = document.getElementById('iconSidebarToggle');
+    if       n) {
+      i        assName = isCollapsed ? 'fa-solid fa-bars' : 'fa-solid fa-bars-staggered';
     }
-    if (btn) {
-      btn.title = isCollapsed ? 'Mostrar menu lateral' : 'Esconder menu lateral';
+       f       ) {
+      b        le = isCollapsed ? 'Mostrar menu lateral' : 'Esconder menu lateral';
     }
+              Re    aura estado retrátil imediatamente ao carregar
+  (func    on() {
+     try           i        alStorage.getItem('sidebar_collapsed') === '1' && window.innerWidth > 900) {
+                 t.querySelector('.app-shell')?.classList.add('sidebar-collapsed');
+                 con = document.getElementById('iconSidebarToggle');
+                 n) icon.className = 'fa-solid fa-bars';
+                 tn = document.getElementById('btnToggleSidebar');
+                 ) btn.title = 'Mostrar menu lateral';
+      }         c      (e) {}
+   })( );      funct    n toggleSidebar() {
+    con      idebar = document.getElementById('sidebar');
+    con      crim = document.getElementById('sidebarScrim');
+    sid      .classList.toggle('is-open');
+    scr      tyle.display = sidebar.classList.contains('is-open') ? 'block' : 'none';
   }
 
-  // Restaura estado retrátil imediatamente ao carregar
-  (function() {
-    try {
-      if (localStorage.getItem('sidebar_collapsed') === '1' && window.innerWidth > 900) {
-        document.querySelector('.app-shell')?.classList.add('sidebar-collapsed');
-        const icon = document.getElementById('iconSidebarToggle');
-        if (icon) icon.className = 'fa-solid fa-bars';
-        const btn = document.getElementById('btnToggleSidebar');
-        if (btn) btn.title = 'Mostrar menu lateral';
-      }
-    } catch(e) {}
-  })();
-
-  function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const scrim = document.getElementById('sidebarScrim');
-    sidebar.classList.toggle('is-open');
-    scrim.style.display = sidebar.classList.contains('is-open') ? 'block' : 'none';
-  }
-
-  function closeSidebarOnMobile() {
-    const sidebar = document.getElementById('sidebar');
-    const scrim = document.getElementById('sidebarScrim');
-    if (window.innerWidth <= 900) {
-      sidebar.classList.remove('is-open');
-      scrim.style.display = 'none';
+      nct    n closeSidebarOnMobile() {
+    con      idebar = document.getElementById('sidebar');
+    con      crim = document.getElementById('sidebarScrim');
+    if       dow.innerWidth <= 900) {
+      s        .classList.remove('is-open');
+      s        tyle.display = 'none';
     }
+             nct    n openModalNovaOS() {
+    doc      t.getElementById('modalNovaOS').classList.add('is-open');
   }
 
-  function openModalNovaOS() {
-    document.getElementById('modalNovaOS').classList.add('is-open');
+      nct    n closeModalNovaOS() {
+    doc      t.getElementById('modalNovaOS').classList.remove('is-open');
   }
 
-  function closeModalNovaOS() {
-    document.getElementById('modalNovaOS').classList.remove('is-open');
-  }
+       Re    stra Service Worker se suportado
+  if ('    rviceWorker' in navigator) {
+    nav      or.serviceWorker.register('/static/service-worker.js').catch(function() {}); 
+  } 
+  </script>
 
-  // Registra Service Worker se suportado
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/static/service-worker.js').catch(function() {});
-  }
-</script>
-
-{% block extra_scripts %}{% endblock %}
+  {% block extra_scripts %}{% endblock %}
 
 </body>
+
 </html>
