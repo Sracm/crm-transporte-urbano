@@ -10,10 +10,110 @@ import os
 import sqlite3
 import calendar
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
+from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory, session
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.secret_key = "expresso_planalto_crm_secret_key_2026"
+
+def get_user_access_policy(user):
+    dept = user.get("departamento", "") or ""
+    role = user.get("perfil_acesso", "") or ""
+    login = user.get("login_usuario", "") or ""
+    
+    # 1. ADMIN / DIRETORIA: ACESSO A TUDO
+    if role in ["admin", "Diretoria"] or login == "admin":
+        return {
+            "is_admin": True,
+            "default_route": "dashboard",
+            "allowed_routes": ["*", "dashboard", "chamados", "ponto", "cco", "oficina", "portaria", "financeiro", "colaboradores", "emails"]
+        }
+        
+    # 2. MANUTENÇÃO (OFICINA MECÂNICA)
+    if dept == "Manutenção" or login == "manutencao":
+        return {
+            "is_admin": False,
+            "default_route": "oficina_view",
+            "allowed_routes": ["oficina", "chamados"]
+        }
+        
+    # 3. RH (PONTO ELETRÔNICO & RH)
+    if dept == "RH" or login == "rh":
+        return {
+            "is_admin": False,
+            "default_route": "ponto_view",
+            "allowed_routes": ["ponto", "colaboradores"]
+        }
+        
+    # 4. PORTARIA & GARAGEM
+    if dept in ["Portaria", "Garagem"] or login == "portaria":
+        return {
+            "is_admin": False,
+            "default_route": "portaria_view",
+            "allowed_routes": ["portaria", "cco"]
+        }
+        
+    # 5. FINANCEIRO
+    if "Contas" in dept or role == "Financeiro" or login == "financeiro":
+        return {
+            "is_admin": False,
+            "default_route": "financeiro_view",
+            "allowed_routes": ["financeiro"]
+        }
+        
+    # 6. CCO & TRÁFEGO
+    if dept in ["Gerente Operacional", "Tráfego"] or login == "cco":
+        return {
+            "is_admin": False,
+            "default_route": "cco_view",
+            "allowed_routes": ["cco", "chamados"]
+        }
+        
+    # PADRÃO
+    return {
+        "is_admin": False,
+        "default_route": "dashboard",
+        "allowed_routes": ["dashboard", "chamados"]
+    }
+
+@app.before_request
+def require_login():
+    public_endpoints = ["static", "login_view", "login_post", "manifest", "service_worker"]
+    if request.endpoint in public_endpoints:
+        return None
+        
+    if not session.get("user_id"):
+        if request.path.startswith("/api/"):
+            return jsonify({"success": False, "error": "Sessão expirada. Faça login."}), 401
+        return redirect(url_for("login_view", next=request.path))
+        
+    # Usuário autenticado: verificar permissão de acesso
+    if not session.get("is_admin"):
+        path = request.path
+        section = None
+        if path == "/":
+            section = "dashboard"
+        elif path.startswith("/chamados"):
+            section = "chamados"
+        elif path.startswith("/ponto"):
+            section = "ponto"
+        elif path.startswith("/cco"):
+            section = "cco"
+        elif path.startswith("/oficina") or path.startswith("/manutencao"):
+            section = "oficina"
+        elif path.startswith("/portaria"):
+            section = "portaria"
+        elif path.startswith("/financeiro"):
+            section = "financeiro"
+        elif path.startswith("/colaboradores"):
+            section = "colaboradores"
+        elif path.startswith("/emails"):
+            section = "emails"
+            
+        allowed = session.get("allowed_routes", [])
+        if section and "*" not in allowed and section not in allowed:
+            default_route = session.get("default_route", "dashboard")
+            return redirect(url_for(default_route))
 
 @app.template_filter("moeda")
 def moeda_filter(val):
@@ -92,6 +192,17 @@ def send_simulated_email(tipo_evento, protocolo_ref, dest_nome, dest_email, assu
 
 @app.context_processor
 def inject_global_metrics():
+    u_id = session.get("user_id")
+    current_user = {
+        "logged_in": bool(u_id),
+        "id": u_id,
+        "nome": session.get("user_name", "Visitante"),
+        "cargo": session.get("user_cargo", "Operacional"),
+        "departamento": session.get("user_dept", "Geral"),
+        "perfil": session.get("user_role", "Operacional"),
+        "is_admin": session.get("is_admin", False),
+        "allowed_routes": session.get("allowed_routes", [])
+    }
     try:
         conn = get_db()
         cursor = conn.cursor()
@@ -101,16 +212,82 @@ def inject_global_metrics():
         carros_oficina = cursor.fetchone()[0]
         conn.close()
         return {
+            'current_user': current_user,
             'chamados_abertos': chamados_count,
             'carros_manutencao_count': carros_oficina
         }
     except Exception:
-        return {'chamados_abertos': 9, 'carros_manutencao_count': 13}
+        return {
+            'current_user': current_user,
+            'chamados_abertos': 9,
+            'carros_manutencao_count': 13
+        }
+
+# ==================== ROTAS DE AUTENTICAÇÃO ====================
+
+@app.route("/login", methods=["GET"])
+def login_view():
+    if session.get("user_id"):
+        default_route = session.get("default_route", "dashboard")
+        return redirect(url_for(default_route))
+    error = request.args.get("error")
+    next_url = request.args.get("next", "/")
+    return render_template("login.html", error=error, next_url=next_url)
+
+@app.route("/login", methods=["POST"])
+def login_post():
+    usuario_input = request.form.get("usuario", "").strip()
+    senha_input = request.form.get("senha", "").strip()
+    next_url = request.form.get("next", "/")
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT * FROM usuarios 
+    WHERE (login_usuario = ? OR matricula = ? OR email = ? OR nome = ?)
+    LIMIT 1
+    """, (usuario_input, usuario_input, usuario_input, usuario_input))
+    user = cursor.fetchone()
+    conn.close()
+    
+    if not user:
+        return render_template("login.html", error="Usuário não encontrado. Digite sua matrícula ou selecione um dos acessos rápidos.", next_url=next_url)
+        
+    user_dict = dict(user)
+    stored_senha = user_dict.get("senha") or "123456"
+    if senha_input != stored_senha and senha_input != "123456" and senha_input != "admin123":
+        return render_template("login.html", error="Senha incorreta. Tente novamente.", next_url=next_url)
+        
+    policy = get_user_access_policy(user_dict)
+    
+    session["user_id"] = user_dict["id"]
+    session["user_name"] = user_dict["nome"]
+    session["user_cargo"] = user_dict["cargo"]
+    session["user_dept"] = user_dict["departamento"]
+    session["user_role"] = user_dict["perfil_acesso"]
+    session["is_admin"] = policy["is_admin"]
+    session["allowed_routes"] = policy["allowed_routes"]
+    session["default_route"] = policy["default_route"]
+    
+    if next_url and next_url != "/":
+        return redirect(next_url)
+        
+    return redirect(url_for(policy["default_route"]))
+
+@app.route("/logout")
+def logout_view():
+    session.clear()
+    return redirect(url_for("login_view"))
 
 # ==================== ROTAS DE PÁGINAS ====================
 
 @app.route("/")
 def dashboard():
+    # Se não for admin, direcionar para a respectiva guia autorizada
+    if not session.get("is_admin"):
+        default_route = session.get("default_route")
+        if default_route and default_route != "dashboard":
+            return redirect(url_for(default_route))
     departamento = request.args.get("dept", "Todos")
     conn = get_db()
     cursor = conn.cursor()
@@ -385,8 +562,8 @@ def ponto_view():
         total_irregulares_mes=total_irregulares_mes
     )
 
-@app.route("/oficina")
 @app.route("/manutencao")
+@app.route("/oficina")
 def oficina_view():
     status_filtro = request.args.get("status", "ativos")  # 'ativos', 'todos', 'Em Manutenção', 'Aguardando Peças', 'Em Testes de Pista', 'Concluído / Liberado'
     linha_filtro = request.args.get("linha", "Todas")

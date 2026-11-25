@@ -64,57 +64,85 @@
       <i class="fa-solid fa-lock"></i>
     </div>
 
-    <!-- SEÇÃO OPERAÇÃO -->
+    <!-- SEÇÃO OPERAÇÃO (FILTRADA POR PERMISSÃO) -->
     <p class="nav-section">OPERAÇÃO</p>
     <nav aria-label="Navegação principal">
+      {% if current_user.is_admin or 'dashboard' in current_user.allowed_routes %}
       <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.path == '/' %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-table-cells-large"></i>
         <span>Visão geral</span>
       </a>
+      {% endif %}
+
+      {% if current_user.is_admin or 'chamados' in current_user.allowed_routes %}
       <a href="{{ url_for('chamados_view') }}" class="nav-item {% if '/chamados' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-headset"></i>
         <span>Chamados & OS</span>
         <span class="nav-count">{{ chamados_abertos|default(9) }}</span>
       </a>
+      {% endif %}
+
+      {% if current_user.is_admin or 'ponto' in current_user.allowed_routes %}
       <a href="{{ url_for('ponto_view') }}" class="nav-item {% if '/ponto' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-fingerprint"></i>
         <span>Ponto Eletrônico</span>
       </a>
+      {% endif %}
+
+      {% if current_user.is_admin or 'cco' in current_user.allowed_routes %}
       <a href="{{ url_for('cco_view') }}" class="nav-item {% if '/cco' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-tower-broadcast"></i>
         <span>Frota CCO</span>
       </a>
+      {% endif %}
+
+      {% if current_user.is_admin or 'oficina' in current_user.allowed_routes %}
       <a href="{{ url_for('oficina_view') }}" class="nav-item {% if '/oficina' in request.path or '/manutencao' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-screwdriver-wrench"></i>
         <span>Manutenção / Oficina</span>
         <span class="nav-count" style="background: #f59e0b; color: #fff;">{{ carros_manutencao_count|default(13) }}</span>
       </a>
+      {% endif %}
+
+      {% if current_user.is_admin or 'portaria' in current_user.allowed_routes %}
       <a href="{{ url_for('portaria_view') }}" class="nav-item {% if '/portaria' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-bus"></i>
         <span>Portaria & Garagem</span>
       </a>
+      {% endif %}
+
+      {% if current_user.is_admin or 'financeiro' in current_user.allowed_routes %}
       <a href="{{ url_for('financeiro_view') }}" class="nav-item {% if '/financeiro' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-wallet"></i>
         <span>Financeiro Integrado</span>
       </a>
+      {% endif %}
+
+      {% if current_user.is_admin or 'colaboradores' in current_user.allowed_routes %}
       <a href="{{ url_for('colaboradores_view') }}" class="nav-item {% if '/colaboradores' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-users"></i>
         <span>Colaboradores (60)</span>
       </a>
+      {% endif %}
+
+      {% if current_user.is_admin or 'emails' in current_user.allowed_routes %}
       <a href="{{ url_for('emails_view') }}" class="nav-item {% if '/emails' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-envelope"></i>
         <span>Histórico E-mails</span>
       </a>
+      {% endif %}
     </nav>
 
     <!-- SEÇÃO CONFIGURAÇÃO -->
     <p class="nav-section" style="margin-top: 18px;">CONFIGURAÇÃO</p>
     <nav aria-label="Configurações">
+      {% if current_user.is_admin %}
       <a href="#" class="nav-item" onclick="alert('Regras operacionais e SLA ativos no servidor.')">
         <i class="fa-solid fa-sliders"></i>
         <span>Regras Operacionais</span>
       </a>
-      <a href="{{ url_for('dashboard') }}" class="nav-item" onclick="closeSidebarOnMobile()">
+      {% endif %}
+      <a href="javascript:window.location.reload()" class="nav-item" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-rotate"></i>
         <span>Atualizar Dados</span>
       </a>
@@ -131,13 +159,17 @@
         <a href="http://10.11.1.100:5600" target="_blank">Ver mapa de telemetria &rarr;</a>
       </div>
 
-      <div class="sidebar-user">
-        <div class="avatar">AM</div>
-        <div class="sidebar-user-info">
-          <strong>Antonio Mello</strong>
-          <span>BI & Operações</span>
+      <div class="sidebar-user" style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+          <div class="avatar">{{ current_user.nome[:2].upper() if current_user.nome else 'US' }}</div>
+          <div class="sidebar-user-info">
+            <strong>{{ current_user.nome }}</strong>
+            <span>{{ current_user.cargo }}</span>
+          </div>
         </div>
-        <i class="fa-solid fa-shield-halved"></i>
+        <a href="{{ url_for('logout_view') }}" title="Sair do Portal" style="color: #ef4444; font-size: 15px; margin-left: 6px; padding: 6px; border-radius: 6px; text-decoration: none; display: flex; align-items: center;" onmouseover="this.style.background='rgba(239,68,68,0.15)'" onmouseout="this.style.background='none'">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </a>
       </div>
     </div>
   </aside>
@@ -172,10 +204,23 @@
           <i class="fa-solid fa-plus"></i> Nova OS
         </button>
         {% endblock %}
-        <span class="private-label">
-          <i class="fa-solid fa-lock"></i> Acesso privado
-        </span>
-        <div class="top-avatar">AM</div>
+        
+        <!-- BADGE DO USUÁRIO LOGADO COM AVATAR E BOTÃO SAIR -->
+        <div class="topbar-user-profile" style="display: flex; align-items: center; gap: 8px;">
+          <span class="private-label" title="{{ current_user.cargo if current_user else 'Usuário Conectado' }}" style="display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i>
+            <span>{{ (current_user.nome.split()[0] if current_user and current_user.nome else 'Operador') }}</span>
+            <span style="font-size: 10px; background: rgba(13,148,136,0.15); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 2px;">
+              {{ (current_user.perfil if current_user and current_user.perfil else 'ACESSO')|upper }}
+            </span>
+          </span>
+          <div class="top-avatar" title="{{ current_user.nome if current_user else 'Usuário' }}" style="cursor: default;">
+            {{ (current_user.nome[:2] if current_user and current_user.nome else 'EP')|upper }}
+          </div>
+          <a href="{{ url_for('logout_view') }}" class="btn-logout" title="Sair do Sistema / Desconectar" style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); text-decoration: none; transition: all 0.2s; font-size: 13px;">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </a>
+        </div>
       </div>
     </header>
 
@@ -193,26 +238,48 @@
 
 <!-- BOTTOM NAVIGATION BAR (TOUCH - APARECE NO CELULAR) -->
 <nav class="bottom-nav">
+  {% if current_user.is_admin or 'dashboard' in current_user.allowed_routes %}
   <a href="{{ url_for('dashboard') }}" class="nav-btn {% if request.path == '/' %}active{% endif %}">
     <i class="fa-solid fa-table-cells-large"></i>
     <span>Geral</span>
   </a>
+  {% endif %}
+  {% if current_user.is_admin or 'chamados' in current_user.allowed_routes %}
   <a href="{{ url_for('chamados_view') }}" class="nav-btn {% if '/chamados' in request.path %}active{% endif %}">
     <i class="fa-solid fa-headset"></i>
     <span>Chamados</span>
   </a>
+  {% endif %}
+  {% if current_user.is_admin or 'ponto' in current_user.allowed_routes %}
   <a href="{{ url_for('ponto_view') }}" class="nav-btn {% if '/ponto' in request.path %}active{% endif %}">
     <i class="fa-solid fa-fingerprint"></i>
     <span>Ponto</span>
   </a>
+  {% endif %}
+  {% if current_user.is_admin or 'oficina' in current_user.allowed_routes %}
+  <a href="{{ url_for('oficina_view') }}" class="nav-btn {% if '/oficina' in request.path %}active{% endif %}">
+    <i class="fa-solid fa-wrench"></i>
+    <span>Oficina</span>
+  </a>
+  {% endif %}
+  {% if current_user.is_admin or 'cco' in current_user.allowed_routes %}
   <a href="{{ url_for('cco_view') }}" class="nav-btn {% if '/cco' in request.path %}active{% endif %}">
     <i class="fa-solid fa-bus"></i>
     <span>Frota CCO</span>
   </a>
+  {% endif %}
+  {% if current_user.is_admin or 'portaria' in current_user.allowed_routes %}
   <a href="{{ url_for('portaria_view') }}" class="nav-btn {% if '/portaria' in request.path %}active{% endif %}">
     <i class="fa-solid fa-warehouse"></i>
     <span>Portaria</span>
   </a>
+  {% endif %}
+  {% if current_user.is_admin or 'financeiro' in current_user.allowed_routes %}
+  <a href="{{ url_for('financeiro_view') }}" class="nav-btn {% if '/financeiro' in request.path %}active{% endif %}">
+    <i class="fa-solid fa-wallet"></i>
+    <span>Financeiro</span>
+  </a>
+  {% endif %}
 </nav>
 
 <!-- MODAL: ABERTURA DE NOVA ORDEM DE SERVIÇO / CHAMADO -->
