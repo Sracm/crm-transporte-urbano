@@ -704,20 +704,22 @@ def ponto_view():
             pass
             
     tot_irr_sem = sum(d['casos'] for d in dias_map.values())
+    max_casos = max((d['casos'] for d in dias_map.values()), default=0)
+    
+    # Ordem CRONOLÓGICA (Segunda a Domingo: 0 a 6)
     ranking_dias_semana = []
-    for k, v in dias_map.items():
+    for k in range(7):
+        v = dias_map[k]
         perc = round((v['casos'] / tot_irr_sem * 100), 1) if tot_irr_sem > 0 else 0.0
         ranking_dias_semana.append({
+            'ordem': k + 1,
             'abrev': v['abrev'],
             'nome': v['nome'],
             'casos': v['casos'],
             'perc': perc,
+            'is_maior': (v['casos'] == max_casos and max_casos > 0),
             'is_critico': v['casos'] >= 20
         })
-    # Ordenar do maior para o menor número de incidências
-    ranking_dias_semana.sort(key=lambda x: x['casos'], reverse=True)
-    for idx, item in enumerate(ranking_dias_semana, 1):
-        item['posicao'] = idx
 
     # 2. Histórico consolidado de todos os meses do ano de 2026
     cursor.execute("""

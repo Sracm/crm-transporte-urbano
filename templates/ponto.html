@@ -257,16 +257,18 @@
     <div class="ponto-ticker-track">
       <!-- BLOCO 1 DE DADOS -->
       <div class="ponto-ticker-group">
-        <!-- 1. RANKING DOS DIAS DA SEMANA -->
+        <!-- 1. DIAS DA SEMANA EM ORDEM CRONOLÓGICA (SEG A DOM) -->
         <span class="ticker-section-tag tag-semana">
-          <i class="fa-solid fa-calendar-week"></i> Ranking Dias da Semana:
+          <i class="fa-solid fa-calendar-week"></i> Dias da Semana (Cronológico):
         </span>
         {% for dia in ranking_dias_semana %}
-          <div class="ticker-chip {% if dia.posicao == 1 %}chip-top1{% elif dia.is_critico %}chip-warning{% endif %}" title="{{ dia.nome }}: {{ dia.casos }} registros irregulares apurados ({{ dia.perc }}% do total semanal)">
-            <span class="chip-rank-badge">#{{ dia.posicao }}</span>
+          <div class="ticker-chip {% if dia.is_maior %}chip-top1{% elif dia.is_critico %}chip-warning{% endif %}" title="{{ dia.nome }}: {{ dia.casos }} registros irregulares apurados ({{ dia.perc }}% do total semanal)">
             <span class="chip-name">{{ dia.abrev }}</span>
             <span class="chip-count">{{ dia.casos }} casos</span>
             <span class="chip-percent">{{ dia.perc }}%</span>
+            {% if dia.is_maior %}
+              <span class="chip-rank-badge" style="background: #ef4444; color: #ffffff; font-size: 8.5px; padding: 1px 4px; border-radius: 3px;" title="Maior incidência da semana">Pico</span>
+            {% endif %}
           </div>
         {% endfor %}
 
@@ -292,14 +294,16 @@
       <!-- BLOCO 2 DE DADOS (CLONE PARA LOOP INFINITO SEM EMENDAS) -->
       <div class="ponto-ticker-group" aria-hidden="true">
         <span class="ticker-section-tag tag-semana">
-          <i class="fa-solid fa-calendar-week"></i> Ranking Dias da Semana:
+          <i class="fa-solid fa-calendar-week"></i> Dias da Semana (Cronológico):
         </span>
         {% for dia in ranking_dias_semana %}
-          <div class="ticker-chip {% if dia.posicao == 1 %}chip-top1{% elif dia.is_critico %}chip-warning{% endif %}" title="{{ dia.nome }}: {{ dia.casos }} registros irregulares apurados ({{ dia.perc }}% do total semanal)">
-            <span class="chip-rank-badge">#{{ dia.posicao }}</span>
+          <div class="ticker-chip {% if dia.is_maior %}chip-top1{% elif dia.is_critico %}chip-warning{% endif %}" title="{{ dia.nome }}: {{ dia.casos }} registros irregulares apurados ({{ dia.perc }}% do total semanal)">
             <span class="chip-name">{{ dia.abrev }}</span>
             <span class="chip-count">{{ dia.casos }} casos</span>
             <span class="chip-percent">{{ dia.perc }}%</span>
+            {% if dia.is_maior %}
+              <span class="chip-rank-badge" style="background: #ef4444; color: #ffffff; font-size: 8.5px; padding: 1px 4px; border-radius: 3px;" title="Maior incidência da semana">Pico</span>
+            {% endif %}
           </div>
         {% endfor %}
 
