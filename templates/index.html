@@ -3,9 +3,68 @@
 {% block title %}Visão geral{% endblock %}
 {% block page_breadcrumb %}Visão geral{% endblock %}
 
+{% block extra_head %}
+<style>
+  /* Bloquear qualquer rolagem horizontal na guia Visão Geral */
+  html, body, .app-shell, .main-shell, .main-content {
+    overflow-x: hidden !important;
+    max-width: 100vw;
+  }
+
+  /* Tabela de chamados da Visão Geral responsiva e sem barra de rolagem horizontal */
+  .operations-grid .table-scroll {
+    overflow-x: hidden !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  .operations-grid .table-scroll::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  .operations-grid .jobs-table {
+    width: 100% !important;
+    table-layout: auto !important;
+    white-space: normal !important;
+  }
+
+  .operations-grid .jobs-table th,
+  .operations-grid .jobs-table td {
+    padding: 10px 8px !important;
+    font-size: 12px !important;
+  }
+
+  .operations-grid .jobs-table th:first-child,
+  .operations-grid .jobs-table td:first-child {
+    white-space: normal !important;
+    word-break: break-word !important;
+    max-width: 260px !important;
+  }
+
+  .operations-grid .jobs-table th:nth-child(2),
+  .operations-grid .jobs-table td:nth-child(2),
+  .operations-grid .jobs-table th:nth-child(3),
+  .operations-grid .jobs-table td:nth-child(3),
+  .operations-grid .jobs-table th:nth-child(4),
+  .operations-grid .jobs-table td:nth-child(4),
+  .operations-grid .jobs-table th:nth-child(5),
+  .operations-grid .jobs-table td:nth-child(5),
+  .operations-grid .jobs-table th:nth-child(6),
+  .operations-grid .jobs-table td:nth-child(6) {
+    white-space: nowrap !important;
+  }
+
+  .operations-grid .status-badge {
+    padding: 3px 7px !important;
+    font-size: 10.5px !important;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- HEADING DA PÁGINA -->
-<div class="page-heading" style="align-items: center; justify-content: space-between;">
+<div class="page-heading">
   <div>
     <div class="eyebrow">CENTRAL DE OPERAÇÕES · TRANSPORTE URBANO</div>
     <h1>Visão geral</h1>
@@ -157,7 +216,8 @@
     <div class="table-toolbar">
       <div class="search-field">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="filterInput" placeholder="Buscar chamado, linha ou responsável..." onkeyup="filterTable()">
+        <input type="text" id="filterInput" placeholder="Buscar chamado, linha ou responsável..."
+          onkeyup="filterTable()">
       </div>
       <div class="select-wrap">
         <select id="statusSelect" onchange="filterTable()">
@@ -187,7 +247,8 @@
           {% for ch in chamados_recentes %}
           <tr>
             <td>
-              <strong style="color: #0f172a; display: block; font-size: 13px;">{{ ch.protocolo }} - {{ ch.titulo }}</strong>
+              <strong style="color: #0f172a; display: block; font-size: 13px;">{{ ch.protocolo }} - {{ ch.titulo
+                }}</strong>
               <span style="font-size: 11px; color: #94a3b8;">
                 {% if ch.prefixo_veiculo %}Carro {{ ch.prefixo_veiculo }} · {% endif %}
                 {% if ch.linha %}{{ ch.linha }} · {% endif %}
@@ -196,11 +257,13 @@
             </td>
             <td>
               {% if ch.status == 'Aberto' %}
-                <span class="status-badge open"><i class="fa-solid fa-circle" style="font-size: 6px;"></i> Aberto</span>
+              <span class="status-badge open"><i class="fa-solid fa-circle" style="font-size: 6px;"></i> Aberto</span>
               {% elif ch.status == 'Em Andamento' %}
-                <span class="status-badge in_progress"><i class="fa-solid fa-spinner" style="font-size: 8px;"></i> Em Andamento</span>
+              <span class="status-badge in_progress"><i class="fa-solid fa-spinner" style="font-size: 8px;"></i> Em
+                Andamento</span>
               {% else %}
-                <span class="status-badge closed"><i class="fa-solid fa-check" style="font-size: 8px;"></i> Concluído</span>
+              <span class="status-badge closed"><i class="fa-solid fa-check" style="font-size: 8px;"></i>
+                Concluído</span>
               {% endif %}
             </td>
             <td>
@@ -208,11 +271,11 @@
             </td>
             <td>
               {% if ch.prioridade == 'Crítica' %}
-                <span class="status-badge critical"><i class="fa-solid fa-bolt"></i> Crítica</span>
+              <span class="status-badge critical"><i class="fa-solid fa-bolt"></i> Crítica</span>
               {% elif ch.prioridade == 'Alta' %}
-                <span class="status-badge open"><i class="fa-solid fa-triangle-exclamation"></i> Alta</span>
+              <span class="status-badge open"><i class="fa-solid fa-triangle-exclamation"></i> Alta</span>
               {% else %}
-                <span style="font-size: 12px; color: #64748b;">Normal</span>
+              <span style="font-size: 12px; color: #64748b;">Normal</span>
               {% endif %}
             </td>
             <td>
@@ -220,15 +283,18 @@
             </td>
             <td>
               {% if ch.status != 'Concluído' %}
-              <form action="{{ url_for('api_fechar_chamado') }}" method="POST" style="display:inline;" onsubmit="return confirm('Concluir este chamado e disparar e-mail de encerramento ao solicitante?')">
+              <form action="{{ url_for('api_fechar_chamado') }}" method="POST" style="display:inline;"
+                onsubmit="return confirm('Concluir este chamado e disparar e-mail de encerramento ao solicitante?')">
                 <input type="hidden" name="chamado_id" value="{{ ch.id }}">
                 <input type="hidden" name="resolucao" value="Serviço concluído conforme procedimento padrão.">
-                <button type="submit" class="status-badge closed" style="cursor: pointer; border: 1px solid #10b981;" title="Encerrar chamado">
+                <button type="submit" class="status-badge closed" style="cursor: pointer; border: 1px solid #10b981;"
+                  title="Encerrar chamado">
                   <i class="fa-solid fa-check"></i> Fechar
                 </button>
               </form>
               {% else %}
-                <span style="font-size: 11px; color: #10b981; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Resolvido</span>
+              <span style="font-size: 11px; color: #10b981; font-weight: 600;"><i class="fa-solid fa-circle-check"></i>
+                Resolvido</span>
               {% endif %}
             </td>
           </tr>
@@ -247,13 +313,14 @@
     <div class="activity-list">
       {% for atv in atividades_recentes %}
       <div class="activity-item">
-        <span class="event-icon {% if atv.acao == 'Fechamento' %}success{% elif atv.acao == 'Abertura' %}info{% else %}warning{% endif %}">
+        <span
+          class="event-icon {% if atv.acao == 'Fechamento' %}success{% elif atv.acao == 'Abertura' %}info{% else %}warning{% endif %}">
           {% if atv.acao == 'Fechamento' %}
-            <i class="fa-solid fa-check"></i>
+          <i class="fa-solid fa-check"></i>
           {% elif atv.acao == 'Abertura' %}
-            <i class="fa-solid fa-paper-plane"></i>
+          <i class="fa-solid fa-paper-plane"></i>
           {% else %}
-            <i class="fa-solid fa-bolt"></i>
+          <i class="fa-solid fa-bolt"></i>
           {% endif %}
         </span>
         <div>
@@ -265,7 +332,8 @@
       {% endfor %}
     </div>
     <div style="padding: 12px 18px; border-top: 1px solid #f1f5f9; background: #fafbfc;">
-      <a href="{{ url_for('emails_view') }}" style="font-size: 11.5px; color: var(--primary); font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
+      <a href="{{ url_for('emails_view') }}"
+        style="font-size: 11.5px; color: var(--primary); font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
         <span>Ver histórico de e-mails disparados</span>
         <i class="fa-solid fa-arrow-right"></i>
       </a>

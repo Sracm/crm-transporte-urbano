@@ -43,6 +43,7 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -54,6 +55,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 button, input, select, textarea {
@@ -80,6 +83,8 @@ a {
 .app-shell {
   min-height: 100vh;
   display: flex;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* ==========================================================================
@@ -376,6 +381,7 @@ a {
   display: flex;
   flex-direction: column;
   transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-x: hidden;
 }
 
 /* SIDEBAR RETRÁTIL (DESKTOP) */
