@@ -459,15 +459,6 @@
       <span>Transmissão Operacional · Garagem Expresso Planalto Itaquá</span>
     </div>
     
-    <!-- BOTÕES PARA TROCAR CÂMERAS DA GARAGEM -->
-    <div class="video-switcher">
-      <button class="btn-camera active" onclick="switchVideo('expresso_planalto_portal.mp4', this)">
-        <i class="fa-solid fa-video"></i> Câmera 1 (Garagem & Novos Torinos)
-      </button>
-      <button class="btn-camera" onclick="switchVideo('saida_frota.mp4', this)">
-        <i class="fa-solid fa-bus"></i> Câmera 2 (Saída da Frota)
-      </button>
-    </div>
     
     <!-- STATS FLUTUANTES -->
     <div class="video-bottom-stats">
@@ -646,18 +637,6 @@
     setTimeout(() => { btn.style.transform = ''; }, 200);
   }
 
-  // Alternar vídeo de fundo (vídeos institucionais locais em MP4)
-  function switchVideo(videoFile, btn) {
-    const video = document.getElementById('portalBgVideo');
-    if (video) {
-      video.src = '/static/video/' + videoFile;
-      video.load();
-      video.play().catch(e => console.log('Autoplay:', e));
-    }
-    
-    document.querySelectorAll('.btn-camera').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-  }
 </script>
 
 </body>
