@@ -167,7 +167,8 @@
   }
 
   .gauge-trend.down {
-    color: #10b981; /* Para ociosidade ou consumo queda é positivo */
+    color: #10b981;
+    /* Para ociosidade ou consumo queda é positivo */
   }
 
   /* BARRAS DE CATEGORIAS DE SEGURANÇA */
@@ -267,11 +268,17 @@
     gap: 16px;
     margin-bottom: 20px;
   }
+
   @media (max-width: 1100px) {
-    .cockpit-master-strip { grid-template-columns: repeat(2, 1fr); }
+    .cockpit-master-strip {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
+
   @media (max-width: 600px) {
-    .cockpit-master-strip { grid-template-columns: 1fr; }
+    .cockpit-master-strip {
+      grid-template-columns: 1fr;
+    }
   }
 
   .master-kpi-card {
@@ -279,7 +286,7 @@
     border: 1px solid #e2e8f0;
     border-radius: 14px;
     padding: 16px 18px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -287,10 +294,12 @@
     overflow: hidden;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
+
   .master-kpi-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
   }
+
   .master-kpi-card::before {
     content: '';
     position: absolute;
@@ -300,12 +309,14 @@
     height: 3.5px;
     background: var(--kpi-accent, var(--primary));
   }
+
   .master-kpi-head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 8px;
   }
+
   .master-kpi-label {
     font-size: 11px;
     font-weight: 800;
@@ -313,6 +324,7 @@
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
+
   .master-kpi-icon {
     width: 34px;
     height: 34px;
@@ -322,6 +334,7 @@
     justify-content: center;
     font-size: 15px;
   }
+
   .master-kpi-value {
     font-size: 25px;
     font-weight: 900;
@@ -329,6 +342,7 @@
     line-height: 1.1;
     margin-bottom: 4px;
   }
+
   .master-kpi-sub {
     font-size: 11.5px;
     font-weight: 700;
@@ -337,6 +351,7 @@
     align-items: center;
     gap: 6px;
   }
+
   .master-kpi-detail {
     font-size: 11px;
     color: #64748b;
@@ -352,22 +367,26 @@
   .km-matriz-bar-wrapper {
     margin: 12px 0 14px;
   }
+
   .km-matriz-bar {
     height: 14px;
     border-radius: 7px;
     overflow: hidden;
     display: flex;
     background: #f1f5f9;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   }
+
   .km-matriz-prod {
     background: linear-gradient(90deg, #10b981 0%, #059669 100%);
     height: 100%;
   }
+
   .km-matriz-morta {
     background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
     height: 100%;
   }
+
   .km-matriz-legend {
     display: flex;
     justify-content: space-between;
@@ -384,6 +403,7 @@
     font-size: 11.5px;
     margin-top: 4px;
   }
+
   .chassi-table th {
     text-align: left;
     font-size: 10px;
@@ -393,12 +413,14 @@
     padding: 6px 6px;
     border-bottom: 1px solid #e2e8f0;
   }
+
   .chassi-table td {
     padding: 7px 6px;
     border-bottom: 1px solid #f8fafc;
     color: #334155;
     vertical-align: middle;
   }
+
   .chassi-table tr:last-child td {
     border-bottom: none;
   }
@@ -414,11 +436,13 @@
     border: 1px solid #f1f5f9;
     margin-bottom: 6px;
   }
+
   .can-event-left {
     display: flex;
     align-items: center;
     gap: 9px;
   }
+
   .can-event-icon {
     width: 26px;
     height: 26px;
@@ -430,25 +454,30 @@
     color: #ffffff;
     flex-shrink: 0;
   }
+
   .can-event-title {
     font-size: 11.5px;
     font-weight: 700;
     color: #0f172a;
     line-height: 1.2;
   }
+
   .can-event-meta {
     font-size: 10px;
     color: #64748b;
   }
+
   .can-event-badge {
     text-align: right;
   }
+
   .can-event-badge strong {
     font-size: 12.5px;
     font-weight: 800;
     color: #0f172a;
     display: block;
   }
+
   .can-event-badge span {
     font-size: 9.5px;
     font-weight: 600;
@@ -464,6 +493,7 @@
     padding: 7px 0;
     border-bottom: 1px dashed #f1f5f9;
   }
+
   .perda-row:last-child {
     border-bottom: none;
   }
@@ -597,7 +627,7 @@
     align-items: center;
     gap: 7px;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
 
   .itin-chip:hover {
@@ -676,11 +706,14 @@
   }
 
   @keyframes itinNeonFlash {
-    0%, 100% {
+
+    0%,
+    100% {
       stroke-opacity: 0.95;
       opacity: 0.95;
       filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 18px currentColor);
     }
+
     50% {
       stroke-opacity: 0.10;
       opacity: 0.10;
@@ -689,12 +722,29 @@
   }
 
   /* Defasagem elegante para dinamismo orgânico entre os 6 corredores */
-  .itin-pulse-glow-0 { animation-delay: 0s; }
-  .itin-pulse-glow-1 { animation-delay: 0.22s; }
-  .itin-pulse-glow-2 { animation-delay: 0.44s; }
-  .itin-pulse-glow-3 { animation-delay: 0.66s; }
-  .itin-pulse-glow-4 { animation-delay: 0.88s; }
-  .itin-pulse-glow-5 { animation-delay: 1.10s; }
+  .itin-pulse-glow-0 {
+    animation-delay: 0s;
+  }
+
+  .itin-pulse-glow-1 {
+    animation-delay: 0.22s;
+  }
+
+  .itin-pulse-glow-2 {
+    animation-delay: 0.44s;
+  }
+
+  .itin-pulse-glow-3 {
+    animation-delay: 0.66s;
+  }
+
+  .itin-pulse-glow-4 {
+    animation-delay: 0.88s;
+  }
+
+  .itin-pulse-glow-5 {
+    animation-delay: 1.10s;
+  }
 
   /* 2. ESTEIRA DE FLUXO ATIVO (LINHA PONTILHADA CORRENDO EM TEMPO REAL) */
   .itinerario-flow-stream {
@@ -709,17 +759,35 @@
     from {
       stroke-dashoffset: 24;
     }
+
     to {
       stroke-dashoffset: 0;
     }
   }
 
-  .itin-stream-0 { animation-duration: 1.0s; }
-  .itin-stream-1 { animation-duration: 1.1s; }
-  .itin-stream-2 { animation-duration: 0.95s; }
-  .itin-stream-3 { animation-duration: 1.05s; }
-  .itin-stream-4 { animation-duration: 1.15s; }
-  .itin-stream-5 { animation-duration: 0.9s; }
+  .itin-stream-0 {
+    animation-duration: 1.0s;
+  }
+
+  .itin-stream-1 {
+    animation-duration: 1.1s;
+  }
+
+  .itin-stream-2 {
+    animation-duration: 0.95s;
+  }
+
+  .itin-stream-3 {
+    animation-duration: 1.05s;
+  }
+
+  .itin-stream-4 {
+    animation-duration: 1.15s;
+  }
+
+  .itin-stream-5 {
+    animation-duration: 0.9s;
+  }
 
   /* 3. TRILHO ESCURO BASE DE ALTO RELEVO */
   .itinerario-rail-casing {
@@ -740,12 +808,16 @@
   .itinerario-foco-glow {
     animation: itinFocoNeon 0.85s infinite ease-in-out !important;
   }
+
   @keyframes itinFocoNeon {
-    0%, 100% {
+
+    0%,
+    100% {
       stroke-opacity: 1.0;
       opacity: 1.0;
       filter: drop-shadow(0 0 14px currentColor) drop-shadow(0 0 28px currentColor);
     }
+
     50% {
       stroke-opacity: 0.20;
       opacity: 0.20;
@@ -773,12 +845,15 @@
   }
 
   @keyframes pillRadarGlow {
-    0%, 100% {
-      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(0,0,0,0.7);
+
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(0, 0, 0, 0.7);
       transform: translate(-50%, -50%) scale(1);
     }
+
     50% {
-      box-shadow: 0 0 0 6px rgba(255, 255, 255, 0), 0 6px 18px rgba(0,0,0,0.85);
+      box-shadow: 0 0 0 6px rgba(255, 255, 255, 0), 0 6px 18px rgba(0, 0, 0, 0.85);
       transform: translate(-50%, -50%) scale(1.08);
     }
   }
@@ -803,16 +878,19 @@
     vertical-align: middle;
     letter-spacing: -0.2px;
   }
+
   .badge-transito-mini.lento {
     background: rgba(239, 68, 68, 0.16);
     color: #dc2626;
     border: 1px solid rgba(239, 68, 68, 0.35);
   }
+
   .badge-transito-mini.moderado {
     background: rgba(245, 158, 11, 0.16);
     color: #d97706;
     border: 1px solid rgba(245, 158, 11, 0.35);
   }
+
   .badge-transito-mini.fluido {
     background: rgba(16, 185, 129, 0.16);
     color: #059669;
@@ -825,9 +903,11 @@
       stroke-dashoffset: 0;
       opacity: 0.95;
     }
+
     50% {
       opacity: 0.60;
     }
+
     100% {
       stroke-dashoffset: -30;
       opacity: 0.95;
@@ -946,36 +1026,49 @@
     <div>
       <div class="eyebrow">SISTEMA INTEGRADO DE TELEMETRIA CAN-BUS J1939 & DMS · EXPRESSO PLANALTO (GRUPO CSC)</div>
       <h1 style="font-size: 26px; font-weight: 900; color: #0f172a; margin: 4px 0;">Painel de Gestão de Frota</h1>
-      <p style="color: #64748b; font-size: 13.5px; margin: 0;">Visão geral de segurança, eficiência e uso da frota em tempo real com auditoria preditiva.</p>
+      <p style="color: #64748b; font-size: 13.5px; margin: 0;">Visão geral de segurança, eficiência e uso da frota em
+        tempo real com auditoria preditiva.</p>
     </div>
 
     <!-- CONTROLES E FILTROS EXECUTIVOS -->
     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
       <!-- SELETOR DE PERÍODO (DO MODELO DE REFERÊNCIA) -->
-      <select class="form-select" style="font-size: 12.5px; padding: 7px 12px; font-weight: 700; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff;" onchange="window.location.href='/telemetria?periodo=' + this.value">
-        <option value="7d" {% if periodo_selecionado == '7d' %}selected{% endif %}>📅 Últimos 7 dias</option>
-        <option value="hoje" {% if periodo_selecionado == 'hoje' %}selected{% endif %}>📅 Hoje (Turno Operacional)</option>
-        <option value="ontem" {% if periodo_selecionado == 'ontem' %}selected{% endif %}>📅 Ontem</option>
-        <option value="mes" {% if periodo_selecionado == 'mes' %}selected{% endif %}>📅 Mês Atual (Novembro/2026)</option>
-        <option value="30d" {% if periodo_selecionado == '30d' %}selected{% endif %}>📅 Últimos 30 dias</option>
+      <select class="form-select"
+        style="font-size: 12.5px; padding: 7px 12px; font-weight: 700; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff;"
+        onchange="window.location.href='/telemetria?periodo=' + this.value">
+        <option value="7d" {% if periodo_selecionado=='7d' %}selected{% endif %}>📅 Últimos 7 dias</option>
+        <option value="hoje" {% if periodo_selecionado=='hoje' %}selected{% endif %}>📅 Hoje (Turno Operacional)
+        </option>
+        <option value="ontem" {% if periodo_selecionado=='ontem' %}selected{% endif %}>📅 Ontem</option>
+        <option value="mes" {% if periodo_selecionado=='mes' %}selected{% endif %}>📅 Mês Atual (Novembro/2026)</option>
+        <option value="30d" {% if periodo_selecionado=='30d' %}selected{% endif %}>📅 Últimos 30 dias</option>
       </select>
 
       <!-- SELETOR DE LINHA -->
-      <select class="form-select" style="font-size: 12.5px; padding: 7px 12px; font-weight: 700; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff;" onchange="window.location.href='/telemetria?linha=' + this.value">
-        <option value="Todas" {% if linha_selecionada == 'Todas' %}selected{% endif %}>🚏 Todas as 6 Linhas</option>
-        <option value="Linha 801" {% if linha_selecionada == 'Linha 801' %}selected{% endif %}>Linha 801 - Central x Term. Sul</option>
-        <option value="Linha 703" {% if linha_selecionada == 'Linha 703' %}selected{% endif %}>Linha 703 - Bairro Alto x Metrô</option>
-        <option value="Linha 602" {% if linha_selecionada == 'Linha 602' %}selected{% endif %}>Linha 602 - Circular Hospitais</option>
-        <option value="Linha 504" {% if linha_selecionada == 'Linha 504' %}selected{% endif %}>Linha 504 - Vila Progresso x Centro</option>
-        <option value="Linha 305" {% if linha_selecionada == 'Linha 305' %}selected{% endif %}>Linha 305 - Expresso Term. Leste</option>
-        <option value="Linha 412" {% if linha_selecionada == 'Linha 412' %}selected{% endif %}>Linha 412 - Interbairros</option>
+      <select class="form-select"
+        style="font-size: 12.5px; padding: 7px 12px; font-weight: 700; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff;"
+        onchange="window.location.href='/telemetria?linha=' + this.value">
+        <option value="Todas" {% if linha_selecionada=='Todas' %}selected{% endif %}>🚏 Todas as 6 Linhas</option>
+        <option value="Linha 801" {% if linha_selecionada=='Linha 801' %}selected{% endif %}>Linha 801 - Central x Term.
+          Sul</option>
+        <option value="Linha 703" {% if linha_selecionada=='Linha 703' %}selected{% endif %}>Linha 703 - Bairro Alto x
+          Metrô</option>
+        <option value="Linha 602" {% if linha_selecionada=='Linha 602' %}selected{% endif %}>Linha 602 - Circular
+          Hospitais</option>
+        <option value="Linha 504" {% if linha_selecionada=='Linha 504' %}selected{% endif %}>Linha 504 - Vila Progresso
+          x Centro</option>
+        <option value="Linha 305" {% if linha_selecionada=='Linha 305' %}selected{% endif %}>Linha 305 - Expresso Term.
+          Leste</option>
+        <option value="Linha 412" {% if linha_selecionada=='Linha 412' %}selected{% endif %}>Linha 412 - Interbairros
+        </option>
       </select>
 
       <button class="btn-primary" style="padding: 7px 14px; font-size: 12.5px;" onclick="window.print()">
         <i class="fa-solid fa-file-pdf"></i> Relatório Diretoria
       </button>
 
-      <button class="btn-primary" style="padding: 7px 12px; font-size: 12.5px; background: #0f172a;" onclick="window.location.reload()" title="Atualizar telemetria">
+      <button class="btn-primary" style="padding: 7px 12px; font-size: 12.5px; background: #0f172a;"
+        onclick="window.location.reload()" title="Atualizar telemetria">
         <i class="fa-solid fa-arrows-rotate"></i>
       </button>
     </div>
@@ -1006,10 +1099,10 @@
        ABA 1: COCKPIT EXECUTIVO & OPERACIONAL (PADRÃO TRANSPORTE URBANO NTU/SPTRANS)
        ========================================================================= -->
   <div id="tab-cockpit" class="tele-tab-content">
-    
+
     <!-- FAIXA SUPERIOR: OS 4 GRANDES NÚMEROS DA CONCESSÃO -->
     <div class="cockpit-master-strip">
-      
+
       <!-- MASTER 1: ICV (ÍNDICE DE CUMPRIMENTO DE VIAGENS) -->
       <div class="master-kpi-card" style="--kpi-accent: #10b981;">
         <div class="master-kpi-head">
@@ -1036,7 +1129,8 @@
             <i class="fa-solid fa-id-card-clip"></i>
           </div>
         </div>
-        <div class="master-kpi-value">{{ kpis.ipk.valor }} <span style="font-size: 14px; font-weight: 700; color: #64748b;">pass/km</span></div>
+        <div class="master-kpi-value">{{ kpis.ipk.valor }} <span
+            style="font-size: 14px; font-weight: 700; color: #64748b;">pass/km</span></div>
         <div class="master-kpi-sub" style="color: #3b82f6;">
           <i class="fa-solid fa-arrow-trend-up"></i> {{ kpis.ipk.diff }} (Meta: {{ kpis.ipk.meta }})
         </div>
@@ -1054,13 +1148,16 @@
             <i class="fa-solid fa-gas-pump"></i>
           </div>
         </div>
-        <div class="master-kpi-value">{{ kpis.combustivel_executivo.valor }} <span style="font-size: 14px; font-weight: 700; color: #64748b;">km/L</span></div>
+        <div class="master-kpi-value">{{ kpis.combustivel_executivo.valor }} <span
+            style="font-size: 14px; font-weight: 700; color: #64748b;">km/L</span></div>
         <div class="master-kpi-sub" style="color: #d97706;">
-          <i class="fa-solid fa-triangle-exclamation"></i> Meta: {{ kpis.combustivel_executivo.meta }} km/L ({{ kpis.combustivel_executivo.diff_perc }})
+          <i class="fa-solid fa-triangle-exclamation"></i> Meta: {{ kpis.combustivel_executivo.meta }} km/L ({{
+          kpis.combustivel_executivo.diff_perc }})
         </div>
         <div class="master-kpi-detail">
           <span>Volume: <strong>{{ kpis.combustivel_executivo.consumo_total_l|intformat }} L</strong></span>
-          <span style="color: #ef4444; font-weight: 700;">Desvio: R$ {{ kpis.combustivel_executivo.desvio_financeiro_rs|moeda }}</span>
+          <span style="color: #ef4444; font-weight: 700;">Desvio: R$ {{
+            kpis.combustivel_executivo.desvio_financeiro_rs|moeda }}</span>
         </div>
       </div>
 
@@ -1072,7 +1169,8 @@
             <i class="fa-solid fa-wrench"></i>
           </div>
         </div>
-        <div class="master-kpi-value">{{ kpis.mkbf.valor|intformat }} <span style="font-size: 14px; font-weight: 700; color: #64748b;">km/quebra</span></div>
+        <div class="master-kpi-value">{{ kpis.mkbf.valor|intformat }} <span
+            style="font-size: 14px; font-weight: 700; color: #64748b;">km/quebra</span></div>
         <div class="master-kpi-sub" style="color: #10b981;">
           <i class="fa-solid fa-circle-check"></i> {{ kpis.mkbf.status }} · {{ kpis.mkbf.diff }}
         </div>
@@ -1086,22 +1184,26 @@
 
     <!-- GRID PRINCIPAL DE 4 CARDS DE GESTÃO -->
     <div class="cockpit-grid">
-      
+
       <!-- CARD 1: DISPONIBILIDADE E ALOCAÇÃO DA FROTA -->
       <div class="tele-card">
         <div class="tele-card-header">
           <h3><i class="fa-solid fa-bus-simple" style="color: var(--primary);"></i> Disponibilidade da Frota</h3>
-          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; font-weight: 800;">
+          <span
+            style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; font-weight: 800;">
             {{ kpis.disponibilidade_frota.disponibilidade_perc }}% Apta
           </span>
         </div>
         <div style="flex: 1; min-height: 145px; position: relative;">
           <canvas id="chartDisponibilidadeFrota"></canvas>
         </div>
-        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; border-top: 1px solid #f1f5f9; padding-top: 8px; margin-top: 4px;">
+        <div
+          style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; border-top: 1px solid #f1f5f9; padding-top: 8px; margin-top: 4px;">
           <span>Rua: <strong style="color: #0f172a;">{{ kpis.disponibilidade_frota.operando_rua }}</strong></span>
-          <span>Reserva: <strong style="color: #0f172a;">{{ kpis.disponibilidade_frota.reserva_tecnica }}</strong></span>
-          <span>Oficina: <strong style="color: #ef4444;">{{ kpis.disponibilidade_frota.oficina_imobilizados }}</strong></span>
+          <span>Reserva: <strong style="color: #0f172a;">{{ kpis.disponibilidade_frota.reserva_tecnica
+              }}</strong></span>
+          <span>Oficina: <strong style="color: #ef4444;">{{ kpis.disponibilidade_frota.oficina_imobilizados
+              }}</strong></span>
         </div>
       </div>
 
@@ -1109,19 +1211,22 @@
       <div class="tele-card">
         <div class="tele-card-header">
           <h3><i class="fa-solid fa-route" style="color: #0284c7;"></i> Matriz de Quilometragem</h3>
-          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; font-weight: 800;">
+          <span
+            style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; font-weight: 800;">
             {{ kpis.quilometragem_matriz.km_morta_perc }}% Km Morta
           </span>
         </div>
-        
+
         <div class="km-matriz-bar-wrapper">
           <div class="km-matriz-bar">
             <div class="km-matriz-prod" style="width: {{ kpis.quilometragem_matriz.km_comercial_perc }}%;"></div>
             <div class="km-matriz-morta" style="width: {{ kpis.quilometragem_matriz.km_morta_perc }}%;"></div>
           </div>
           <div class="km-matriz-legend">
-            <span><span style="color: #10b981;">●</span> Produtiva: {{ kpis.quilometragem_matriz.km_comercial_perc }}%</span>
-            <span><span style="color: #f59e0b;">●</span> Morta: {{ kpis.quilometragem_matriz.km_morta_perc }}% (Meta &lt; 5%)</span>
+            <span><span style="color: #10b981;">●</span> Produtiva: {{ kpis.quilometragem_matriz.km_comercial_perc
+              }}%</span>
+            <span><span style="color: #f59e0b;">●</span> Morta: {{ kpis.quilometragem_matriz.km_morta_perc }}% (Meta
+              &lt; 5%)</span>
           </div>
         </div>
 
@@ -1145,11 +1250,12 @@
       <div class="tele-card">
         <div class="tele-card-header">
           <h3><i class="fa-solid fa-truck-monster" style="color: #8b5cf6;"></i> Consumo por Chassi</h3>
-          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: #f1f5f9; color: #475569; font-weight: 700;">
+          <span
+            style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: #f1f5f9; color: #475569; font-weight: 700;">
             Frota 150 carros
           </span>
         </div>
-        
+
         <table class="chassi-table">
           <thead>
             <tr>
@@ -1176,8 +1282,10 @@
           </tbody>
         </table>
 
-        <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 6px 10px; margin-top: 6px; font-size: 10.5px; color: #854d0e; display: flex; justify-content: space-between; align-items: center;">
-          <span><i class="fa-solid fa-clock"></i> Marcha Lenta: <strong>{{ kpis.combustivel_executivo.marcha_lenta_perc }}%</strong></span>
+        <div
+          style="background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 6px 10px; margin-top: 6px; font-size: 10.5px; color: #854d0e; display: flex; justify-content: space-between; align-items: center;">
+          <span><i class="fa-solid fa-clock"></i> Marcha Lenta: <strong>{{ kpis.combustivel_executivo.marcha_lenta_perc
+              }}%</strong></span>
           <span>Desperdício: <strong>R$ {{ kpis.combustivel_executivo.custo_marcha_lenta_rs|moeda }}</strong></span>
         </div>
       </div>
@@ -1186,11 +1294,12 @@
       <div class="tele-card">
         <div class="tele-card-header">
           <h3><i class="fa-solid fa-microchip" style="color: #ef4444;"></i> Eventos CAN (Segurança)</h3>
-          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; font-weight: 800;">
+          <span
+            style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; font-weight: 800;">
             {{ kpis.telemetria_can.diff_semana }}
           </span>
         </div>
-        
+
         <div class="can-events-list">
           {% for ev in kpis.telemetria_can.eventos %}
           <div class="can-event-item">
@@ -1216,33 +1325,38 @@
 
     <!-- GRID SECUNDÁRIO DE 3 CARDS (PERDAS OSO, CURVA HORÁRIA, IQT REGULATÓRIO) -->
     <div style="display: grid; grid-template-columns: 1fr 1.6fr 1.2fr; gap: 18px; margin-bottom: 20px;">
-      
+
       <!-- CARD 5: PERDAS DE VIAGENS POR CAUSA RAIZ (AUDITORIA OSO) -->
       <div class="tele-card">
         <div class="tele-card-header">
           <h3><i class="fa-solid fa-file-circle-xmark" style="color: #ef4444;"></i> Perdas de Viagens (OSO)</h3>
-          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: #fee2e2; color: #b91c1c; font-weight: 800;">
+          <span
+            style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: #fee2e2; color: #b91c1c; font-weight: 800;">
             {{ kpis.icv.perdas_total }} não realizadas
           </span>
         </div>
-        
+
         <div style="margin: 6px 0;">
           <div class="perda-row">
             <span><i class="fa-solid fa-wrench" style="color: #ef4444; width: 16px;"></i> Falha Mecânica / Pane</span>
             <strong>{{ kpis.icv.perdas_mecanica }} viagens <small style="color: #64748b;">(38%)</small></strong>
           </div>
           <div class="perda-row">
-            <span><i class="fa-solid fa-user-xmark" style="color: #f59e0b; width: 16px;"></i> Falta de Motorista / RH</span>
+            <span><i class="fa-solid fa-user-xmark" style="color: #f59e0b; width: 16px;"></i> Falta de Motorista /
+              RH</span>
             <strong>{{ kpis.icv.perdas_rh }} viagens <small style="color: #64748b;">(38%)</small></strong>
           </div>
           <div class="perda-row">
-            <span><i class="fa-solid fa-traffic-light" style="color: #3b82f6; width: 16px;"></i> Retenções de Trânsito</span>
+            <span><i class="fa-solid fa-traffic-light" style="color: #3b82f6; width: 16px;"></i> Retenções de
+              Trânsito</span>
             <strong>{{ kpis.icv.perdas_transito }} viagens <small style="color: #64748b;">(24%)</small></strong>
           </div>
         </div>
 
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; margin-top: 8px; font-size: 11px; color: #475569;">
-          <strong>Regulação Municipal:</strong> Perdas mecânicas e de RH sofrem glosa financeira tarifária na liquidação mensal.
+        <div
+          style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; margin-top: 8px; font-size: 11px; color: #475569;">
+          <strong>Regulação Municipal:</strong> Perdas mecânicas e de RH sofrem glosa financeira tarifária na liquidação
+          mensal.
         </div>
       </div>
 
@@ -1250,7 +1364,8 @@
       <div class="tele-card">
         <div class="tele-card-header">
           <h3><i class="fa-solid fa-chart-column" style="color: var(--primary);"></i> Demanda Horária & IPK</h3>
-          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(13,148,136,0.12); color: var(--primary); font-weight: 800;">
+          <span
+            style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(13,148,136,0.12); color: var(--primary); font-weight: 800;">
             Pico Manhã & Tarde
           </span>
         </div>
@@ -1263,11 +1378,12 @@
       <div class="tele-card">
         <div class="tele-card-header">
           <h3><i class="fa-solid fa-award" style="color: #10b981;"></i> IQT Regulatória</h3>
-          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.15); color: #10b981; font-weight: 800;">
+          <span
+            style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.15); color: #10b981; font-weight: 800;">
             Nota {{ kpis.iqt.nota_geral }} / 100
           </span>
         </div>
-        
+
         <div style="margin: 6px 0;">
           <div class="perda-row">
             <span>Limpeza & Conservação</span>
@@ -1288,10 +1404,12 @@
         </div>
 
         <div style="display: flex; gap: 6px; margin-top: 8px;">
-          <span style="flex: 1; text-align: center; font-size: 10px; font-weight: 700; background: #ecfdf5; color: #047857; padding: 4px 6px; border-radius: 6px;">
+          <span
+            style="flex: 1; text-align: center; font-size: 10px; font-weight: 700; background: #ecfdf5; color: #047857; padding: 4px 6px; border-radius: 6px;">
             <i class="fa-solid fa-snowflake"></i> 100% Ar-Cond.
           </span>
-          <span style="flex: 1; text-align: center; font-size: 10px; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 4px 6px; border-radius: 6px;">
+          <span
+            style="flex: 1; text-align: center; font-size: 10px; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 4px 6px; border-radius: 6px;">
             <i class="fa-solid fa-wheelchair"></i> 100% Acessível
           </span>
         </div>
@@ -1345,14 +1463,17 @@
        ========================================================================= -->
   <div id="tab-mapa" class="tele-tab-content" style="display: none;">
     <div class="tele-card" style="padding: 16px 20px; margin-bottom: 20px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
         <div>
           <h3 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0;">
-            <i class="fa-solid fa-tower-broadcast" style="color: var(--primary);"></i> Mapa Tático CCO ao Vivo · Itaquaquecetuba / SP
+            <i class="fa-solid fa-tower-broadcast" style="color: var(--primary);"></i> Mapa Tático CCO ao Vivo ·
+            Itaquaquecetuba / SP
           </h3>
-          <p style="font-size: 12px; color: #64748b; margin: 2px 0 0;">Telemetria GPS georreferenciada atualizada a cada 10 segundos com telemetria CAN embarcada.</p>
+          <p style="font-size: 12px; color: #64748b; margin: 2px 0 0;">Telemetria GPS georreferenciada atualizada a cada
+            10 segundos com telemetria CAN embarcada.</p>
         </div>
-        
+
         <!-- CHIPS DE FILTRO DO MAPA & CAMADA DE TRÂNSITO AO VIVO -->
         <div class="map-filter-bar" style="margin-bottom: 0;">
           <span class="map-chip active" onclick="filtrarMapa('Todos', this)">
@@ -1385,49 +1506,70 @@
       <div class="itinerarios-bar">
         <div class="itinerarios-header">
           <span class="itinerarios-title">
-            <i class="fa-solid fa-route" style="color: var(--primary);"></i> ITINERÁRIOS MUNICIPAIS & ÍNDICE DE TRÂNSITO (ITAQUAQUECETUBA):
+            <i class="fa-solid fa-route" style="color: var(--primary);"></i> ITINERÁRIOS MUNICIPAIS & ÍNDICE DE TRÂNSITO
+            (ITAQUAQUECETUBA):
           </span>
           <span class="itinerarios-hint">
-            <i class="fa-solid fa-computer-mouse"></i> Clique no itinerário para traçar a rota, ver velocidade comercial e gargalos ao vivo
+            <i class="fa-solid fa-computer-mouse"></i> Clique no itinerário para traçar a rota, ver velocidade comercial
+            e gargalos ao vivo
           </span>
         </div>
         <div class="itinerarios-chips">
-          <button type="button" class="itin-chip active" id="btnItinTodas" onclick="destacarItinerario('Todas', this)" style="border-left: 4px solid var(--primary);">
+          <button type="button" class="itin-chip active" id="btnItinTodas" onclick="destacarItinerario('Todas', this)"
+            style="border-left: 4px solid var(--primary);">
             <i class="fa-solid fa-network-wired"></i> Todas as Linhas (6)
             <span class="badge-transito-mini moderado" title="Média de tráfego de toda a malha: 51%">51% Médio</span>
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 801', this)" style="border-left: 4px solid #00f0ff;">
-            <span class="itin-dot" style="background: #00f0ff; box-shadow: 0 0 8px rgba(0,240,255,0.8);"></span> <strong>801</strong> · Term. Central x Sul
-            <span class="badge-transito-mini lento" title="Trânsito Intenso na Av. Ítalo Adami: 78% · Atraso +14 min">78% 🔴</span>
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 801', this)"
+            style="border-left: 4px solid #00f0ff;">
+            <span class="itin-dot" style="background: #00f0ff; box-shadow: 0 0 8px rgba(0,240,255,0.8);"></span>
+            <strong>801</strong> · Term. Central x Sul
+            <span class="badge-transito-mini lento"
+              title="Trânsito Intenso na Av. Ítalo Adami: 78% · Atraso +14 min">78% 🔴</span>
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 703', this)" style="border-left: 4px solid #0066ff;">
-            <span class="itin-dot" style="background: #0066ff; box-shadow: 0 0 8px rgba(0,102,255,0.6);"></span> <strong>703</strong> · Bairro Alto x Manoel Feio
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 703', this)"
+            style="border-left: 4px solid #0066ff;">
+            <span class="itin-dot" style="background: #0066ff; box-shadow: 0 0 8px rgba(0,102,255,0.6);"></span>
+            <strong>703</strong> · Bairro Alto x Manoel Feio
             <span class="badge-transito-mini fluido" title="Fluxo Livre na SP-056: 24% · Sem retenção">24% 🟢</span>
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 602', this)" style="border-left: 4px solid #a855f7;">
-            <span class="itin-dot" style="background: #a855f7; box-shadow: 0 0 8px rgba(168,85,247,0.6);"></span> <strong>602</strong> · Circular Hospitais
-            <span class="badge-transito-mini moderado" title="Trânsito Moderado na região do CSI: 45% · Atraso +5 min">45% 🟡</span>
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 602', this)"
+            style="border-left: 4px solid #a855f7;">
+            <span class="itin-dot" style="background: #a855f7; box-shadow: 0 0 8px rgba(168,85,247,0.6);"></span>
+            <strong>602</strong> · Circular Hospitais
+            <span class="badge-transito-mini moderado"
+              title="Trânsito Moderado na região do CSI: 45% · Atraso +5 min">45% 🟡</span>
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 504', this)" style="border-left: 4px solid #ff6b00;">
-            <span class="itin-dot" style="background: #ff6b00; box-shadow: 0 0 8px rgba(255,107,0,0.6);"></span> <strong>504</strong> · Vila Progresso x Centro
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 504', this)"
+            style="border-left: 4px solid #ff6b00;">
+            <span class="itin-dot" style="background: #ff6b00; box-shadow: 0 0 8px rgba(255,107,0,0.6);"></span>
+            <strong>504</strong> · Vila Progresso x Centro
             <span class="badge-transito-mini lento" title="Lentidão na Av. Uberaba: 68% · Atraso +11 min">68% 🔴</span>
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 305', this)" style="border-left: 4px solid #ffd600;">
-            <span class="itin-dot" style="background: #ffd600; box-shadow: 0 0 8px rgba(255,214,0,0.8);"></span> <strong>305</strong> · Expresso Term. Leste
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 305', this)"
+            style="border-left: 4px solid #ffd600;">
+            <span class="itin-dot" style="background: #ffd600; box-shadow: 0 0 8px rgba(255,214,0,0.8);"></span>
+            <strong>305</strong> · Expresso Term. Leste
             <span class="badge-transito-mini fluido" title="Corredor Rápido Ayrton Senna: 28% · Fluido">28% 🟢</span>
           </button>
-          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 412', this)" style="border-left: 4px solid #ff007f;">
-            <span class="itin-dot" style="background: #ff007f; box-shadow: 0 0 8px rgba(255,0,127,0.6);"></span> <strong>412</strong> · Interbairros Norte x Oeste
-            <span class="badge-transito-mini moderado" title="Trânsito Moderado na Est. do Mandi: 52% · Atraso +7 min">52% 🟡</span>
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 412', this)"
+            style="border-left: 4px solid #ff007f;">
+            <span class="itin-dot" style="background: #ff007f; box-shadow: 0 0 8px rgba(255,0,127,0.6);"></span>
+            <strong>412</strong> · Interbairros Norte x Oeste
+            <span class="badge-transito-mini moderado"
+              title="Trânsito Moderado na Est. do Mandi: 52% · Atraso +7 min">52% 🟡</span>
           </button>
         </div>
 
         <!-- BANNER DE INFORMAÇÕES DA LINHA SELECIONADA & ÍNDICE DE TRÂNSITO -->
         <div id="itinInfoBanner" class="itin-info-banner">
           <div>
-            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8;">Itinerário Ativo:</span>
-            <strong id="itinTitulo" style="display: block; font-size: 13.5px; margin-top: 2px;">Todas as Linhas Operacionais da Malha Municipal</strong>
-            <span id="itinDesc" style="font-size: 11.5px; color: #cbd5e1;">6 corredores ativos conectando o Centro aos terminais Manoel Feio, Sul e Leste.</span>
+            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8;">Itinerário
+              Ativo:</span>
+            <strong id="itinTitulo" style="display: block; font-size: 13.5px; margin-top: 2px;">Todas as Linhas
+              Operacionais da Malha Municipal</strong>
+            <span id="itinDesc" style="font-size: 11.5px; color: #cbd5e1;">6 corredores ativos conectando o Centro aos
+              terminais Manoel Feio, Sul e Leste.</span>
           </div>
           <div class="itin-kpis-mini">
             <div class="itin-kpi-item">
@@ -1444,7 +1586,8 @@
             </div>
             <div class="itin-kpi-item" id="boxTransitoIndice">
               <i class="fa-solid fa-traffic-light" style="color: #f87171;"></i>
-              <div><span>Índice Trânsito:</span> <b id="itinTransitoIndice" style="color: #fbbf24;">51% (Moderado)</b></div>
+              <div><span>Índice Trânsito:</span> <b id="itinTransitoIndice" style="color: #fbbf24;">51% (Moderado)</b>
+              </div>
             </div>
             <div class="itin-kpi-item" id="boxTransitoVelocidade">
               <i class="fa-solid fa-gauge-high" style="color: #a78bfa;"></i>
@@ -1459,34 +1602,42 @@
       </div>
 
       <!-- BARRA DE SINCRONIZAÇÃO DE TRÂNSITO AO VIVO (GOOGLE TRAFFIC + TELEMETRIA CAN) -->
-      <div class="traffic-sync-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 14px; margin: 10px 0 14px; flex-wrap: wrap;">
-        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 11.5px; font-weight: 700; color: #334155;">
+      <div class="traffic-sync-bar"
+        style="display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 14px; margin: 10px 0 14px; flex-wrap: wrap;">
+        <div
+          style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 11.5px; font-weight: 700; color: #334155;">
           <span style="display: inline-flex; align-items: center; gap: 6px; color: #0f172a;">
             <i class="fa-solid fa-satellite-dish" style="color: #0284c7;"></i>
             <strong>Sincronização de Trânsito ao Vivo (Itaquaquecetuba / SP):</strong>
           </span>
           <span style="display: inline-flex; align-items: center; gap: 5px;">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; display: inline-block; box-shadow: 0 0 6px rgba(16,185,129,0.6);"></span>
+            <span
+              style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; display: inline-block; box-shadow: 0 0 6px rgba(16,185,129,0.6);"></span>
             <span>Fluido (20 a 50 km/h)</span>
           </span>
           <span style="display: inline-flex; align-items: center; gap: 5px;">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; display: inline-block; box-shadow: 0 0 6px rgba(245,158,11,0.6);"></span>
+            <span
+              style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; display: inline-block; box-shadow: 0 0 6px rgba(245,158,11,0.6);"></span>
             <span>Moderado (12 a 20 km/h)</span>
           </span>
           <span style="display: inline-flex; align-items: center; gap: 5px;">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; display: inline-block; box-shadow: 0 0 6px rgba(239,68,68,0.6);"></span>
+            <span
+              style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; display: inline-block; box-shadow: 0 0 6px rgba(239,68,68,0.6);"></span>
             <span>Congestionado (5 a 12 km/h)</span>
           </span>
           <span style="display: inline-flex; align-items: center; gap: 5px;">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background: #7f1d1d; display: inline-block; box-shadow: 0 0 6px rgba(127,29,29,0.8);"></span>
+            <span
+              style="width: 10px; height: 10px; border-radius: 50%; background: #7f1d1d; display: inline-block; box-shadow: 0 0 6px rgba(127,29,29,0.8);"></span>
             <span>Parado / Retenção (&lt; 5 km/h)</span>
           </span>
         </div>
         <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: #64748b;">
-          <span style="display: inline-flex; align-items: center; gap: 4px; background: #e0f2fe; color: #0284c7; padding: 2px 8px; border-radius: 12px; font-weight: 700;">
+          <span
+            style="display: inline-flex; align-items: center; gap: 4px; background: #e0f2fe; color: #0284c7; padding: 2px 8px; border-radius: 12px; font-weight: 700;">
             <i class="fa-solid fa-signal" style="font-size: 10px;"></i> Google Traffic API Live
           </span>
-          <span><i class="fa-solid fa-arrows-rotate fa-spin" style="color: var(--primary);"></i> Atualização contínua</span>
+          <span><i class="fa-solid fa-arrows-rotate fa-spin" style="color: var(--primary);"></i> Atualização
+            contínua</span>
         </div>
       </div>
 
@@ -1495,17 +1646,21 @@
 
       <!-- ALERTAS DE HEADWAY & EFEITO COMBOIO -->
       <div class="headway-card">
-        <h4 style="font-size: 13.5px; font-weight: 800; color: #0f172a; margin: 0 0 10px; display: flex; align-items: center; gap: 8px;">
-          <i class="fa-solid fa-arrows-left-right-to-line" style="color: #6366f1;"></i> Monitoramento de Intervalo (Headway) & Prevenção de Comboio
+        <h4
+          style="font-size: 13.5px; font-weight: 800; color: #0f172a; margin: 0 0 10px; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-arrows-left-right-to-line" style="color: #6366f1;"></i> Monitoramento de Intervalo
+          (Headway) & Prevenção de Comboio
         </h4>
-        
+
         <div class="headway-alert comboio">
           <i class="fa-solid fa-triangle-exclamation" style="font-size: 16px;"></i>
           <div style="flex: 1;">
             <strong>Alerta de Efeito Comboio na Linha 801 (Central x Term. Sul)</strong>
-            <p style="margin: 2px 0 0; font-size: 11.5px;">Carro 5014 e Carro 5022 estão distanciados por apenas 1,5 minuto (tolerância mínima: 4,0 min). Risco de canibalização de passageiros no Corredor Sul.</p>
+            <p style="margin: 2px 0 0; font-size: 11.5px;">Carro 5014 e Carro 5022 estão distanciados por apenas 1,5
+              minuto (tolerância mínima: 4,0 min). Risco de canibalização de passageiros no Corredor Sul.</p>
           </div>
-          <button class="btn-primary" style="padding: 4px 10px; font-size: 11px; background: #b91c1c;" onclick="alert('Instrução de retenção de 2.5 min transmitida via rádio/CCO ao Carro 5022.')">
+          <button class="btn-primary" style="padding: 4px 10px; font-size: 11px; background: #b91c1c;"
+            onclick="alert('Instrução de retenção de 2.5 min transmitida via rádio/CCO ao Carro 5022.')">
             Segurar no Terminal
           </button>
         </div>
@@ -1514,9 +1669,11 @@
           <i class="fa-solid fa-circle-exclamation" style="font-size: 16px;"></i>
           <div style="flex: 1;">
             <strong>Alerta de Buraco Operacional na Linha 703 (Bairro Alto x Metrô)</strong>
-            <p style="margin: 2px 0 0; font-size: 11.5px;">Intervalo entre o Carro 5028 e o Carro 5035 atingiu 14 minutos (programado: 6,0 min) devido à lentidão na Radial Leste.</p>
+            <p style="margin: 2px 0 0; font-size: 11.5px;">Intervalo entre o Carro 5028 e o Carro 5035 atingiu 14
+              minutos (programado: 6,0 min) devido à lentidão na Radial Leste.</p>
           </div>
-          <button class="btn-primary" style="padding: 4px 10px; font-size: 11px; background: #d97706;" onclick="alert('Carro Reserva 5099 liberado da garagem para cobrir partida extra.')">
+          <button class="btn-primary" style="padding: 4px 10px; font-size: 11px; background: #d97706;"
+            onclick="alert('Carro Reserva 5099 liberado da garagem para cobrir partida extra.')">
             Injetar Carro Reserva
           </button>
         </div>
@@ -1529,7 +1686,7 @@
        ABA 3: SAÚDE MECÂNICA & CÓDIGOS DTC DA REDE CAN-BUS
        ========================================================================= -->
   <div id="tab-mecanica" class="tele-tab-content" style="display: none;">
-    
+
     <!-- 4 KPI CARDS DE SENSORES CRÍTICOS -->
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px;">
       <div class="tele-card">
@@ -1574,11 +1731,14 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <div>
           <h3 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0;">
-            <i class="fa-solid fa-microchip" style="color: #ef4444;"></i> Alertas Preditivos da Injeção Eletrônica (Códigos DTC J1939)
+            <i class="fa-solid fa-microchip" style="color: #ef4444;"></i> Alertas Preditivos da Injeção Eletrônica
+            (Códigos DTC J1939)
           </h3>
-          <p style="font-size: 12px; color: #64748b; margin: 2px 0 0;">Falhas capturadas diretamente do barramento CAN dos chassis Mercedes-Benz e Caio/Marcopolo.</p>
+          <p style="font-size: 12px; color: #64748b; margin: 2px 0 0;">Falhas capturadas diretamente do barramento CAN
+            dos chassis Mercedes-Benz e Caio/Marcopolo.</p>
         </div>
-        <span class="badge-pill" style="background: #fee2e2; color: #b91c1c; font-weight: 700;">4 Alertas Requerem Ação</span>
+        <span class="badge-pill" style="background: #fee2e2; color: #b91c1c; font-weight: 700;">4 Alertas Requerem
+          Ação</span>
       </div>
 
       <table class="tele-table">
@@ -1605,7 +1765,8 @@
               <div style="font-size: 11px; color: #64748b; margin-top: 2px;">{{ alt.linha }}</div>
             </td>
             <td>
-              <span style="font-family: monospace; font-weight: 700; background: #f1f5f9; padding: 3px 6px; border-radius: 4px; color: #0f172a;">
+              <span
+                style="font-family: monospace; font-weight: 700; background: #f1f5f9; padding: 3px 6px; border-radius: 4px; color: #0f172a;">
                 {{ alt.spn_fmi }}
               </span>
             </td>
@@ -1631,7 +1792,8 @@
             <td><strong>{{ alt.temp }}</strong></td>
             <td><span style="font-size: 11.5px; color: #334155;">{{ alt.acao }}</span></td>
             <td>
-              <a href="{{ url_for('oficina_view') }}" class="btn-primary" style="padding: 4px 8px; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+              <a href="{{ url_for('oficina_view') }}" class="btn-primary"
+                style="padding: 4px 8px; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
                 <i class="fa-solid fa-screwdriver-wrench"></i> Ver Oficina
               </a>
             </td>
@@ -1648,16 +1810,21 @@
        ========================================================================= -->
   <div id="tab-ranking" class="tele-tab-content" style="display: none;">
     <div class="tele-card" style="padding: 20px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
         <div>
           <h3 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0;">
-            <i class="fa-solid fa-trophy" style="color: #f59e0b;"></i> Ranking de Condução Segura e Econômica (Eco-Driving)
+            <i class="fa-solid fa-trophy" style="color: #f59e0b;"></i> Ranking de Condução Segura e Econômica
+            (Eco-Driving)
           </h3>
-          <p style="font-size: 12px; color: #64748b; margin: 2px 0 0;">Classificação dos 60 condutores da empresa com base em suavidade, consumo de diesel e telemetria DMS.</p>
+          <p style="font-size: 12px; color: #64748b; margin: 2px 0 0;">Classificação dos 60 condutores da empresa com
+            base em suavidade, consumo de diesel e telemetria DMS.</p>
         </div>
         <div style="display: flex; gap: 8px;">
-          <span class="badge-pill" style="background: #ecfdf5; color: #047857; font-weight: 700;">Top Condutores (Prêmio Trimestral)</span>
-          <span class="badge-pill" style="background: #fef2f2; color: #b91c1c; font-weight: 700;">Programa de Reciclagem</span>
+          <span class="badge-pill" style="background: #ecfdf5; color: #047857; font-weight: 700;">Top Condutores (Prêmio
+            Trimestral)</span>
+          <span class="badge-pill" style="background: #fef2f2; color: #b91c1c; font-weight: 700;">Programa de
+            Reciclagem</span>
         </div>
       </div>
 
@@ -1677,7 +1844,7 @@
         </thead>
         <tbody>
           {% for rk in ranking %}
-          <tr {% if rk.classe == 'danger' %}style="background: #fff8f8;"{% endif %}>
+          <tr {% if rk.classe=='danger' %}style="background: #fff8f8;" {% endif %}>
             <td>
               {% if rk.pos == 1 %}
               <span style="font-size: 16px;">🥇</span>
@@ -1696,11 +1863,14 @@
             <td><strong>{{ rk.linha }}</strong></td>
             <td>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <strong style="font-size: 14px; color: {% if rk.score >= 90 %}#10b981{% elif rk.score >= 80 %}#f59e0b{% else %}#ef4444{% endif %};">
+                <strong
+                  style="font-size: 14px; color: {% if rk.score >= 90 %}#10b981{% elif rk.score >= 80 %}#f59e0b{% else %}#ef4444{% endif %};">
                   {{ rk.score }}/100
                 </strong>
                 <div style="width: 50px; height: 6px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
-                  <div style="width: {{ rk.score }}%; height: 100%; background: {% if rk.score >= 90 %}#10b981{% elif rk.score >= 80 %}#f59e0b{% else %}#ef4444{% endif %};"></div>
+                  <div
+                    style="width: {{ rk.score }}%; height: 100%; background: {% if rk.score >= 90 %}#10b981{% elif rk.score >= 80 %}#f59e0b{% else %}#ef4444{% endif %};">
+                  </div>
                 </div>
               </div>
             </td>
@@ -1708,17 +1878,20 @@
             <td>{{ rk.acel_agressiva }} / 100km</td>
             <td><strong style="color: #0f172a;">{{ rk.km_l }} km/L</strong></td>
             <td>
-              <span class="badge-pill" style="{% if rk.classe == 'top' %}background: #ecfdf5; color: #047857;{% elif rk.classe == 'warn' %}background: #fffbeb; color: #b45309;{% else %}background: #fef2f2; color: #b91c1c;{% endif %} font-weight: 700;">
+              <span class="badge-pill"
+                style="{% if rk.classe == 'top' %}background: #ecfdf5; color: #047857;{% elif rk.classe == 'warn' %}background: #fffbeb; color: #b45309;{% else %}background: #fef2f2; color: #b91c1c;{% endif %} font-weight: 700;">
                 {{ rk.status }}
               </span>
             </td>
             <td>
               {% if rk.classe == 'top' %}
-              <button class="btn-primary" style="padding: 3px 8px; font-size: 11px; background: #047857;" onclick="alert('Bonificação de R$ 350,00 lançada para {{ rk.nome }}.')">
+              <button class="btn-primary" style="padding: 3px 8px; font-size: 11px; background: #047857;"
+                onclick="alert('Bonificação de R$ 350,00 lançada para {{ rk.nome }}.')">
                 <i class="fa-solid fa-gift"></i> Bonificar
               </button>
               {% else %}
-              <button class="btn-primary" style="padding: 3px 8px; font-size: 11px; background: #b91c1c;" onclick="alert('Reciclagem em simulador e direção defensiva agendada para {{ rk.nome }}.')">
+              <button class="btn-primary" style="padding: 3px 8px; font-size: 11px; background: #b91c1c;"
+                onclick="alert('Reciclagem em simulador e direção defensiva agendada para {{ rk.nome }}.')">
                 <i class="fa-solid fa-graduation-cap"></i> Treinamento
               </button>
               {% endif %}
@@ -1734,33 +1907,37 @@
        ABA 5: GOVERNANÇA, CONTRATOS & ESG (DIRETOR DE OPERAÇÕES)
        ========================================================================= -->
   <div id="tab-governanca" class="tele-tab-content" style="display: none;">
-    
+
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px;">
       <!-- ECONOMIA DE DIESEL -->
       <div class="tele-card">
         <span style="font-size: 12px; font-weight: 700; color: #64748b;">Economia Gerada (Eco-Driving)</span>
-        <strong style="font-size: 26px; font-weight: 900; color: #10b981; margin: 4px 0;">+ R$ {{ kpis.impacto_financeiro.economia_diesel_mes|moeda }}</strong>
+        <strong style="font-size: 26px; font-weight: 900; color: #10b981; margin: 4px 0;">+ R$ {{
+          kpis.impacto_financeiro.economia_diesel_mes|moeda }}</strong>
         <span style="font-size: 11.5px; color: #64748b;">Economia vs meta contratual no mês</span>
       </div>
 
       <!-- CUMPRIMENTO DE VIAGENS ICV -->
       <div class="tele-card">
         <span style="font-size: 12px; font-weight: 700; color: #64748b;">Índice Cumprimento Viagens (ICV)</span>
-        <strong style="font-size: 26px; font-weight: 900; color: #0f172a; margin: 4px 0;">{{ kpis.qualidade_contratual.icv }}%</strong>
+        <strong style="font-size: 26px; font-weight: 900; color: #0f172a; margin: 4px 0;">{{
+          kpis.qualidade_contratual.icv }}%</strong>
         <span style="font-size: 11.5px; color: #10b981; font-weight: 600;">942 / 955 viagens realizadas</span>
       </div>
 
       <!-- PONTUALIDADE OTP -->
       <div class="tele-card">
         <span style="font-size: 12px; font-weight: 700; color: #64748b;">Pontualidade na Faixa (OTP)</span>
-        <strong style="font-size: 26px; font-weight: 900; color: #0f172a; margin: 4px 0;">{{ kpis.qualidade_contratual.otp_pontualidade }}%</strong>
+        <strong style="font-size: 26px; font-weight: 900; color: #0f172a; margin: 4px 0;">{{
+          kpis.qualidade_contratual.otp_pontualidade }}%</strong>
         <span style="font-size: 11.5px; color: #10b981; font-weight: 600;">Tolerância -1 min / +3 min</span>
       </div>
 
       <!-- SUSTENTABILIDADE ESG -->
       <div class="tele-card">
         <span style="font-size: 12px; font-weight: 700; color: #64748b;">Emissões de CO₂ Evitadas</span>
-        <strong style="font-size: 26px; font-weight: 900; color: #0ea5e9; margin: 4px 0;">{{ kpis.qualidade_contratual.co2_evitado_ton }} ton</strong>
+        <strong style="font-size: 26px; font-weight: 900; color: #0ea5e9; margin: 4px 0;">{{
+          kpis.qualidade_contratual.co2_evitado_ton }} ton</strong>
         <span style="font-size: 11.5px; color: #0ea5e9; font-weight: 600;">Crédito de carbono & ESG</span>
       </div>
     </div>
@@ -1768,25 +1945,29 @@
     <!-- DETALHAMENTO DE CUSTO POR QUILÔMETRO (CPK) -->
     <div class="tele-card" style="padding: 22px;">
       <h3 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0 0 16px;">
-        <i class="fa-solid fa-coins" style="color: var(--primary);"></i> Matriz de Custo por Quilômetro Rodado (CPK Operacional)
+        <i class="fa-solid fa-coins" style="color: var(--primary);"></i> Matriz de Custo por Quilômetro Rodado (CPK
+        Operacional)
       </h3>
-      
+
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
         <div style="padding: 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;">
           <span style="font-size: 12px; color: #64748b; font-weight: 600;">CPK de Combustível</span>
-          <strong style="font-size: 22px; font-weight: 800; color: #0f172a; display: block; margin: 4px 0;">R$ {{ kpis.impacto_financeiro.cpk_combustivel|moeda }} / km</strong>
+          <strong style="font-size: 22px; font-weight: 800; color: #0f172a; display: block; margin: 4px 0;">R$ {{
+            kpis.impacto_financeiro.cpk_combustivel|moeda }} / km</strong>
           <p style="font-size: 11.5px; color: #64748b; margin: 0;">Calculado com Diesel S-10 a R$ 6,00/litro.</p>
         </div>
 
         <div style="padding: 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;">
           <span style="font-size: 12px; color: #64748b; font-weight: 600;">CPK de Manutenção Preditiva</span>
-          <strong style="font-size: 22px; font-weight: 800; color: #0f172a; display: block; margin: 4px 0;">R$ {{ kpis.impacto_financeiro.cpk_manutencao|moeda }} / km</strong>
+          <strong style="font-size: 22px; font-weight: 800; color: #0f172a; display: block; margin: 4px 0;">R$ {{
+            kpis.impacto_financeiro.cpk_manutencao|moeda }} / km</strong>
           <p style="font-size: 11.5px; color: #64748b; margin: 0;">Oficina, peças trocadas e filtros.</p>
         </div>
 
         <div style="padding: 16px; background: #f0fdf4; border-radius: 10px; border: 1px solid #bbf7d0;">
           <span style="font-size: 12px; color: #166534; font-weight: 700;">CPK Total Consolidado</span>
-          <strong style="font-size: 22px; font-weight: 900; color: #15803d; display: block; margin: 4px 0;">R$ {{ kpis.impacto_financeiro.cpk_total|moeda }} / km</strong>
+          <strong style="font-size: 22px; font-weight: 900; color: #15803d; display: block; margin: 4px 0;">R$ {{
+            kpis.impacto_financeiro.cpk_total|moeda }} / km</strong>
           <p style="font-size: 11.5px; color: #166534; margin: 0;">Performance 4,2% melhor que o benchmark do setor.</p>
         </div>
       </div>
@@ -1798,7 +1979,7 @@
 
 <!-- DADOS DOS VEÍCULOS PARA O MAPA LEAFLET -->
 <script>
-  const veiculosData = {{ veiculos|tojson }};
+  const veiculosData = {{ veiculos| tojson }};
   let mapInstance = null;
   let markersLayer = null;
 
@@ -2201,7 +2382,7 @@
       const itin = itinerariosData[chave];
       const pulseDelayClass = 'itin-pulse-glow-' + (index % 6);
       const streamClass = 'itin-stream-' + (index % 6);
-      
+
       // 1. CAMADA 1 (BASE INFERIOR): Trilho escuro de alto contraste
       const railCasing = L.polyline(itin.coords, {
         color: '#0b0f19',
@@ -2250,12 +2431,12 @@
         className: 'itin-map-tooltip'
       });
 
-      flowStream.on('click', function() {
+      flowStream.on('click', function () {
         const btn = Array.from(document.querySelectorAll('.itin-chip')).find(b => b.innerText.includes(chave.replace('Linha ', '')));
         destacarItinerario(chave, btn);
       });
 
-      corePoly.on('click', function() {
+      corePoly.on('click', function () {
         const btn = Array.from(document.querySelectorAll('.itin-chip')).find(b => b.innerText.includes(chave.replace('Linha ', '')));
         destacarItinerario(chave, btn);
       });
@@ -2617,8 +2798,8 @@
   }
 
   // Inicialização dos Gráficos Chart.js (Padrão Transporte Urbano)
-  document.addEventListener('DOMContentLoaded', function() {
-    
+  document.addEventListener('DOMContentLoaded', function () {
+
     // 1. Gráfico Disponibilidade e Alocação da Frota (Donut 150 Ônibus)
     const ctxDisp = document.getElementById('chartDisponibilidadeFrota');
     if (ctxDisp) {
@@ -2629,114 +2810,114 @@
           datasets: [{
             data: [
               {{ kpis.disponibilidade_frota.operando_rua }},
-              {{ kpis.disponibilidade_frota.reserva_tecnica }},
+          {{ kpis.disponibilidade_frota.reserva_tecnica }},
               {{ kpis.disponibilidade_frota.oficina_imobilizados }}
             ],
-            backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
-            borderWidth: 2,
-            borderColor: '#ffffff'
-          }]
+    backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
+      borderWidth: 2,
+        borderColor: '#ffffff'
+  }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'right',
-              labels: {
-                boxWidth: 10,
-                font: { size: 10.5, weight: '700' },
-                color: '#475569'
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(c) {
-                  return c.label + ': ' + c.raw + ' veículos';
-                }
-              }
-            }
-          },
-          cutout: '62%'
+    options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right',
+        labels: {
+          boxWidth: 10,
+          font: { size: 10.5, weight: '700' },
+          color: '#475569'
         }
+      },
+      tooltip: {
+        callbacks: {
+          label: function (c) {
+            return c.label + ': ' + c.raw + ' veículos';
+          }
+        }
+      }
+    },
+    cutout: '62%'
+  }
       });
     }
 
-    // 2. Gráfico Demanda Horária e IPK (Misto: Barras Passageiros + Linha IPK)
-    const ctxCurva = document.getElementById('chartCurvaDemanda');
-    if (ctxCurva) {
-      new Chart(ctxCurva, {
-        type: 'bar',
-        data: {
-          labels: {{ kpis.curva_horaria.faixas|tojson }},
-          datasets: [
-            {
-              type: 'line',
-              label: 'IPK (pass/km)',
-              data: {{ kpis.curva_horaria.ipk_horario|tojson }},
-              borderColor: '#f59e0b',
-              backgroundColor: '#f59e0b',
-              borderWidth: 2.5,
-              pointRadius: 3.5,
-              pointHoverRadius: 5,
-              tension: 0.35,
-              yAxisID: 'y1'
+  // 2. Gráfico Demanda Horária e IPK (Misto: Barras Passageiros + Linha IPK)
+  const ctxCurva = document.getElementById('chartCurvaDemanda');
+  if (ctxCurva) {
+    new Chart(ctxCurva, {
+      type: 'bar',
+      data: {
+        labels: {{ kpis.curva_horaria.faixas | tojson }},
+  datasets: [
+    {
+      type: 'line',
+      label: 'IPK (pass/km)',
+      data: {{ kpis.curva_horaria.ipk_horario | tojson }},
+    borderColor: '#f59e0b',
+    backgroundColor: '#f59e0b',
+    borderWidth: 2.5,
+    pointRadius: 3.5,
+    pointHoverRadius: 5,
+    tension: 0.35,
+    yAxisID: 'y1'
             },
-            {
-              type: 'bar',
-              label: 'Passageiros Catraca',
-              data: {{ kpis.curva_horaria.passageiros|tojson }},
-              backgroundColor: 'rgba(13, 148, 136, 0.75)',
-              borderRadius: 4,
-              barThickness: 14,
-              yAxisID: 'y'
+    {
+      type: 'bar',
+      label: 'Passageiros Catraca',
+      data: {{ kpis.curva_horaria.passageiros | tojson }},
+    backgroundColor: 'rgba(13, 148, 136, 0.75)',
+    borderRadius: 4,
+    barThickness: 14,
+    yAxisID: 'y'
             }
-          ]
+  ]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'top',
-              labels: {
-                boxWidth: 10,
-                font: { size: 10, weight: '700' },
-                color: '#475569'
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(c) {
-                  if (c.dataset.type === 'line') {
-                    return 'IPK: ' + c.raw.toFixed(2) + ' pass/km';
-                  }
-                  return 'Demanda: ' + c.raw.toLocaleString('pt-BR') + ' passageiros';
-                }
-              }
+  options: {
+    responsive: true,
+      maintainAspectRatio: false,
+        plugins: {
+      legend: {
+        position: 'top',
+          labels: {
+          boxWidth: 10,
+            font: { size: 10, weight: '700' },
+          color: '#475569'
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(c) {
+            if (c.dataset.type === 'line') {
+              return 'IPK: ' + c.raw.toFixed(2) + ' pass/km';
             }
-          },
-          scales: {
-            y: {
-              type: 'linear',
-              position: 'left',
-              ticks: { font: { size: 9 }, stepSize: 3000 },
-              grid: { color: '#f1f5f9' }
-            },
-            y1: {
-              type: 'linear',
-              position: 'right',
-              min: 0,
-              max: 6,
-              ticks: { font: { size: 9 }, stepSize: 1 },
-              grid: { display: false }
-            },
-            x: {
-              ticks: { font: { size: 9.5, weight: '600' } },
-              grid: { display: false }
-            }
+            return 'Demanda: ' + c.raw.toLocaleString('pt-BR') + ' passageiros';
           }
         }
+      }
+    },
+    scales: {
+      y: {
+        type: 'linear',
+          position: 'left',
+            ticks: { font: { size: 9 }, stepSize: 3000 },
+        grid: { color: '#f1f5f9' }
+      },
+      y1: {
+        type: 'linear',
+          position: 'right',
+            min: 0,
+              max: 6,
+                ticks: { font: { size: 9 }, stepSize: 1 },
+        grid: { display: false }
+      },
+      x: {
+        ticks: { font: { size: 9.5, weight: '600' } },
+        grid: { display: false }
+      }
+    }
+  }
       });
     }
 

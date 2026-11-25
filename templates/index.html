@@ -73,18 +73,28 @@
   <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
     <div style="display: flex; gap: 8px; align-items: center;">
       <span style="font-size: 12px; color: #64748b; font-weight: 600;">Filtrar:</span>
-      <select class="form-select" style="width: auto; padding: 6px 12px; font-size: 12.5px;" onchange="window.location.href='/?dept=' + this.value">
-        <option value="Todos" {% if departamento_atual == 'Todos' %}selected{% endif %}>🏢 Todos os 10 Departamentos</option>
-        <option value="Diretor de Operações" {% if departamento_atual == 'Diretor de Operações' %}selected{% endif %}>👔 Diretor de Operações</option>
-        <option value="Gerente Operacional" {% if departamento_atual == 'Gerente Operacional' %}selected{% endif %}>🚏 Gerente Operacional</option>
-        <option value="Gerente Administrativo" {% if departamento_atual == 'Gerente Administrativo' %}selected{% endif %}>📋 Gerente Administrativo</option>
-        <option value="Manutenção" {% if departamento_atual == 'Manutenção' %}selected{% endif %}>🛠️ Manutenção (Oficina)</option>
-        <option value="RH" {% if departamento_atual == 'RH' %}selected{% endif %}>👥 RH (Recursos Humanos)</option>
-        <option value="Treinamento" {% if departamento_atual == 'Treinamento' %}selected{% endif %}>🎓 Treinamento</option>
-        <option value="Contas a Pagar" {% if departamento_atual == 'Contas a Pagar' %}selected{% endif %}>💳 Contas a Pagar</option>
-        <option value="Contas a Receber" {% if departamento_atual == 'Contas a Receber' %}selected{% endif %}>💰 Contas a Receber</option>
-        <option value="Garagem" {% if departamento_atual == 'Garagem' %}selected{% endif %}>⛽ Garagem (Pátio)</option>
-        <option value="Portaria" {% if departamento_atual == 'Portaria' %}selected{% endif %}>🚪 Portaria (Guarita)</option>
+      <select class="form-select" style="width: auto; padding: 6px 12px; font-size: 12.5px;"
+        onchange="window.location.href='/?dept=' + this.value">
+        <option value="Todos" {% if departamento_atual=='Todos' %}selected{% endif %}>🏢 Todos os 10 Departamentos
+        </option>
+        <option value="Diretor de Operações" {% if departamento_atual=='Diretor de Operações' %}selected{% endif %}>👔
+          Diretor de Operações</option>
+        <option value="Gerente Operacional" {% if departamento_atual=='Gerente Operacional' %}selected{% endif %}>🚏
+          Gerente Operacional</option>
+        <option value="Gerente Administrativo" {% if departamento_atual=='Gerente Administrativo' %}selected{% endif %}>
+          📋 Gerente Administrativo</option>
+        <option value="Manutenção" {% if departamento_atual=='Manutenção' %}selected{% endif %}>🛠️ Manutenção (Oficina)
+        </option>
+        <option value="RH" {% if departamento_atual=='RH' %}selected{% endif %}>👥 RH (Recursos Humanos)</option>
+        <option value="Treinamento" {% if departamento_atual=='Treinamento' %}selected{% endif %}>🎓 Treinamento
+        </option>
+        <option value="Contas a Pagar" {% if departamento_atual=='Contas a Pagar' %}selected{% endif %}>💳 Contas a
+          Pagar</option>
+        <option value="Contas a Receber" {% if departamento_atual=='Contas a Receber' %}selected{% endif %}>💰 Contas a
+          Receber</option>
+        <option value="Garagem" {% if departamento_atual=='Garagem' %}selected{% endif %}>⛽ Garagem (Pátio)</option>
+        <option value="Portaria" {% if departamento_atual=='Portaria' %}selected{% endif %}>🚪 Portaria (Guarita)
+        </option>
       </select>
     </div>
   </div>
