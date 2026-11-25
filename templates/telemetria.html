@@ -258,6 +258,216 @@
     font-weight: 700;
   }
 
+  /* =========================================================================
+     NOVOS ESTILOS DO COCKPIT EXECUTIVO (PADRÃO TRANSPORTE URBANO NTU/SPTRANS)
+     ========================================================================= */
+  .cockpit-master-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 1100px) {
+    .cockpit-master-strip { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .cockpit-master-strip { grid-template-columns: 1fr; }
+  }
+
+  .master-kpi-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .master-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+  }
+  .master-kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3.5px;
+    background: var(--kpi-accent, var(--primary));
+  }
+  .master-kpi-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .master-kpi-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .master-kpi-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+  .master-kpi-value {
+    font-size: 25px;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .master-kpi-sub {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .master-kpi-detail {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* BARRA HORIZONTAL DA MATRIZ DE QUILOMETRAGEM */
+  .km-matriz-bar-wrapper {
+    margin: 12px 0 14px;
+  }
+  .km-matriz-bar {
+    height: 14px;
+    border-radius: 7px;
+    overflow: hidden;
+    display: flex;
+    background: #f1f5f9;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+  }
+  .km-matriz-prod {
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    height: 100%;
+  }
+  .km-matriz-morta {
+    background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+    height: 100%;
+  }
+  .km-matriz-legend {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-top: 6px;
+    color: #475569;
+    font-weight: 700;
+  }
+
+  /* TABELA LIMPA DE CONSUMO POR CHASSI */
+  .chassi-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11.5px;
+    margin-top: 4px;
+  }
+  .chassi-table th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    padding: 6px 6px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .chassi-table td {
+    padding: 7px 6px;
+    border-bottom: 1px solid #f8fafc;
+    color: #334155;
+    vertical-align: middle;
+  }
+  .chassi-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* LISTA DE EVENTOS DA TELEMETRIA CAN */
+  .can-event-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    margin-bottom: 6px;
+  }
+  .can-event-left {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .can-event-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #ffffff;
+    flex-shrink: 0;
+  }
+  .can-event-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.2;
+  }
+  .can-event-meta {
+    font-size: 10px;
+    color: #64748b;
+  }
+  .can-event-badge {
+    text-align: right;
+  }
+  .can-event-badge strong {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #0f172a;
+    display: block;
+  }
+  .can-event-badge span {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  /* PERDAS DE VIAGENS OSO */
+  .perda-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11.5px;
+    padding: 7px 0;
+    border-bottom: 1px dashed #f1f5f9;
+  }
+  .perda-row:last-child {
+    border-bottom: none;
+  }
+
   /* RODAPÉ EM FAIXA (KPI STRIP) */
   .tele-strip {
     background: #ffffff;
@@ -770,173 +980,297 @@
   </div>
 
   <!-- =========================================================================
-       ABA 1: COCKPIT EXECUTIVO & SEGURANÇA (IDÊNTICO AO MODELO DA IMAGEM)
+       ABA 1: COCKPIT EXECUTIVO & OPERACIONAL (PADRÃO TRANSPORTE URBANO NTU/SPTRANS)
        ========================================================================= -->
   <div id="tab-cockpit" class="tele-tab-content">
     
-    <!-- GRID SUPERIOR DE 4 CARDS -->
-    <div class="cockpit-grid">
+    <!-- FAIXA SUPERIOR: OS 4 GRANDES NÚMEROS DA CONCESSÃO -->
+    <div class="cockpit-master-strip">
       
-      <!-- CARD 1: PONTUAÇÃO DE SEGURANÇA -->
-      <div class="tele-card">
-        <div class="tele-card-header">
-          <h3>Pontuação de Segurança</h3>
-          <i class="fa-solid fa-circle-info info-icon" title="Cálculo consolidado com base em frenagens, acelerações, excesso de velocidade e uso de cinto/celular."></i>
-        </div>
-        <div class="gauge-box">
-          <!-- GAUGE SEMICIRCULAR SVG -->
-          <svg class="gauge-svg" viewBox="0 0 100 55">
-            <!-- Arco de fundo cinza -->
-            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#f1f5f9" stroke-width="8" stroke-linecap="round"/>
-            <!-- Arco Vermelho (0 a 30) -->
-            <path d="M 10 50 A 40 40 0 0 1 25 21" fill="none" stroke="#ef4444" stroke-width="8" stroke-linecap="round"/>
-            <!-- Arco Amarelo (30 a 70) -->
-            <path d="M 25 21 A 40 40 0 0 1 65 14" fill="none" stroke="#f59e0b" stroke-width="8"/>
-            <!-- Arco Verde (70 a 100) -->
-            <path d="M 65 14 A 40 40 0 0 1 90 50" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round"/>
-            <!-- Agulha / Indicador aponta para 87 -->
-            <circle cx="50" cy="50" r="4" fill="#0f172a" />
-            <line x1="50" y1="50" x2="77" y2="24" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
-          </svg>
-          <div class="gauge-value">{{ kpis.score_seguranca }}</div>
-          <div class="gauge-subtext">{{ kpis.score_status }}</div>
-          <div class="gauge-trend up">
-            <i class="fa-solid fa-arrow-up"></i> {{ kpis.score_diff }}
+      <!-- MASTER 1: ICV (ÍNDICE DE CUMPRIMENTO DE VIAGENS) -->
+      <div class="master-kpi-card" style="--kpi-accent: #10b981;">
+        <div class="master-kpi-head">
+          <span class="master-kpi-label">Índice Cumprimento Viagens (ICV)</span>
+          <div class="master-kpi-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+            <i class="fa-solid fa-calendar-check"></i>
           </div>
         </div>
+        <div class="master-kpi-value">{{ kpis.icv.valor }}%</div>
+        <div class="master-kpi-sub" style="color: #10b981;">
+          <i class="fa-solid fa-circle-check"></i> {{ kpis.icv.status }} · {{ kpis.icv.diff }}
+        </div>
+        <div class="master-kpi-detail">
+          <span>Realizadas: <strong>{{ kpis.icv.realizadas }}</strong> / {{ kpis.icv.programadas }}</span>
+          <span style="color: #ef4444; font-weight: 700;">-{{ kpis.icv.perdas_total }} perdas OSO</span>
+        </div>
       </div>
 
-      <!-- CARD 2: CATEGORIAS DE SEGURANÇA -->
-      <div class="tele-card">
-        <div class="tele-card-header">
-          <h3>Categorias de Segurança</h3>
-          <i class="fa-solid fa-circle-info info-icon" title="Índice de conformidade operacional por tipo de comportamento de direção."></i>
-        </div>
-        <div class="safety-cat-list">
-          {% for cat in kpis.categorias_seguranca %}
-          <div class="safety-cat-item">
-            <div class="safety-cat-left">
-              <span class="safety-icon-circle" style="background: {{ cat.cor }};">
-                <i class="fa-solid {{ cat.icone }}"></i>
-              </span>
-              <span>{{ cat.nome }}</span>
-            </div>
-            <strong>{{ cat.perc }}%</strong>
+      <!-- MASTER 2: IPK (ÍNDICE DE PASSAGEIROS POR KM) -->
+      <div class="master-kpi-card" style="--kpi-accent: #3b82f6;">
+        <div class="master-kpi-head">
+          <span class="master-kpi-label">Índice Passageiros / Km (IPK)</span>
+          <div class="master-kpi-icon" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
+            <i class="fa-solid fa-id-card-clip"></i>
           </div>
-          {% endfor %}
+        </div>
+        <div class="master-kpi-value">{{ kpis.ipk.valor }} <span style="font-size: 14px; font-weight: 700; color: #64748b;">pass/km</span></div>
+        <div class="master-kpi-sub" style="color: #3b82f6;">
+          <i class="fa-solid fa-arrow-trend-up"></i> {{ kpis.ipk.diff }} (Meta: {{ kpis.ipk.meta }})
+        </div>
+        <div class="master-kpi-detail">
+          <span>Catraca: <strong>{{ kpis.ipk.passageiros_dia|intformat }} pass/dia</strong></span>
+          <span><strong>{{ kpis.ipk.pagantes_perc }}%</strong> pagantes</span>
         </div>
       </div>
 
-      <!-- CARD 3: HISTÓRICO DA PONTUAÇÃO -->
-      <div class="tele-card">
-        <div class="tele-card-header">
-          <h3>Histórico da Pontuação</h3>
-          <i class="fa-solid fa-circle-info info-icon" title="Evolução diária da nota média de condução da frota nos últimos 7 dias."></i>
+      <!-- MASTER 3: CONSUMO MÉDIO REAL VS META -->
+      <div class="master-kpi-card" style="--kpi-accent: #f59e0b;">
+        <div class="master-kpi-head">
+          <span class="master-kpi-label">Consumo Médio da Frota</span>
+          <div class="master-kpi-icon" style="background: rgba(245, 158, 11, 0.12); color: #d97706;">
+            <i class="fa-solid fa-gas-pump"></i>
+          </div>
         </div>
-        <div style="flex: 1; min-height: 140px; position: relative;">
-          <canvas id="chartHistoricoPontuacao"></canvas>
+        <div class="master-kpi-value">{{ kpis.combustivel_executivo.valor }} <span style="font-size: 14px; font-weight: 700; color: #64748b;">km/L</span></div>
+        <div class="master-kpi-sub" style="color: #d97706;">
+          <i class="fa-solid fa-triangle-exclamation"></i> Meta: {{ kpis.combustivel_executivo.meta }} km/L ({{ kpis.combustivel_executivo.diff_perc }})
+        </div>
+        <div class="master-kpi-detail">
+          <span>Volume: <strong>{{ kpis.combustivel_executivo.consumo_total_l|intformat }} L</strong></span>
+          <span style="color: #ef4444; font-weight: 700;">Desvio: R$ {{ kpis.combustivel_executivo.desvio_financeiro_rs|moeda }}</span>
         </div>
       </div>
 
-      <!-- CARD 4: DISTRIBUIÇÃO DO NÍVEL DE SEGURANÇA -->
-      <div class="tele-card">
-        <div class="tele-card-header">
-          <h3>Distribuição do Nível de Segurança</h3>
-          <i class="fa-solid fa-circle-info info-icon" title="Proporção da frota classificada em nível Alto, Médio e Baixo risco."></i>
+      <!-- MASTER 4: MKBF (QUILÔMETROS ENTRE QUEBRAS) -->
+      <div class="master-kpi-card" style="--kpi-accent: #8b5cf6;">
+        <div class="master-kpi-head">
+          <span class="master-kpi-label">MKBF · Confiabilidade Mecânica</span>
+          <div class="master-kpi-icon" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6;">
+            <i class="fa-solid fa-wrench"></i>
+          </div>
         </div>
-        <div style="flex: 1; min-height: 140px; position: relative;">
-          <canvas id="chartDistribuicaoSeguranca"></canvas>
+        <div class="master-kpi-value">{{ kpis.mkbf.valor|intformat }} <span style="font-size: 14px; font-weight: 700; color: #64748b;">km/quebra</span></div>
+        <div class="master-kpi-sub" style="color: #10b981;">
+          <i class="fa-solid fa-circle-check"></i> {{ kpis.mkbf.status }} · {{ kpis.mkbf.diff }}
+        </div>
+        <div class="master-kpi-detail">
+          <span>Socorros em rota: <strong>{{ kpis.mkbf.socorros_linha }}</strong></span>
+          <span>MTTR: <strong>{{ kpis.mkbf.mttr_minutos }} min</strong></span>
         </div>
       </div>
 
     </div>
 
-    <!-- GRID INTERMEDIÁRIO DE 4 CARDS (EFICIÊNCIA, TENDÊNCIA, CONSUMO, OCIOSIDADE) -->
+    <!-- GRID PRINCIPAL DE 4 CARDS DE GESTÃO -->
     <div class="cockpit-grid">
-
-      <!-- CARD 5: EFICIÊNCIA DE COMBUSTÍVEL -->
+      
+      <!-- CARD 1: DISPONIBILIDADE E ALOCAÇÃO DA FROTA -->
       <div class="tele-card">
         <div class="tele-card-header">
-          <h3>Eficiência de Combustível</h3>
-          <i class="fa-solid fa-circle-info info-icon" title="Média de consumo em km/L da frota urbana a diesel S-10. Meta: 2,30 km/L."></i>
+          <h3><i class="fa-solid fa-bus-simple" style="color: var(--primary);"></i> Disponibilidade da Frota</h3>
+          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; font-weight: 800;">
+            {{ kpis.disponibilidade_frota.disponibilidade_perc }}% Apta
+          </span>
         </div>
-        <div class="gauge-box">
-          <svg class="gauge-svg" viewBox="0 0 100 55">
-            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#f1f5f9" stroke-width="8" stroke-linecap="round"/>
-            <path d="M 10 50 A 40 40 0 0 1 32 17" fill="none" stroke="#ef4444" stroke-width="8" stroke-linecap="round"/>
-            <path d="M 32 17 A 40 40 0 0 1 60 12" fill="none" stroke="#f59e0b" stroke-width="8"/>
-            <path d="M 60 12 A 40 40 0 0 1 90 50" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round"/>
-            <circle cx="50" cy="50" r="4" fill="#0f172a" />
-            <line x1="50" y1="50" x2="68" y2="18" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
-          </svg>
-          <div class="gauge-value" style="color: #0f172a;">{{ kpis.eficiencia_combustivel.valor|dec1 }}</div>
-          <div class="gauge-subtext">km/L (Diesel S-10)</div>
-          <div class="gauge-trend up">
-            <i class="fa-solid fa-arrow-up"></i> {{ kpis.eficiencia_combustivel.diff_perc }}
+        <div style="flex: 1; min-height: 145px; position: relative;">
+          <canvas id="chartDisponibilidadeFrota"></canvas>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; border-top: 1px solid #f1f5f9; padding-top: 8px; margin-top: 4px;">
+          <span>Rua: <strong style="color: #0f172a;">{{ kpis.disponibilidade_frota.operando_rua }}</strong></span>
+          <span>Reserva: <strong style="color: #0f172a;">{{ kpis.disponibilidade_frota.reserva_tecnica }}</strong></span>
+          <span>Oficina: <strong style="color: #ef4444;">{{ kpis.disponibilidade_frota.oficina_imobilizados }}</strong></span>
+        </div>
+      </div>
+
+      <!-- CARD 2: MATRIZ DE QUILOMETRAGEM (PRODUTIVA VS MORTA) -->
+      <div class="tele-card">
+        <div class="tele-card-header">
+          <h3><i class="fa-solid fa-route" style="color: #0284c7;"></i> Matriz de Quilometragem</h3>
+          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; font-weight: 800;">
+            {{ kpis.quilometragem_matriz.km_morta_perc }}% Km Morta
+          </span>
+        </div>
+        
+        <div class="km-matriz-bar-wrapper">
+          <div class="km-matriz-bar">
+            <div class="km-matriz-prod" style="width: {{ kpis.quilometragem_matriz.km_comercial_perc }}%;"></div>
+            <div class="km-matriz-morta" style="width: {{ kpis.quilometragem_matriz.km_morta_perc }}%;"></div>
+          </div>
+          <div class="km-matriz-legend">
+            <span><span style="color: #10b981;">●</span> Produtiva: {{ kpis.quilometragem_matriz.km_comercial_perc }}%</span>
+            <span><span style="color: #f59e0b;">●</span> Morta: {{ kpis.quilometragem_matriz.km_morta_perc }}% (Meta &lt; 5%)</span>
+          </div>
+        </div>
+
+        <div class="fuel-stat-rows" style="border-top: none; padding-top: 0;">
+          <div class="fuel-stat-row">
+            <span>Km Comercial (Passageiros)</span>
+            <strong>{{ kpis.quilometragem_matriz.km_comercial|intformat }} km</strong>
+          </div>
+          <div class="fuel-stat-row">
+            <span>Km Morta (Garagem ↔ Linha)</span>
+            <strong style="color: #d97706;">{{ kpis.quilometragem_matriz.km_morta|intformat }} km</strong>
+          </div>
+          <div class="fuel-stat-row">
+            <span>Custo da Km Morta</span>
+            <strong>R$ {{ kpis.quilometragem_matriz.custo_km_morta_rs|moeda }}</strong>
           </div>
         </div>
       </div>
 
-      <!-- CARD 6: TENDÊNCIA DE EFICIÊNCIA -->
+      <!-- CARD 3: EFICIÊNCIA DE COMBUSTÍVEL POR CHASSI -->
       <div class="tele-card">
         <div class="tele-card-header">
-          <h3>Tendência de Eficiência</h3>
-          <i class="fa-solid fa-circle-info info-icon" title="Evolução do rendimento de diesel dia a dia."></i>
+          <h3><i class="fa-solid fa-truck-monster" style="color: #8b5cf6;"></i> Consumo por Chassi</h3>
+          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: #f1f5f9; color: #475569; font-weight: 700;">
+            Frota 150 carros
+          </span>
         </div>
-        <div style="flex: 1; min-height: 140px; position: relative;">
-          <canvas id="chartTendenciaEficiencia"></canvas>
+        
+        <table class="chassi-table">
+          <thead>
+            <tr>
+              <th>Modelo / Chassi</th>
+              <th>Real</th>
+              <th>Meta</th>
+              <th>Diff</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in kpis.chassis_consumo %}
+            <tr>
+              <td>
+                <strong style="font-size: 11px; color: #0f172a; display: block;">{{ c.modelo }}</strong>
+                <span style="font-size: 10px; color: #64748b;">{{ c.qtd }} veículos</span>
+              </td>
+              <td><strong>{{ c.real }}</strong></td>
+              <td style="color: #64748b;">{{ c.meta }}</td>
+              <td>
+                <span style="font-size: 10.5px; font-weight: 800; color: {{ c.cor }};">{{ c.diff }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 6px 10px; margin-top: 6px; font-size: 10.5px; color: #854d0e; display: flex; justify-content: space-between; align-items: center;">
+          <span><i class="fa-solid fa-clock"></i> Marcha Lenta: <strong>{{ kpis.combustivel_executivo.marcha_lenta_perc }}%</strong></span>
+          <span>Desperdício: <strong>R$ {{ kpis.combustivel_executivo.custo_marcha_lenta_rs|moeda }}</strong></span>
         </div>
       </div>
 
-      <!-- CARD 7: CONSUMO DE COMBUSTÍVEL -->
+      <!-- CARD 4: TELEMETRIA CAN DE FÁBRICA (J1939) -->
       <div class="tele-card">
         <div class="tele-card-header">
-          <h3>Consumo de Combustível</h3>
-          <i class="fa-solid fa-circle-info info-icon" title="Volume total consumido nos últimos 7 dias e custo financeiro projetado."></i>
+          <h3><i class="fa-solid fa-microchip" style="color: #ef4444;"></i> Eventos CAN (Segurança)</h3>
+          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; font-weight: 800;">
+            {{ kpis.telemetria_can.diff_semana }}
+          </span>
         </div>
-        <div class="fuel-hero">
-          <i class="fa-solid fa-gas-pump"></i>
-          <div class="fuel-hero-info">
-            <strong>{{ kpis.consumo.volume_total_l|intformat }} L</strong>
-            <span><i class="fa-solid fa-arrow-down"></i> {{ kpis.consumo.diff_perc }}</span>
+        
+        <div class="can-events-list">
+          {% for ev in kpis.telemetria_can.eventos %}
+          <div class="can-event-item">
+            <div class="can-event-left">
+              <span class="can-event-icon" style="background: {{ ev.cor }};">
+                <i class="fa-solid {{ ev.icone }}"></i>
+              </span>
+              <div>
+                <div class="can-event-title">{{ ev.tipo }}</div>
+                <div class="can-event-meta">Taxa: {{ ev.taxa_mil_km }}</div>
+              </div>
+            </div>
+            <div class="can-event-badge">
+              <strong>{{ ev.qtd }}</strong>
+              <span>Meta {{ ev.meta }}</span>
+            </div>
           </div>
-        </div>
-        <div class="fuel-stat-rows">
-          <div class="fuel-stat-row">
-            <span>Consumo médio</span>
-            <strong>{{ kpis.consumo.consumo_medio_dia|intformat }} L/dia</strong>
-          </div>
-          <div class="fuel-stat-row">
-            <span>Distância total</span>
-            <strong>{{ kpis.consumo.distancia_total_km|intformat }} km</strong>
-          </div>
-          <div class="fuel-stat-row">
-            <span>Custo estimado</span>
-            <strong>R$ {{ kpis.consumo.custo_estimado_rs|moeda }}</strong>
-          </div>
+          {% endfor %}
         </div>
       </div>
 
-      <!-- CARD 8: TAXA DE OCIOSIDADE (MARCHA LENTA) -->
+    </div>
+
+    <!-- GRID SECUNDÁRIO DE 3 CARDS (PERDAS OSO, CURVA HORÁRIA, IQT REGULATÓRIO) -->
+    <div style="display: grid; grid-template-columns: 1fr 1.6fr 1.2fr; gap: 18px; margin-bottom: 20px;">
+      
+      <!-- CARD 5: PERDAS DE VIAGENS POR CAUSA RAIZ (AUDITORIA OSO) -->
       <div class="tele-card">
         <div class="tele-card-header">
-          <h3>Taxa de Ociosidade</h3>
-          <i class="fa-solid fa-circle-info info-icon" title="Percentual do tempo de motor ligado com o veículo parado (marcha lenta improdutiva)."></i>
+          <h3><i class="fa-solid fa-file-circle-xmark" style="color: #ef4444;"></i> Perdas de Viagens (OSO)</h3>
+          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: #fee2e2; color: #b91c1c; font-weight: 800;">
+            {{ kpis.icv.perdas_total }} não realizadas
+          </span>
         </div>
-        <div class="gauge-box">
-          <svg class="gauge-svg" viewBox="0 0 100 55">
-            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#f1f5f9" stroke-width="8" stroke-linecap="round"/>
-            <path d="M 10 50 A 40 40 0 0 1 42 12" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round"/>
-            <path d="M 42 12 A 40 40 0 0 1 70 18" fill="none" stroke="#f59e0b" stroke-width="8"/>
-            <path d="M 70 18 A 40 40 0 0 1 90 50" fill="none" stroke="#ef4444" stroke-width="8" stroke-linecap="round"/>
-            <circle cx="50" cy="50" r="4" fill="#0f172a" />
-            <line x1="50" y1="50" x2="38" y2="16" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
-          </svg>
-          <div class="gauge-value">{{ kpis.taxa_ociosidade.perc }}%</div>
-          <div class="gauge-subtext">Marcha Lenta</div>
-          <div class="gauge-trend down">
-            <i class="fa-solid fa-arrow-down"></i> {{ kpis.taxa_ociosidade.diff_pp }}
+        
+        <div style="margin: 6px 0;">
+          <div class="perda-row">
+            <span><i class="fa-solid fa-wrench" style="color: #ef4444; width: 16px;"></i> Falha Mecânica / Pane</span>
+            <strong>{{ kpis.icv.perdas_mecanica }} viagens <small style="color: #64748b;">(38%)</small></strong>
           </div>
+          <div class="perda-row">
+            <span><i class="fa-solid fa-user-xmark" style="color: #f59e0b; width: 16px;"></i> Falta de Motorista / RH</span>
+            <strong>{{ kpis.icv.perdas_rh }} viagens <small style="color: #64748b;">(38%)</small></strong>
+          </div>
+          <div class="perda-row">
+            <span><i class="fa-solid fa-traffic-light" style="color: #3b82f6; width: 16px;"></i> Retenções de Trânsito</span>
+            <strong>{{ kpis.icv.perdas_transito }} viagens <small style="color: #64748b;">(24%)</small></strong>
+          </div>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; margin-top: 8px; font-size: 11px; color: #475569;">
+          <strong>Regulação Municipal:</strong> Perdas mecânicas e de RH sofrem glosa financeira tarifária na liquidação mensal.
+        </div>
+      </div>
+
+      <!-- CARD 6: CURVA HORÁRIA DE PASSAGEIROS & IPK -->
+      <div class="tele-card">
+        <div class="tele-card-header">
+          <h3><i class="fa-solid fa-chart-column" style="color: var(--primary);"></i> Demanda Horária & IPK</h3>
+          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(13,148,136,0.12); color: var(--primary); font-weight: 800;">
+            Pico Manhã & Tarde
+          </span>
+        </div>
+        <div style="flex: 1; min-height: 160px; position: relative;">
+          <canvas id="chartCurvaDemanda"></canvas>
+        </div>
+      </div>
+
+      <!-- CARD 7: IQT - ÍNDICE DE QUALIDADE DO TRANSPORTE -->
+      <div class="tele-card">
+        <div class="tele-card-header">
+          <h3><i class="fa-solid fa-award" style="color: #10b981;"></i> IQT Regulatória</h3>
+          <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.15); color: #10b981; font-weight: 800;">
+            Nota {{ kpis.iqt.nota_geral }} / 100
+          </span>
+        </div>
+        
+        <div style="margin: 6px 0;">
+          <div class="perda-row">
+            <span>Limpeza & Conservação</span>
+            <strong style="color: #10b981;">{{ kpis.iqt.limpeza_conservacao }}%</strong>
+          </div>
+          <div class="perda-row">
+            <span>Cumprimento de Partidas</span>
+            <strong style="color: #10b981;">{{ kpis.iqt.cumprimento_partidas }}%</strong>
+          </div>
+          <div class="perda-row">
+            <span>Pontualidade nos Terminais</span>
+            <strong style="color: #10b981;">{{ kpis.iqt.pontualidade_terminais }}%</strong>
+          </div>
+          <div class="perda-row">
+            <span>Idade Média da Frota</span>
+            <strong style="color: #0f172a;">{{ kpis.iqt.idade_media_frota }} anos</strong>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 6px; margin-top: 8px;">
+          <span style="flex: 1; text-align: center; font-size: 10px; font-weight: 700; background: #ecfdf5; color: #047857; padding: 4px 6px; border-radius: 6px;">
+            <i class="fa-solid fa-snowflake"></i> 100% Ar-Cond.
+          </span>
+          <span style="flex: 1; text-align: center; font-size: 10px; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 4px 6px; border-radius: 6px;">
+            <i class="fa-solid fa-wheelchair"></i> 100% Acessível
+          </span>
         </div>
       </div>
 
@@ -947,16 +1281,16 @@
       <div class="strip-item">
         <div class="strip-icon"><i class="fa-solid fa-bus"></i></div>
         <div class="strip-content">
-          <span>Veículos ativos</span>
-          <strong>{{ kpis.faixa_rodape.veiculos_ativos }}</strong>
-          <small><i class="fa-solid fa-arrow-up"></i> {{ kpis.faixa_rodape.veiculos_diff }}</small>
+          <span>Veículos operando</span>
+          <strong>{{ kpis.faixa_rodape.veiculos_ativos }} / {{ kpis.faixa_rodape.frota_total }}</strong>
+          <small><i class="fa-solid fa-check"></i> {{ kpis.faixa_rodape.veiculos_diff }}</small>
         </div>
       </div>
 
       <div class="strip-item">
         <div class="strip-icon"><i class="fa-solid fa-route"></i></div>
         <div class="strip-content">
-          <span>Distância total</span>
+          <span>Distância total rodada</span>
           <strong>{{ kpis.faixa_rodape.distancia_total }}</strong>
           <small><i class="fa-solid fa-arrow-up"></i> {{ kpis.faixa_rodape.distancia_diff }}</small>
         </div>
@@ -972,9 +1306,9 @@
       </div>
 
       <div class="strip-item">
-        <div class="strip-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="strip-icon"><i class="fa-solid fa-microchip"></i></div>
         <div class="strip-content">
-          <span>Eventos de segurança</span>
+          <span>Eventos telemetria CAN</span>
           <strong>{{ kpis.faixa_rodape.eventos_seguranca }}</strong>
           <small><i class="fa-solid fa-arrow-down"></i> {{ kpis.faixa_rodape.eventos_diff }}</small>
         </div>
@@ -2214,60 +2548,23 @@
     renderMapMarkers();
   }
 
-  // Inicialização dos Gráficos Chart.js (Idênticos ao modelo do print)
+  // Inicialização dos Gráficos Chart.js (Padrão Transporte Urbano)
   document.addEventListener('DOMContentLoaded', function() {
     
-    // 1. Gráfico Histórico da Pontuação (Colunas Verdes)
-    const ctxHist = document.getElementById('chartHistoricoPontuacao');
-    if (ctxHist) {
-      new Chart(ctxHist, {
-        type: 'bar',
-        data: {
-          labels: {{ kpis.historico_pontuacao.dias|tojson }},
-          datasets: [{
-            data: {{ kpis.historico_pontuacao.valores|tojson }},
-            backgroundColor: '#10b981',
-            borderRadius: 6,
-            barThickness: 16
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(c) { return c.raw + ' pontos'; }
-              }
-            }
-          },
-          scales: {
-            y: {
-              min: 50,
-              max: 100,
-              ticks: { stepSize: 10, font: { size: 10 } },
-              grid: { color: '#f1f5f9' }
-            },
-            x: {
-              ticks: { font: { size: 10, weight: '600' } },
-              grid: { display: false }
-            }
-          }
-        }
-      });
-    }
-
-    // 2. Gráfico Distribuição do Nível de Segurança (Donut)
-    const ctxDist = document.getElementById('chartDistribuicaoSeguranca');
-    if (ctxDist) {
-      new Chart(ctxDist, {
+    // 1. Gráfico Disponibilidade e Alocação da Frota (Donut 150 Ônibus)
+    const ctxDisp = document.getElementById('chartDisponibilidadeFrota');
+    if (ctxDisp) {
+      new Chart(ctxDisp, {
         type: 'doughnut',
         data: {
-          labels: ['Alto (72%)', 'Médio (18%)', 'Baixo (10%)'],
+          labels: ['Linha (85,3%)', 'Reserva (9,3%)', 'Oficina (5,4%)'],
           datasets: [{
-            data: [72, 18, 10],
-            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+            data: [
+              {{ kpis.disponibilidade_frota.operando_rua }},
+              {{ kpis.disponibilidade_frota.reserva_tecnica }},
+              {{ kpis.disponibilidade_frota.oficina_imobilizados }}
+            ],
+            backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
             borderWidth: 2,
             borderColor: '#ffffff'
           }]
@@ -2279,56 +2576,95 @@
             legend: {
               position: 'right',
               labels: {
-                boxWidth: 12,
-                font: { size: 11, weight: '700' },
+                boxWidth: 10,
+                font: { size: 10.5, weight: '700' },
                 color: '#475569'
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(c) {
+                  return c.label + ': ' + c.raw + ' veículos';
+                }
               }
             }
           },
-          cutout: '65%'
+          cutout: '62%'
         }
       });
     }
 
-    // 3. Gráfico Tendência de Eficiência (Linha Verde)
-    const ctxTend = document.getElementById('chartTendenciaEficiencia');
-    if (ctxTend) {
-      new Chart(ctxTend, {
-        type: 'line',
+    // 2. Gráfico Demanda Horária e IPK (Misto: Barras Passageiros + Linha IPK)
+    const ctxCurva = document.getElementById('chartCurvaDemanda');
+    if (ctxCurva) {
+      new Chart(ctxCurva, {
+        type: 'bar',
         data: {
-          labels: {{ kpis.tendencia_eficiencia.dias|tojson }},
-          datasets: [{
-            data: {{ kpis.tendencia_eficiencia.valores|tojson }},
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            borderWidth: 2.5,
-            pointBackgroundColor: '#10b981',
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            tension: 0.35,
-            fill: true
-          }]
+          labels: {{ kpis.curva_horaria.faixas|tojson }},
+          datasets: [
+            {
+              type: 'line',
+              label: 'IPK (pass/km)',
+              data: {{ kpis.curva_horaria.ipk_horario|tojson }},
+              borderColor: '#f59e0b',
+              backgroundColor: '#f59e0b',
+              borderWidth: 2.5,
+              pointRadius: 3.5,
+              pointHoverRadius: 5,
+              tension: 0.35,
+              yAxisID: 'y1'
+            },
+            {
+              type: 'bar',
+              label: 'Passageiros Catraca',
+              data: {{ kpis.curva_horaria.passageiros|tojson }},
+              backgroundColor: 'rgba(13, 148, 136, 0.75)',
+              borderRadius: 4,
+              barThickness: 14,
+              yAxisID: 'y'
+            }
+          ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { display: false },
+            legend: {
+              position: 'top',
+              labels: {
+                boxWidth: 10,
+                font: { size: 10, weight: '700' },
+                color: '#475569'
+              }
+            },
             tooltip: {
               callbacks: {
-                label: function(c) { return c.raw.toFixed(2) + ' km/L'; }
+                label: function(c) {
+                  if (c.dataset.type === 'line') {
+                    return 'IPK: ' + c.raw.toFixed(2) + ' pass/km';
+                  }
+                  return 'Demanda: ' + c.raw.toLocaleString('pt-BR') + ' passageiros';
+                }
               }
             }
           },
           scales: {
             y: {
-              min: 2.1,
-              max: 2.6,
-              ticks: { stepSize: 0.1, font: { size: 10 } },
+              type: 'linear',
+              position: 'left',
+              ticks: { font: { size: 9 }, stepSize: 3000 },
               grid: { color: '#f1f5f9' }
             },
+            y1: {
+              type: 'linear',
+              position: 'right',
+              min: 0,
+              max: 6,
+              ticks: { font: { size: 9 }, stepSize: 1 },
+              grid: { display: false }
+            },
             x: {
-              ticks: { font: { size: 10, weight: '600' } },
+              ticks: { font: { size: 9.5, weight: '600' } },
               grid: { display: false }
             }
           }

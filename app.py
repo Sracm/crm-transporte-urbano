@@ -182,53 +182,125 @@ def telemetria_view():
     linha_filtro = request.args.get("linha", "Todas")
     garagem_filtro = request.args.get("garagem", "Todas")
 
-    # 1. Indicadores Executivos (Baseados no Modelo do Painel de Gestão de Frota)
+    # 1. Indicadores Executivos e Operacionais (Padrão NTU / SPTrans / EMTU)
     kpis = {
-        "score_seguranca": 87,
-        "score_diff": "+4 pontos vs. 7 dias anteriores",
-        "score_status": "Bom",
-        "score_meta": 85,
-        "categorias_seguranca": [
-            {"nome": "Excesso de velocidade", "perc": 92, "cor": "#10b981", "meta": "≤ 60 km/h na malha viária", "eventos": 8, "icone": "fa-gauge-high"},
-            {"nome": "Direção brusca", "perc": 88, "cor": "#10b981", "meta": "Aceleração < 2.5 m/s²", "eventos": 12, "icone": "fa-arrows-split-up-and-left"},
-            {"nome": "Frenagens bruscas", "perc": 76, "cor": "#f59e0b", "meta": "Desaceleração < 3.0 m/s²", "eventos": 19, "icone": "fa-triangle-exclamation"},
-            {"nome": "Uso do cinto", "perc": 98, "cor": "#10b981", "meta": "Auditoria de câmera DMS", "eventos": 2, "icone": "fa-shield-halved"},
-            {"nome": "Uso do celular & fadiga", "perc": 95, "cor": "#10b981", "meta": "Sensor facial ADAS", "eventos": 4, "icone": "fa-mobile-screen-button"}
-        ],
-        "historico_pontuacao": {
-            "dias": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
-            "valores": [81, 82, 84, 83, 85, 86, 87]
+        # 4 KPIs de Destaque Superior
+        "icv": {
+            "valor": 98.6,
+            "meta": 98.0,
+            "status": "Em Conformidade",
+            "diff": "+0,6 p.p. vs. meta contratual",
+            "realizadas": 942,
+            "programadas": 955,
+            "perdas_total": 13,
+            "perdas_mecanica": 5,
+            "perdas_rh": 5,
+            "perdas_transito": 3
         },
-        "distribuicao_seguranca": {
-            "alto_perc": 72, "alto_qtd": 108,
-            "medio_perc": 18, "medio_qtd": 27,
-            "baixo_perc": 10, "baixo_qtd": 15
+        "ipk": {
+            "valor": 3.42,
+            "meta": 3.30,
+            "diff": "+3,8% vs. semana anterior",
+            "passageiros_dia": 82400,
+            "pagantes": 62800,
+            "pagantes_perc": 76.2,
+            "gratuidades": 19600,
+            "gratuidades_perc": 23.8
         },
-        "eficiencia_combustivel": {
+        "combustivel_executivo": {
             "valor": 2.45,
-            "meta": 2.30,
-            "diff_perc": "+6,3% vs. 7 dias anteriores",
-            "unidade": "km/L",
-            "classificacao": "Excelente"
+            "meta": 2.48,
+            "diff_perc": "-1,2% vs. meta técnica",
+            "status": "Atenção",
+            "consumo_total_l": 38450,
+            "distancia_total_km": 94200,
+            "desvio_financeiro_rs": -14200.00,
+            "marcha_lenta_perc": 12.4,
+            "custo_marcha_lenta_rs": 28602.00
         },
+        "mkbf": {
+            "valor": 8420,
+            "meta": 8000,
+            "diff": "+5,2% acima da meta",
+            "status": "Excelente",
+            "socorros_linha": 11,
+            "mttr_minutos": 28,
+            "tempo_medio_reboque_min": 35
+        },
+
+        # Disponibilidade da Frota (150 Ônibus)
+        "disponibilidade_frota": {
+            "frota_total": 150,
+            "operando_rua": 128,
+            "operando_perc": 85.3,
+            "reserva_tecnica": 14,
+            "reserva_perc": 9.3,
+            "oficina_imobilizados": 8,
+            "oficina_perc": 5.4,
+            "disponibilidade_perc": 94.6,
+            "meta_disponibilidade": 93.0,
+            "status": "Apta para Operação de Pico"
+        },
+
+        # Matriz de Quilometragem (Produtiva vs Morta/Ociosa)
+        "quilometragem_matriz": {
+            "km_total": 94200,
+            "km_comercial": 89600,
+            "km_comercial_perc": 95.1,
+            "km_morta": 4600,
+            "km_morta_perc": 4.9,
+            "meta_km_morta_perc": 5.0,
+            "custo_km_morta_rs": 27600.00,
+            "status": "Meta Cumprida (< 5,0%)"
+        },
+
+        # Eficiência de Combustível por Modelo de Chassi
+        "chassis_consumo": [
+            {"modelo": "Mercedes-Benz OF-1721 Bluetec 5", "qtd": 90, "real": 2.48, "meta": 2.50, "diff": "-0,8%", "status": "Regular", "cor": "#10b981"},
+            {"modelo": "Mercedes-Benz OF-1721 Euro 6", "qtd": 20, "real": 2.54, "meta": 2.55, "diff": "-0,4%", "status": "Excelente", "cor": "#10b981"},
+            {"modelo": "Volkswagen 17-230 V-Tronic", "qtd": 40, "real": 2.36, "meta": 2.40, "diff": "-1,6%", "status": "Atenção", "cor": "#f59e0b"}
+        ],
+
+        # Telemetria CAN de Fábrica (Segurança & Eco-Driving Real J1939)
+        "telemetria_can": {
+            "total_eventos": 65,
+            "diff_semana": "-22% vs. período anterior",
+            "taxa_1000km": 0.69,
+            "eventos": [
+                {"tipo": "Frenagens Bruscas (> 0,35g)", "qtd": 19, "taxa_mil_km": "0,20 / 1.000 km", "meta": "< 0,25", "cor": "#f59e0b", "icone": "fa-triangle-exclamation"},
+                {"tipo": "Acelerações Bruscas (> 0,25g)", "qtd": 12, "taxa_mil_km": "0,13 / 1.000 km", "meta": "< 0,15", "cor": "#10b981", "icone": "fa-forward-fast"},
+                {"tipo": "Excesso de Velocidade Urbana (> 60 km/h)", "qtd": 6, "taxa_mil_km": "0,06 / 1.000 km", "meta": "< 0,10", "cor": "#10b981", "icone": "fa-gauge-high"},
+                {"tipo": "Rotação Fora da Faixa Verde (> 2.300 RPM)", "qtd": 28, "taxa_mil_km": "0,30 / 1.000 km", "meta": "< 0,35", "cor": "#3b82f6", "icone": "fa-arrows-rotate"}
+            ],
+            "historico_dias": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
+            "historico_eventos": [14, 12, 11, 9, 8, 6, 5]
+        },
+
+        # Auditoria IQT (Índice de Qualidade do Transporte / Regulação)
+        "iqt": {
+            "nota_geral": 92.4,
+            "limpeza_conservacao": 94.0,
+            "cumprimento_partidas": 98.6,
+            "pontualidade_terminais": 96.8,
+            "idade_media_frota": 3.8,
+            "ar_condicionado_ativos": "100%",
+            "acessibilidade_elevador": "100%"
+        },
+
+        # Curva Horária de Passageiros & Demanda (Pico vs Vale)
+        "curva_horaria": {
+            "faixas": ["05h", "06h", "07h", "08h", "09h", "11h", "13h", "15h", "17h", "18h", "19h", "21h"],
+            "passageiros": [3200, 7800, 9400, 8100, 5200, 4800, 5100, 5900, 9100, 9800, 7900, 4100],
+            "ipk_horario": [2.4, 4.8, 5.2, 4.9, 3.1, 2.9, 3.0, 3.4, 5.0, 5.3, 4.6, 2.6]
+        },
+
+        # Tendência de Consumo dos Últimos 7 Dias
         "tendencia_eficiencia": {
             "dias": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
-            "valores": [2.32, 2.35, 2.38, 2.39, 2.41, 2.43, 2.45]
+            "valores": [2.41, 2.42, 2.43, 2.44, 2.45, 2.46, 2.45]
         },
-        "consumo": {
-            "volume_total_l": 38450,
-            "diff_perc": "-5,8% vs. 7 dias anteriores",
-            "consumo_medio_dia": 5492,
-            "distancia_total_km": 94200,
-            "custo_estimado_rs": 230700.00
-        },
-        "taxa_ociosidade": {
-            "perc": 12.4,
-            "diff_pp": "-3,1 p.p. vs. 7 dias anteriores",
-            "litros_desperdicados": 4767,
-            "custo_desperdicado_rs": 28602.00,
-            "status": "Otimizado (Meta ≤ 15%)"
-        },
+
+        # Faixa de Rodapé Executiva
         "faixa_rodape": {
             "veiculos_ativos": 142,
             "frota_total": 150,
@@ -237,7 +309,7 @@ def telemetria_view():
             "distancia_diff": "+4,7% vs. período anterior",
             "eficiencia_media": "2,45 km/L",
             "eficiencia_diff": "+6,3% vs. período anterior",
-            "eventos_seguranca": 37,
+            "eventos_seguranca": 65,
             "eventos_diff": "-22% vs. período anterior"
         },
         "impacto_financeiro": {
@@ -254,7 +326,7 @@ def telemetria_view():
             "otp_pontualidade": 96.8,
             "headway_regularidade": 97.2,
             "co2_evitado_ton": 48.2,
-            "ipk": 2.68,
+            "ipk": 3.42,
             "dwell_time_seg": 28,
             "velocidade_comercial": 19.4
         }
