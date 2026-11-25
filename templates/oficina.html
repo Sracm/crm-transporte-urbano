@@ -1,0 +1,862 @@
+{% extends "base.html" %}
+
+{% block title %}Manutenção & Oficina Mecânica{% endblock %}
+{% block page_breadcrumb %}Manutenção / Oficina{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js para o Dashboard Estratégico -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block topbar_actions %}
+<div style="display: flex; gap: 10px; align-items: center;">
+  <button class="btn-primary" onclick="abrirModalNovaOSOficina()" style="background: #f59e0b; border-color: #f59e0b;">
+    <i class="fa-solid fa-plus"></i> Nova Entrada na Oficina
+  </button>
+  <span class="private-label">
+    <i class="fa-solid fa-wrench"></i> Oficina Central Ativa
+  </span>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- HEADING DA PÁGINA COM SELETOR DE MODO -->
+<div class="page-heading" style="margin-bottom: 16px;">
+  <div>
+    <div class="eyebrow"><i class="fa-solid fa-gears"></i> ENGENHARIA DE MANUTENÇÃO & GESTÃO DE FROTA</div>
+    <h1>Oficina Mecânica & Gestão de Disponibilidade</h1>
+    <p>Monitoramento operacional de veículos em serviço, controle de peças, MTTR e dashboard estratégico para tomada de decisões.</p>
+  </div>
+
+  <!-- SELETOR DE VISÃO (OPERACIONAL VS DASHBOARD ESTRATÉGICO) -->
+  <div class="oficina-view-switcher">
+    <a href="{{ url_for('oficina_view', view='operacional', status=status_filtro, linha=linha_filtro) }}" class="oficina-view-btn {% if view_mode == 'operacional' %}active{% endif %}">
+      <i class="fa-solid fa-wrench"></i> Visão Operacional & Pátio
+    </a>
+    <a href="{{ url_for('oficina_view', view='dashboard', status=status_filtro, linha=linha_filtro) }}" class="oficina-view-btn {% if view_mode == 'dashboard' %}active{% endif %}">
+      <i class="fa-solid fa-chart-line"></i> Dashboard Estratégico Gerencial
+    </a>
+  </div>
+</div>
+
+<!-- 5 CARDS KPI PRINCIPAIS DA OFICINA -->
+<div class="metrics" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 22px;">
+  <!-- CARD 1: CARROS EM MANUTENÇÃO -->
+  <article class="metric" style="border-left: 4px solid #f59e0b;">
+    <div class="metric-top">
+      <span>Em Manutenção</span>
+      <span class="metric-icon amber"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+    </div>
+    <strong style="color: #b45309;">{{ kpis.carros_manutencao }} veículos</strong>
+    <p>Intervenção mecânica ativa nos boxes</p>
+  </article>
+
+  <!-- CARD 2: AGUARDANDO PEÇAS -->
+  <article class="metric" style="border-left: 4px solid #8b5cf6;">
+    <div class="metric-top">
+      <span>Aguardando Peças</span>
+      <span class="metric-icon violet"><i class="fa-solid fa-boxes-packing"></i></span>
+    </div>
+    <strong style="color: #6d28d9;">{{ kpis.carros_aguardando_pecas }} veículos</strong>
+    <p>Aguardando entrega de fornecedor</p>
+  </article>
+
+  <!-- CARD 3: TEMPO MÉDIO INOPERANTE -->
+  <article class="metric" style="border-left: 4px solid #0284c7;">
+    <div class="metric-top">
+      <span>Tempo Médio Inoperante</span>
+      <span class="metric-icon blue"><i class="fa-solid fa-stopwatch-20"></i></span>
+    </div>
+    <strong style="color: #0369a1;">{{ kpis.tempo_medio_inoperante }} dias</strong>
+    <p>MTTR médio por veículo na oficina</p>
+  </article>
+
+  <!-- CARD 4: DIAS PARADOS TOTAIS -->
+  <article class="metric" style="border-left: 4px solid #ef4444;">
+    <div class="metric-top">
+      <span>Dias Parados Totais</span>
+      <span class="metric-icon red"><i class="fa-solid fa-hourglass-half"></i></span>
+    </div>
+    <strong style="color: #b91c1c;">{{ kpis.dias_parados_totais }} dias</strong>
+    <p>Acumulado da frota inoperante no mês</p>
+  </article>
+
+  <!-- CARD 5: EFETIVO DA FROTA -->
+  <article class="metric" style="border-left: 4px solid #10b981;">
+    <div class="metric-top">
+      <span>Disponibilidade da Frota</span>
+      <span class="metric-icon emerald"><i class="fa-solid fa-bus"></i></span>
+    </div>
+    <strong style="color: #047857;">{{ kpis.frota_operando }} / {{ kpis.frota_total }}</strong>
+    <p>{{ kpis.frota_operando_perc }}% em operação ({{ kpis.frota_parada_perc }}% oficina)</p>
+  </article>
+</div>
+
+{% if view_mode == 'dashboard' %}
+<!-- ==========================================================================
+     MODO 2: DASHBOARD ESTRATÉGICO GERENCIAL (DECISÕES DO GERENTE DE OPERAÇÕES)
+     ========================================================================== -->
+
+<!-- COMPARATIVO COM O MÊS ANTERIOR (OUTUBRO VS NOVEMBRO) -->
+<div class="comparativo-grid">
+  <!-- CARD COMPARATIVO 1: VOLUME DE ORDENS DE SERVIÇO -->
+  <div class="comparativo-card">
+    <div class="comparativo-header">
+      <span><i class="fa-solid fa-calendar-check"></i> Volume de Ordens de Serviço</span>
+      {% if comparativo.var_os_perc > 0 %}
+        <span class="tag-delta up-bad"><i class="fa-solid fa-arrow-trend-up"></i> +{{ comparativo.var_os_perc }}% vs Out</span>
+      {% else %}
+        <span class="tag-delta down-good"><i class="fa-solid fa-arrow-trend-down"></i> {{ comparativo.var_os_perc }}% vs Out</span>
+      {% endif %}
+    </div>
+    <div class="comparativo-values">
+      <div class="comparativo-atual">{{ comparativo.os_novembro }} OSs</div>
+      <div class="comparativo-anterior">Outubro: {{ comparativo.os_outubro }} OSs</div>
+    </div>
+    <p style="font-size: 11.5px; color: #64748b; margin: 0;">Entradas na oficina registradas no período.</p>
+  </div>
+
+  <!-- CARD COMPARATIVO 2: TEMPO MÉDIO NA OFICINA (MTTR) -->
+  <div class="comparativo-card">
+    <div class="comparativo-header">
+      <span><i class="fa-solid fa-clock-rotate-left"></i> Tempo Médio na Oficina (MTTR)</span>
+      {% if comparativo.var_mttr_perc <= 0 %}
+        <span class="tag-delta down-good"><i class="fa-solid fa-arrow-trend-down"></i> {{ comparativo.var_mttr_perc }}% (Mais rápido)</span>
+      {% else %}
+        <span class="tag-delta up-bad"><i class="fa-solid fa-arrow-trend-up"></i> +{{ comparativo.var_mttr_perc }}% (Mais tempo parado)</span>
+      {% endif %}
+    </div>
+    <div class="comparativo-values">
+      <div class="comparativo-atual">{{ comparativo.mttr_novembro }} dias</div>
+      <div class="comparativo-anterior">Outubro: {{ comparativo.mttr_outubro }} dias</div>
+    </div>
+    <p style="font-size: 11.5px; color: #64748b; margin: 0;">Média de dias desde a entrada até a liberação.</p>
+  </div>
+
+  <!-- CARD COMPARATIVO 3: CUSTO DE PEÇAS & MANUTENÇÃO -->
+  <div class="comparativo-card">
+    <div class="comparativo-header">
+      <span><i class="fa-solid fa-wallet"></i> Custo de Peças Trocadas</span>
+      <span class="tag-delta up-bad"><i class="fa-solid fa-arrow-trend-up"></i> +{{ comparativo.var_custo_perc }}% vs Out</span>
+    </div>
+    <div class="comparativo-values">
+      <div class="comparativo-atual">R$ {{ comparativo.custo_novembro|moeda }}</div>
+      <div class="comparativo-anterior">Out: R$ {{ comparativo.custo_outubro|moeda }}</div>
+    </div>
+    <p style="font-size: 11.5px; color: #64748b; margin: 0;">Impacto direto nas provisões do Contas a Pagar.</p>
+  </div>
+</div>
+
+<!-- GRÁFICOS DO DASHBOARD ESTRATÉGICO -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 22px;">
+  <!-- GRÁFICO 1: EVOLUÇÃO SEMANAL DE NOVEMBRO -->
+  <div class="panel" style="padding: 20px;">
+    <div class="panel-heading" style="padding: 0 0 14px 0; border-bottom: 1px solid #f1f5f9;">
+      <div>
+        <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; margin: 0;"><i class="fa-solid fa-chart-column" style="color: var(--primary);"></i> Entradas e Tempo Médio por Semana em Novembro</h3>
+        <p style="font-size: 12px; color: #64748b; margin: 3px 0 0 0;">Volume de quebras e tempo médio que os ônibus ficaram parados semana a semana.</p>
+      </div>
+    </div>
+    <div style="height: 280px; margin-top: 10px;">
+      <canvas id="chartSemanas"></canvas>
+    </div>
+  </div>
+
+  <!-- GRÁFICO 2: EFETIVO DA FROTA (DISPONIBILIDADE) -->
+  <div class="panel" style="padding: 20px;">
+    <div class="panel-heading" style="padding: 0 0 14px 0; border-bottom: 1px solid #f1f5f9;">
+      <div>
+        <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; margin: 0;"><i class="fa-solid fa-pie-chart" style="color: #f59e0b;"></i> Efetivo da Frota (150 Carros)</h3>
+        <p style="font-size: 12px; color: #64748b; margin: 3px 0 0 0;">Proporção em operação versus pátio da oficina.</p>
+      </div>
+    </div>
+    <div style="height: 220px; margin-top: 10px; display: flex; align-items: center; justify-content: center;">
+      <canvas id="chartEfetivo"></canvas>
+    </div>
+    <div style="text-align: center; font-size: 11.5px; color: #64748b; margin-top: 8px;">
+      <strong style="color: #10b981;">137 em Linha</strong> &bull;
+      <strong style="color: #f59e0b;">7 Box Ativo</strong> &bull;
+      <strong style="color: #8b5cf6;">4 Aguardando Peças</strong> &bull;
+      <strong style="color: #0284c7;">2 Testes</strong>
+    </div>
+  </div>
+</div>
+
+<!-- PAINEL DE DIRETRIZES ESTRATÉGICAS PARA O GERENTE DE OPERAÇÕES -->
+<div class="panel" style="padding: 20px; border-left: 5px solid var(--primary); margin-bottom: 22px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; margin: 0;">
+      <i class="fa-solid fa-clipboard-check" style="color: var(--primary);"></i> Parecer Estratégico para Tomada de Decisões do Gerente de Operações
+    </h3>
+    <span class="status-badge closed" style="font-size: 11px;">SLA Operacional: 91.3% / Meta: 95.0%</span>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; font-size: 12.5px; color: #334155;">
+    <div style="background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+      <strong style="color: #b91c1c; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+        <i class="fa-solid fa-triangle-exclamation"></i> 1. Gargalo de Peças Críticas
+      </strong>
+      <p style="margin: 0; color: #64748b; line-height: 1.4;">
+        4 ônibus estão parados há mais de 48h aguardando compressores de ar e kits de embreagem. <em>Recomendação: Acionar compras para homologar fornecedor alternativo de entrega expressa.</em>
+      </p>
+    </div>
+
+    <div style="background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+      <strong style="color: #b45309; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+        <i class="fa-solid fa-arrows-rotate"></i> 2. Reincidência de Freios (Linhas Pesadas)
+      </strong>
+      <p style="margin: 0; color: #64748b; line-height: 1.4;">
+        O defeito <em>"Lonas no rebite e tambor riscado"</em> lidera 38% das entradas. Os carros 5045 e 5019 tiveram quebras antes de 4.000 km. <em>Recomendação: Ajustar inspeção preventiva na portaria a cada 2.500 km.</em>
+      </p>
+    </div>
+
+    <div style="background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+      <strong style="color: #0369a1; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+        <i class="fa-solid fa-gauge-high"></i> 3. MTBF Operacional (4.650 km)
+      </strong>
+      <p style="margin: 0; color: #64748b; line-height: 1.4;">
+        O intervalo médio entre passagens na oficina está em 4.650 km rodados. Com o cronograma de manutenção preditiva, a meta de 6.000 km reduzirá em 22% os custos de socorro guincho.
+      </p>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+
+<!-- ==========================================================================
+     OS 5 RANKINGS ESTRATÉGICOS DA OFICINA (SOLICITADOS PELO USUÁRIO)
+     ========================================================================== -->
+<div class="oficina-rankings-grid">
+  <!-- RANKING 1: MAIORES DEFEITOS RECLAMADOS -->
+  <div class="ranking-card">
+    <div class="ranking-card-header">
+      <h3><i class="fa-solid fa-bullhorn" style="color: #ef4444;"></i> Defeitos Reclamados</h3>
+      <span class="ranking-badge-top">Top 5 Reclamações</span>
+    </div>
+    {% for r in ranking_reclamados %}
+    <div class="ranking-item">
+      <div class="ranking-item-top">
+        <div class="ranking-item-title" title="{{ r.defeito }}">
+          <span class="ranking-pos pos-{{ loop.index }}">{{ loop.index }}</span>
+          <span>{{ r.defeito }}</span>
+        </div>
+        <span class="ranking-val">{{ r.qtd }} ({{ r.perc }}%)</span>
+      </div>
+      <div class="ranking-bar-bg">
+        <div class="ranking-bar-fill" style="width: {{ r.perc }}%; background: #ef4444;"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- RANKING 2: MAIORES DEFEITOS CONSTATADOS (DIAGNÓSTICO OFICINA) -->
+  <div class="ranking-card">
+    <div class="ranking-card-header">
+      <h3><i class="fa-solid fa-magnifying-glass-chart" style="color: #f59e0b;"></i> Defeitos Constatados</h3>
+      <span class="ranking-badge-top">Diagnóstico Real</span>
+    </div>
+    {% for r in ranking_constatados %}
+    <div class="ranking-item">
+      <div class="ranking-item-top">
+        <div class="ranking-item-title" title="{{ r.defeito }}">
+          <span class="ranking-pos pos-{{ loop.index }}">{{ loop.index }}</span>
+          <span>{{ r.defeito }}</span>
+        </div>
+        <span class="ranking-val">{{ r.qtd }} ({{ r.perc }}%)</span>
+      </div>
+      <div class="ranking-bar-bg">
+        <div class="ranking-bar-fill" style="width: {{ r.perc }}%; background: #f59e0b;"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- RANKING 3: PEÇAS MAIS TROCADAS -->
+  <div class="ranking-card">
+    <div class="ranking-card-header">
+      <h3><i class="fa-solid fa-gears" style="color: #8b5cf6;"></i> Peças Mais Trocadas</h3>
+      <span class="ranking-badge-top">Consumo de Peças</span>
+    </div>
+    {% for r in ranking_pecas %}
+    <div class="ranking-item">
+      <div class="ranking-item-top">
+        <div class="ranking-item-title" title="{{ r.peca }}">
+          <span class="ranking-pos pos-{{ loop.index }}">{{ loop.index }}</span>
+          <span>{{ r.peca }}</span>
+        </div>
+        <span class="ranking-val">{{ r.qtd }} un &bull; R$ {{ r.custo_total|moeda }}</span>
+      </div>
+      <div class="ranking-bar-bg">
+        <div class="ranking-bar-fill" style="width: {{ (r.qtd / 10 * 100)|int }}%; background: #8b5cf6;"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- RANKING 4: SERVIÇOS MAIS REALIZADOS -->
+  <div class="ranking-card">
+    <div class="ranking-card-header">
+      <h3><i class="fa-solid fa-hand-holding-hand" style="color: #0284c7;"></i> Serviços Mais Realizados</h3>
+      <span class="ranking-badge-top">Mão de Obra</span>
+    </div>
+    {% for r in ranking_servicos %}
+    <div class="ranking-item">
+      <div class="ranking-item-top">
+        <div class="ranking-item-title" title="{{ r.servico }}">
+          <span class="ranking-pos pos-{{ loop.index }}">{{ loop.index }}</span>
+          <span>{{ r.servico }}</span>
+        </div>
+        <span class="ranking-val">{{ r.qtd }} execuções</span>
+      </div>
+      <div class="ranking-bar-bg">
+        <div class="ranking-bar-fill" style="width: {{ (r.qtd / 10 * 100)|int }}%; background: #0284c7;"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- RANKING 5: CARROS QUE MAIS PASSARAM PELA OFICINA (REINCIDÊNCIA & CONTROLE DE KM) -->
+  <div class="ranking-card" style="grid-column: span 2;">
+    <div class="ranking-card-header">
+      <h3><i class="fa-solid fa-bus-simple" style="color: #dc2626;"></i> Carros com Maior Reincidência na Oficina & Controle de Km</h3>
+      <span class="ranking-badge-top">Top 5 Reincidentes</span>
+    </div>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+        <thead>
+          <tr style="background: #f8fafc; color: #64748b; font-weight: 700; text-align: left;">
+            <th style="padding: 8px 10px;">PREFIXO / PLACA</th>
+            <th style="padding: 8px 10px;">MODELO / LINHA</th>
+            <th style="padding: 8px 10px; text-align: center;">PASSAGENS</th>
+            <th style="padding: 8px 10px; text-align: center;">DIAS PARADO</th>
+            <th style="padding: 8px 10px; text-align: right;">INTERVALO MÉDIO (KM)</th>
+            <th style="padding: 8px 10px; text-align: right;">KM TOTAL ATUAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in ranking_carros %}
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 8px 10px;">
+              <strong style="color: #0f172a; font-size: 13px;">Carro {{ r.prefixo }}</strong>
+              <span style="font-size: 11px; color: #64748b; display: block;">{{ r.placa }}</span>
+            </td>
+            <td style="padding: 8px 10px;">
+              <span style="color: #334155; font-weight: 600; display: block;">{{ r.modelo }}</span>
+              <span style="font-size: 11px; color: #94a3b8;">{{ r.linha }}</span>
+            </td>
+            <td style="padding: 8px 10px; text-align: center;">
+              <span class="status-badge" style="background: #fee2e2; color: #b91c1c; font-weight: 800;">
+                {{ r.passagens }} visitas
+              </span>
+            </td>
+            <td style="padding: 8px 10px; text-align: center;">
+              <strong style="color: #ef4444;">{{ r.dias_parados }} dias</strong>
+            </td>
+            <td style="padding: 8px 10px; text-align: right;">
+              <span class="km-intervalo-pill">{{ r.km_medio_entre_quebras|intformat }} km</span>
+            </td>
+            <td style="padding: 8px 10px; text-align: right;">
+              <span class="km-pill">{{ r.km_total|intformat }} km</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     TABELA OPERACIONAL COMPLETA DA OFICINA
+     ========================================================================== -->
+<div class="panel">
+  <div class="panel-heading" style="flex-wrap: wrap; gap: 14px;">
+    <div>
+      <h2 style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-list-check" style="color: var(--primary);"></i>
+        Quadro Operacional de Ordens de Serviço da Oficina (Visão Pátio)
+      </h2>
+      <p>Exibindo <strong>{{ total_exibido }}</strong> ordens de serviço encontradas. Mecânicos podem atualizar as datas de entrada, conclusão e peças diretamente.</p>
+    </div>
+
+    <!-- FILTROS RÁPIDOS DA TABELA -->
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+      <!-- BUSCA POR TEXTO -->
+      <form method="GET" action="{{ url_for('oficina_view') }}" style="display: flex; gap: 6px; align-items: center;">
+        <input type="hidden" name="view" value="{{ view_mode }}">
+        <input type="hidden" name="linha" value="{{ linha_filtro }}">
+        <input type="text" name="busca" class="form-input" placeholder="Buscar Carro, Placa, OS ou Mecânico..." value="{{ busca }}" style="width: 210px; height: 34px; font-size: 12px;">
+
+        <select name="status" class="form-select" style="height: 34px; font-size: 12px; padding: 0 10px;" onchange="this.form.submit()">
+          <option value="ativos" {% if status_filtro == 'ativos' %}selected{% endif %}>Carros Ativos na Oficina ({{ kpis.total_inoperantes }})</option>
+          <option value="Em Manutenção" {% if status_filtro == 'Em Manutenção' %}selected{% endif %}>Em Manutenção ({{ kpis.carros_manutencao }})</option>
+          <option value="Aguardando Peças" {% if status_filtro == 'Aguardando Peças' %}selected{% endif %}>Aguardando Peças ({{ kpis.carros_aguardando_pecas }})</option>
+          <option value="Concluído / Liberado" {% if status_filtro == 'Concluído / Liberado' %}selected{% endif %}>Concluídos / Liberados</option>
+          <option value="todos" {% if status_filtro == 'todos' %}selected{% endif %}>Todos os Registros</option>
+        </select>
+
+        <button type="submit" class="btn-primary" style="height: 34px; padding: 0 12px; font-size: 12px;">
+          <i class="fa-solid fa-filter"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table class="table-ponto-alta-legibilidade" style="font-size: 12.5px;">
+      <thead>
+        <tr>
+          <th style="min-width: 140px;">CARRO / OS</th>
+          <th style="min-width: 180px;">MODELO & LINHA</th>
+          <th style="min-width: 130px;">MECÂNICO</th>
+          <th style="min-width: 180px;">CONTROLE DE KM (ENTRADA x RETORNO)</th>
+          <th style="min-width: 220px;">DEFEITO RECLAMADO & CONSTATADO</th>
+          <th style="min-width: 220px;">PEÇAS & SERVIÇOS REALIZADOS</th>
+          <th style="min-width: 110px; text-align: center;">ENTRADA</th>
+          <th style="min-width: 110px; text-align: center;">PREVISÃO</th>
+          <th style="min-width: 110px; text-align: center;">CONCLUSÃO</th>
+          <th style="min-width: 90px; text-align: center;">DIAS PARADO</th>
+          <th style="min-width: 130px; text-align: center;">STATUS</th>
+          <th style="min-width: 110px; text-align: center;">AÇÃO MECÂNICO</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in ordens %}
+        <tr style="{% if o.status == 'Aguardando Peças' %}background: #fdf4ff;{% elif o.status == 'Em Manutenção' %}background: #fffbeb;{% endif %}">
+          <!-- CARRO E NÚMERO DA OS -->
+          <td>
+            <strong style="color: #0f172a; font-size: 13.5px; display: block;">🚌 Carro {{ o.prefixo_veiculo }}</strong>
+            <span style="font-size: 11px; color: #475569; font-family: monospace;">{{ o.placa }} &bull; {{ o.numero_os }}</span>
+          </td>
+
+          <!-- MODELO E LINHA -->
+          <td>
+            <span style="color: #1e293b; font-weight: 700; font-size: 12px; display: block;">{{ o.modelo }}</span>
+            <span style="font-size: 11px; color: #64748b;">{{ o.linha }}</span>
+          </td>
+
+          <!-- MECÂNICO RESPONSÁVEL -->
+          <td>
+            <span style="font-weight: 700; color: #334155; font-size: 12px;">{{ o.mecanico_responsavel }}</span>
+          </td>
+
+          <!-- CONTROLE DE KM (ENTRADA VS RETORNO E TOTAL) -->
+          <td>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <span class="km-pill">Entrada: <strong>{{ o.km_entrada|intformat }} km</strong></span>
+              <div style="font-size: 10.5px; color: #64748b;">
+                Última saída: {{ o.km_anterior|intformat }} km &bull;
+                <strong style="color: #0284c7;">+{{ o.km_rodados_desde_anterior|intformat }} km rodados</strong>
+              </div>
+            </div>
+          </td>
+
+          <!-- DEFEITO RECLAMADO E CONSTATADO -->
+          <td>
+            <div style="font-size: 12px; color: #b91c1c; font-weight: 700; margin-bottom: 2px;">
+              <i class="fa-solid fa-bullhorn" style="font-size: 10px;"></i> Reclamado: {{ o.defeito_reclamado }}
+            </div>
+            <div style="font-size: 11.5px; color: #334155;">
+              <i class="fa-solid fa-wrench" style="font-size: 10px; color: #f59e0b;"></i> Constatado: {{ o.defeito_constatado }}
+            </div>
+          </td>
+
+          <!-- PEÇAS E SERVIÇOS -->
+          <td>
+            <div style="font-size: 11.5px; color: #6d28d9; font-weight: 600; margin-bottom: 2px;">
+              <i class="fa-solid fa-box" style="font-size: 10px;"></i> {{ o.pecas_trocadas or 'Aguardando requisição' }}
+            </div>
+            <div style="font-size: 11px; color: #64748b;">
+              {{ o.servicos_realizados or 'Em andamento' }}
+            </div>
+          </td>
+
+          <!-- DATAS (ENTRADA, PREVISÃO, CONCLUSÃO) -->
+          <td style="text-align: center;">
+            <span style="font-weight: 700; color: #0f172a; font-size: 12px;">{{ o.data_entrada[5:16] }}</span>
+          </td>
+
+          <td style="text-align: center;">
+            <span style="font-weight: 600; color: #64748b; font-size: 11.5px;">{{ o.previsao_entrega[5:16] if o.previsao_entrega else '--' }}</span>
+          </td>
+
+          <td style="text-align: center;">
+            {% if o.data_conclusao %}
+              <span style="font-weight: 800; color: #10b981; font-size: 12px;">{{ o.data_conclusao[5:16] }}</span>
+            {% else %}
+              <span style="color: #ef4444; font-weight: 700; font-size: 11px; background: #fee2e2; padding: 2px 6px; border-radius: 4px;">Em aberto</span>
+            {% endif %}
+          </td>
+
+          <!-- DIAS PARADOS -->
+          <td style="text-align: center;">
+            <strong style="color: #b91c1c; font-size: 13px;">{{ o.dias_parados|dec1 }} d</strong>
+          </td>
+
+          <!-- STATUS BADGE -->
+          <td style="text-align: center;">
+            {% if o.status == 'Em Manutenção' %}
+              <span class="status-badge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-weight: 700;">
+                <i class="fa-solid fa-gear fa-spin" style="font-size: 10px;"></i> Em Manutenção
+              </span>
+            {% elif o.status == 'Aguardando Peças' %}
+              <span class="status-badge" style="background: #f3e8ff; color: #6d28d9; border: 1px solid #ddd6fe; font-weight: 700;">
+                <i class="fa-solid fa-clock" style="font-size: 10px;"></i> Aguardando Peças
+              </span>
+            {% elif o.status == 'Em Testes de Pista' %}
+              <span class="status-badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-weight: 700;">
+                <i class="fa-solid fa-road" style="font-size: 10px;"></i> Em Testes
+              </span>
+            {% else %}
+              <span class="status-badge closed" style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-weight: 700;">
+                <i class="fa-solid fa-circle-check" style="font-size: 10px;"></i> Concluído / Liberado
+              </span>
+            {% endif %}
+          </td>
+
+          <!-- BOTÃO DE AÇÃO DO MECÂNICO (EDITAR / ATUALIZAR) -->
+          <td style="text-align: center;">
+            <button type="button" class="btn-edit-mecanico" onclick="abrirModalEditarOS({
+              id: '{{ o.id }}',
+              numero_os: '{{ o.numero_os }}',
+              prefixo: '{{ o.prefixo_veiculo }}',
+              placa: '{{ o.placa }}',
+              modelo: '{{ o.modelo }}',
+              linha: '{{ o.linha }}',
+              mecanico: '{{ o.mecanico_responsavel }}',
+              data_entrada: '{{ o.data_entrada }}',
+              previsao_entrega: '{{ o.previsao_entrega or "" }}',
+              data_conclusao: '{{ o.data_conclusao or "" }}',
+              status: '{{ o.status }}',
+              defeito_reclamado: '{{ o.defeito_reclamado }}',
+              defeito_constatado: '{{ o.defeito_constatado }}',
+              pecas: '{{ o.pecas_trocadas or "" }}',
+              servicos: '{{ o.servicos_realizados or "" }}',
+              km_entrada: '{{ o.km_entrada }}',
+              km_total: '{{ o.km_total_atual }}',
+              custo_pecas: '{{ o.custo_pecas|default(0.0) }}',
+              custo_mo: '{{ o.custo_mao_obra|default(0.0) }}',
+              observacoes: '{{ o.observacoes or "" }}'
+            })">
+              <i class="fa-solid fa-pen-to-square"></i> Atualizar OS
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     MODAL DE ATUALIZAÇÃO DE OS PELO MECÂNICO / CHEFE DE OFICINA
+     ========================================================================== -->
+<div class="modal-backdrop" id="modalEditarOS">
+  <div class="modal-box" style="max-width: 680px;">
+    <div class="modal-header">
+      <h3 style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-screwdriver-wrench" style="color: var(--primary);"></i>
+        Atualizar Ordem de Serviço &bull; <span id="lblModalNumeroOS">--</span>
+      </h3>
+      <button style="font-size: 22px; color: #94a3b8; border: none; background: none; cursor: pointer;" onclick="fecharModalEditarOS()">&times;</button>
+    </div>
+
+    <form action="{{ url_for('api_atualizar_oficina') }}" method="POST">
+      <input type="hidden" name="os_id" id="editOSId">
+
+      <div class="modal-body" style="padding: 20px;">
+        <!-- CABEÇALHO DO CARRO -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 15px; font-weight: 800; color: #0f172a;" id="lblModalCarro">Carro --</div>
+            <div style="font-size: 12px; color: #64748b; margin-top: 2px;" id="lblModalLinhaModelo">--</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700;">Defeito Reclamado:</div>
+            <div style="font-size: 12px; color: #b91c1c; font-weight: 700;" id="lblModalDefeitoReclamado">--</div>
+          </div>
+        </div>
+
+        <!-- DATAS OPERACIONAIS (O MECÂNICO PODE ALTERAR DIRETAMENTE) -->
+        <p style="font-size: 11.5px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+          <i class="fa-solid fa-calendar-days"></i> Cronograma de Manutenção (Editável pelo Mecânico)
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <div>
+            <label class="form-label" style="font-size: 11px;">Data de Entrada em Serviço</label>
+            <input type="text" name="data_entrada" id="editDataEntrada" class="form-input" style="font-weight: 700;" placeholder="AAAA-MM-DD HH:MM" required>
+          </div>
+          <div>
+            <label class="form-label" style="font-size: 11px;">Previsão de Entrega</label>
+            <input type="text" name="previsao_entrega" id="editPrevisaoEntrega" class="form-input" style="font-weight: 700;" placeholder="AAAA-MM-DD HH:MM">
+          </div>
+          <div>
+            <label class="form-label" style="font-size: 11px;">Data de Conclusão / Liberação</label>
+            <input type="text" name="data_conclusao" id="editDataConclusao" class="form-input" style="font-weight: 700; color: #10b981;" placeholder="AAAA-MM-DD HH:MM (ou vazio)">
+          </div>
+        </div>
+
+        <!-- STATUS E MECÂNICO RESPONSÁVEL -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <div>
+            <label class="form-label" style="font-size: 11px;">Status da Ordem de Serviço</label>
+            <select name="status" id="editStatus" class="form-select" style="font-weight: 700;">
+              <option value="Em Manutenção">Em Manutenção (Box Ativo)</option>
+              <option value="Aguardando Peças">Aguardando Peças (Estoque/Compras)</option>
+              <option value="Em Testes de Pista">Em Testes de Pista</option>
+              <option value="Concluído / Liberado">Concluído / Liberado para Garagem</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size: 11px;">Mecânico Responsável</label>
+            <select name="mecanico_responsavel" id="editMecanico" class="form-select">
+              {% for m in mecanicos_lista %}
+                <option value="{{ m }}">{{ m }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- CONTROLE DE KM -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <div>
+            <label class="form-label" style="font-size: 11px;">Km de Entrada na Oficina</label>
+            <input type="number" name="km_entrada" id="editKmEntrada" class="form-input" style="font-weight: 700; font-family: monospace;">
+          </div>
+          <div>
+            <label class="form-label" style="font-size: 11px;">Km Total Atual do Veículo</label>
+            <input type="number" name="km_total_atual" id="editKmTotal" class="form-input" style="font-weight: 700; font-family: monospace;">
+          </div>
+        </div>
+
+        <!-- DIAGNÓSTICO TÉCNICO & PEÇAS TROCADAS -->
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label" style="font-size: 11px;">Defeito Constatado pelo Mecânico (Diagnóstico Real)</label>
+          <input type="text" name="defeito_constatado" id="editDefeitoConstatado" class="form-input" style="font-weight: 600;" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <label class="form-label" style="font-size: 11px;">Peças Trocadas (Separadas por vírgula)</label>
+            <input type="text" name="pecas_trocadas" id="editPecasTrocadas" class="form-input" placeholder="Ex: Jogo de lonas, Tambor de freio">
+          </div>
+          <div>
+            <label class="form-label" style="font-size: 11px;">Custo de Peças (R$)</label>
+            <input type="number" step="0.01" name="custo_pecas" id="editCustoPecas" class="form-input" style="font-weight: 700; color: #7c3aed;">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label" style="font-size: 11px;">Serviços Realizados na Oficina</label>
+          <input type="text" name="servicos_realizados" id="editServicosRealizados" class="form-input" placeholder="Ex: Substituição e regulagem de freios pneumáticos">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-size: 11px;">Observações Técnicas / Motivo de Atraso</label>
+          <textarea name="observacoes" id="editObservacoes" class="form-textarea" rows="2" placeholder="Informações de testes, garantia ou peças pendentes..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 20px; display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn-limpar-filtros" onclick="fecharModalEditarOS()">Cancelar</button>
+        <button type="submit" class="btn-primary" style="padding: 8px 18px;">
+          <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações da Oficina
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     MODAL DE NOVA ENTRADA NA OFICINA
+     ========================================================================== -->
+<div class="modal-backdrop" id="modalNovaOSOficina">
+  <div class="modal-box" style="max-width: 580px;">
+    <div class="modal-header">
+      <h3 style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-plus" style="color: #f59e0b;"></i> Nova Entrada de Carro na Oficina
+      </h3>
+      <button style="font-size: 22px; color: #94a3b8; border: none; background: none; cursor: pointer;" onclick="fecharModalNovaOSOficina()">&times;</button>
+    </div>
+
+    <form action="{{ url_for('api_nova_os_oficina') }}" method="POST">
+      <div class="modal-body" style="padding: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <label class="form-label">Prefixo do Ônibus (Ex: 5045)</label>
+            <input type="text" name="prefixo_veiculo" class="form-input" placeholder="Ex: 5045" required>
+          </div>
+          <div>
+            <label class="form-label">Placa</label>
+            <input type="text" name="placa" class="form-input" placeholder="Ex: BRA2E19" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <label class="form-label">Linha de Operação</label>
+            <select name="linha" class="form-select">
+              {% for l in linhas %}
+                <option value="{{ l }}">{{ l }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Mecânico Responsável</label>
+            <select name="mecanico_responsavel" class="form-select">
+              {% for m in mecanicos_lista %}
+                <option value="{{ m }}">{{ m }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <label class="form-label">Km de Entrada</label>
+            <input type="number" name="km_entrada" class="form-input" value="147500" required>
+          </div>
+          <div>
+            <label class="form-label">Status Inicial</label>
+            <select name="status" class="form-select">
+              <option value="Em Manutenção">Em Manutenção (Box)</option>
+              <option value="Aguardando Peças">Aguardando Peças</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label">Defeito Reclamado (Pelo Motorista ou Portaria)</label>
+          <input type="text" name="defeito_reclamado" class="form-input" placeholder="Ex: Freio assobiando e perda de pressão de ar" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">Defeito Constatado Inicial</label>
+          <input type="text" name="defeito_constatado" class="form-input" placeholder="Ex: Avaliação inicial aponta desgaste acentuado nas lonas" required>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 20px; display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn-limpar-filtros" onclick="fecharModalNovaOSOficina()">Cancelar</button>
+        <button type="submit" class="btn-primary" style="background: #f59e0b; border-color: #f59e0b;">
+          <i class="fa-solid fa-check"></i> Abrir Ordem de Serviço
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function abrirModalEditarOS(dados) {
+    document.getElementById('editOSId').value = dados.id;
+    document.getElementById('lblModalNumeroOS').textContent = dados.numero_os;
+    document.getElementById('lblModalCarro').textContent = 'Ônibus ' + dados.prefixo + ' (' + dados.placa + ')';
+    document.getElementById('lblModalLinhaModelo').textContent = dados.modelo + ' • ' + dados.linha;
+    document.getElementById('lblModalDefeitoReclamado').textContent = dados.defeito_reclamado;
+
+    document.getElementById('editDataEntrada').value = dados.data_entrada;
+    document.getElementById('editPrevisaoEntrega').value = dados.previsao_entrega || '';
+    document.getElementById('editDataConclusao').value = dados.data_conclusao || '';
+    document.getElementById('editStatus').value = dados.status;
+    document.getElementById('editMecanico').value = dados.mecanico;
+
+    document.getElementById('editKmEntrada').value = dados.km_entrada;
+    document.getElementById('editKmTotal').value = dados.km_total;
+
+    document.getElementById('editDefeitoConstatado').value = dados.defeito_constatado;
+    document.getElementById('editPecasTrocadas').value = dados.pecas;
+    document.getElementById('editServicosRealizados').value = dados.servicos;
+    document.getElementById('editCustoPecas').value = parseFloat(dados.custo_pecas || 0).toFixed(2);
+    document.getElementById('editObservacoes').value = dados.observacoes;
+
+    document.getElementById('modalEditarOS').classList.add('is-open');
+  }
+
+  function fecharModalEditarOS() {
+    document.getElementById('modalEditarOS').classList.remove('is-open');
+  }
+
+  function abrirModalNovaOSOficina() {
+    document.getElementById('modalNovaOSOficina').classList.add('is-open');
+  }
+
+  function fecharModalNovaOSOficina() {
+    document.getElementById('modalNovaOSOficina').classList.remove('is-open');
+  }
+
+  {% if view_mode == 'dashboard' %}
+  // Inicialização dos Gráficos Chart.js do Dashboard Estratégico
+  window.addEventListener('DOMContentLoaded', function() {
+    // 1. Gráfico Semanas de Novembro
+    const ctxSemanas = document.getElementById('chartSemanas');
+    if (ctxSemanas) {
+      new Chart(ctxSemanas, {
+        type: 'bar',
+        data: {
+          labels: {{ historico_semanas|map(attribute='semana_label')|list|tojson }},
+          datasets: [
+            {
+              label: 'Ordens de Serviço Abertas',
+              data: {{ historico_semanas|map(attribute='qtd_os')|list|tojson }},
+              backgroundColor: 'rgba(20, 134, 110, 0.85)',
+              borderRadius: 6,
+              yAxisID: 'y'
+            },
+            {
+              label: 'Tempo Médio Parado (Dias)',
+              data: {{ historico_semanas|map(attribute='media_dias')|list|tojson }},
+              type: 'line',
+              borderColor: '#ef4444',
+              backgroundColor: '#ef4444',
+              borderWidth: 3,
+              pointRadius: 5,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Qtd. de OSs' }
+            },
+            y1: {
+              beginAtZero: true,
+              position: 'right',
+              grid: { drawOnChartArea: false },
+              title: { display: true, text: 'Dias Parados (Média)' }
+            }
+          }
+        }
+      });
+    }
+
+    // 2. Gráfico Efetivo da Frota (Donut)
+    const ctxEfetivo = document.getElementById('chartEfetivo');
+    if (ctxEfetivo) {
+      new Chart(ctxEfetivo, {
+        type: 'doughnut',
+        data: {
+          labels: ['Em Operação (Linha)', 'Em Manutenção (Box)', 'Aguardando Peças', 'Em Testes'],
+          datasets: [{
+            data: [{{ kpis.frota_operando }}, {{ kpis.carros_manutencao }}, {{ kpis.carros_aguardando_pecas }}, {{ kpis.carros_testes }}],
+            backgroundColor: ['#10b981', '#f59e0b', '#8b5cf6', '#0284c7'],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          cutout: '72%'
+        }
+      });
+    }
+  });
+  {% endif %}
+</script>
+{% endblock %}

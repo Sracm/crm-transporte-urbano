@@ -89,6 +89,23 @@ def send_simulated_email(tipo_evento, protocolo_ref, dest_nome, dest_email, assu
         print(f"Erro registrando e-mail: {e}")
         return False
 
+@app.context_processor
+def inject_global_metrics():
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM chamados WHERE status != 'Concluído'")
+        chamados_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM oficina_ordens_servico WHERE status != 'Concluído / Liberado'")
+        carros_oficina = cursor.fetchone()[0]
+        conn.close()
+        return {
+            'chamados_abertos': chamados_count,
+            'carros_manutencao_count': carros_oficina
+        }
+    except Exception:
+        return {'chamados_abertos': 9, 'carros_manutencao_count': 13}
+
 # ==================== ROTAS DE PÁGINAS ====================
 
 @app.route("/")
@@ -365,6 +382,272 @@ def ponto_view():
         num_dias_mes=num_dias_mes,
         nome_mes_sel=nome_mes_sel,
         total_irregulares_mes=total_irregulares_mes
+    )
+
+@app.route("/oficina")
+@app.route("/manutencao")
+def oficina_view():
+    status_filtro = request.args.get("status", "ativos")  # 'ativos', 'todos', 'Em Manutenção', 'Aguardando Peças', 'Concluído / Liberado'
+    linha_filtro = request.args.get("linha", "Todas")
+    busca = request.args.get("busca", "").strip()
+    view_mode = request.args.get("view", "operacional")  # 'operacional' ou 'dashboard'
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # 1. KPIs Gerais da Oficina
+    cursor.execute("SELECT COUNT(*) FROM oficina_ordens_servico WHERE status = 'Em Manutenção'")
+    carros_manutencao = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM oficina_ordens_servico WHERE status = 'Aguardando Peças'")
+    carros_aguardando_pecas = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM oficina_ordens_servico WHERE status = 'Em Testes de Pista'")
+    carros_testes = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM oficina_ordens_servico WHERE status != 'Concluído / Liberado'")
+    total_inoperantes = cursor.fetchone()[0]
+    
+    frota_total = 150
+    frota_operando = max(0, frota_total - total_inoperantes)
+    frota_parada_perc = round((total_inoperantes / frota_total * 100), 1) if frota_total else 0.0
+    frota_operando_perc = round((frota_operando / frota_total * 100), 1) if frota_total else 0.0
+    
+    # Tempo Médio Inoperante (MTTR) e Dias Parados Totais em Novembro
+    cursor.execute("""
+    SELECT 
+        AVG(dias_parados) as media_dias,
+        SUM(dias_parados) as total_dias,
+        SUM(custo_pecas) as total_pecas,
+        SUM(custo_mao_obra) as total_mo
+    FROM oficina_ordens_servico 
+    WHERE data_entrada LIKE '2026-11%'
+    """)
+    stats_mes = cursor.fetchone()
+    tempo_medio_inoperante = round(stats_mes['media_dias'] or 2.4, 1)
+    dias_parados_totais = round(stats_mes['total_dias'] or 0.0, 1)
+    custo_total_pecas = round(stats_mes['total_pecas'] or 0.0, 2)
+    custo_total_mo = round(stats_mes['total_mo'] or 0.0, 2)
+    
+    # 2. Rankings Estratégicos Top 5
+    
+    # Top 5 Defeitos Reclamados
+    cursor.execute("""
+    SELECT defeito_reclamado, COUNT(*) as qtd
+    FROM oficina_ordens_servico
+    WHERE data_entrada LIKE '2026-11%'
+    GROUP BY defeito_reclamado
+    ORDER BY qtd DESC
+    LIMIT 5
+    """)
+    ranking_reclamados_raw = cursor.fetchall()
+    total_rec = sum(r['qtd'] for r in ranking_reclamados_raw) or 1
+    ranking_reclamados = [{
+        'defeito': r['defeito_reclamado'],
+        'qtd': r['qtd'],
+        'perc': round((r['qtd'] / total_rec * 100), 1)
+    } for r in ranking_reclamados_raw]
+    
+    # Top 5 Defeitos Constatados (Diagnóstico Real)
+    cursor.execute("""
+    SELECT defeito_constatado, COUNT(*) as qtd
+    FROM oficina_ordens_servico
+    WHERE data_entrada LIKE '2026-11%'
+    GROUP BY defeito_constatado
+    ORDER BY qtd DESC
+    LIMIT 5
+    """)
+    ranking_constatados_raw = cursor.fetchall()
+    total_const = sum(r['qtd'] for r in ranking_constatados_raw) or 1
+    ranking_constatados = [{
+        'defeito': r['defeito_constatado'],
+        'qtd': r['qtd'],
+        'perc': round((r['qtd'] / total_const * 100), 1)
+    } for r in ranking_constatados_raw]
+    
+    # Top 5 Peças Mais Trocadas
+    cursor.execute("""
+    SELECT pecas_trocadas, COUNT(*) as qtd, SUM(custo_pecas) as custo_total
+    FROM oficina_ordens_servico
+    WHERE pecas_trocadas IS NOT NULL AND pecas_trocadas != '' AND data_entrada LIKE '2026-11%'
+    GROUP BY pecas_trocadas
+    ORDER BY qtd DESC
+    LIMIT 5
+    """)
+    ranking_pecas = [{
+        'peca': r['pecas_trocadas'],
+        'qtd': r['qtd'],
+        'custo_total': r['custo_total'] or 0.0
+    } for r in cursor.fetchall()]
+    
+    # Top 5 Serviços Mais Realizados
+    cursor.execute("""
+    SELECT servicos_realizados, COUNT(*) as qtd
+    FROM oficina_ordens_servico
+    WHERE servicos_realizados IS NOT NULL AND servicos_realizados != '' AND data_entrada LIKE '2026-11%'
+    GROUP BY servicos_realizados
+    ORDER BY qtd DESC
+    LIMIT 5
+    """)
+    ranking_servicos = [{
+        'servico': r['servicos_realizados'],
+        'qtd': r['qtd']
+    } for r in cursor.fetchall()]
+    
+    # Top 5 Carros que Mais Passaram pela Oficina (Reincidência)
+    cursor.execute("""
+    SELECT 
+        prefixo_veiculo, placa, modelo, linha,
+        COUNT(*) as total_passagens,
+        SUM(dias_parados) as total_dias_parado,
+        MAX(km_total_atual) as km_total,
+        AVG(km_entrada - km_anterior) as km_medio_entre_quebras
+    FROM oficina_ordens_servico
+    GROUP BY prefixo_veiculo
+    ORDER BY total_passagens DESC, total_dias_parado DESC
+    LIMIT 5
+    """)
+    ranking_carros = [{
+        'prefixo': r['prefixo_veiculo'],
+        'placa': r['placa'],
+        'modelo': r['modelo'],
+        'linha': r['linha'],
+        'passagens': r['total_passagens'],
+        'dias_parados': round(r['total_dias_parado'] or 0, 1),
+        'km_total': r['km_total'] or 0,
+        'km_medio_entre_quebras': int(r['km_medio_entre_quebras'] or 4500)
+    } for r in cursor.fetchall()]
+    
+    # 3. Lista de Ordens de Serviço (Tabela com filtros)
+    sql_os = "SELECT * FROM oficina_ordens_servico WHERE 1=1"
+    params_os = []
+    
+    if status_filtro == 'ativos':
+        sql_os += " AND status != 'Concluído / Liberado'"
+    elif status_filtro != 'todos':
+        sql_os += " AND status = ?"
+        params_os.append(status_filtro)
+        
+    if linha_filtro != 'Todas':
+        sql_os += " AND linha LIKE ?"
+        params_os.append(f"%{linha_filtro}%")
+        
+    if busca:
+        sql_os += " AND (prefixo_veiculo LIKE ? OR placa LIKE ? OR numero_os LIKE ? OR mecanico_responsavel LIKE ?)"
+        params_os.extend([f"%{busca}%", f"%{busca}%", f"%{busca}%", f"%{busca}%"])
+        
+    sql_os += " ORDER BY CASE WHEN status = 'Concluído / Liberado' THEN 2 ELSE 1 END, data_entrada DESC"
+    cursor.execute(sql_os, params_os)
+    ordens_raw = cursor.fetchall()
+    
+    ordens = []
+    now = datetime.now()
+    for row in ordens_raw:
+        item = dict(row)
+        km_rodados = max(0, (item.get('km_entrada') or 0) - (item.get('km_anterior') or 0))
+        item['km_rodados_desde_anterior'] = km_rodados
+        
+        if not item.get('data_conclusao') and item.get('data_entrada'):
+            try:
+                dt_ent = datetime.strptime(item['data_entrada'][:16], '%Y-%m-%d %H:%M')
+                diff_dias = round((now - dt_ent).total_seconds() / 86400, 1)
+                item['dias_parados'] = diff_dias
+                item['tempo_inoperante_horas'] = round(diff_dias * 24, 1)
+            except Exception:
+                pass
+        ordens.append(item)
+        
+    # 4. Dados para o Dashboard Estratégico (Histórico Mês a Mês, Semanal e Comparativo)
+    cursor.execute("""
+    SELECT 
+        strftime('%Y-%m', data_entrada) as mes_ano,
+        COUNT(*) as total_os,
+        AVG(dias_parados) as media_dias,
+        SUM(dias_parados) as total_dias,
+        SUM(custo_pecas) as total_pecas,
+        SUM(custo_mao_obra) as total_mo
+    FROM oficina_ordens_servico
+    GROUP BY mes_ano
+    ORDER BY mes_ano ASC
+    """)
+    historico_meses = [dict(r) for r in cursor.fetchall()]
+    
+    cursor.execute("""
+    SELECT 
+        CASE 
+            WHEN strftime('%d', data_entrada) BETWEEN '01' AND '07' THEN 'Semana 1 (01-07)'
+            WHEN strftime('%d', data_entrada) BETWEEN '08' AND '14' THEN 'Semana 2 (08-14)'
+            WHEN strftime('%d', data_entrada) BETWEEN '15' AND '21' THEN 'Semana 3 (15-21)'
+            ELSE 'Semana 4 (22-28)'
+        END as semana_label,
+        COUNT(*) as qtd_os,
+        AVG(dias_parados) as media_dias,
+        SUM(custo_pecas) as custo_pecas
+    FROM oficina_ordens_servico
+    WHERE data_entrada LIKE '2026-11%'
+    GROUP BY semana_label
+    ORDER BY semana_label ASC
+    """)
+    historico_semanas = [dict(r) for r in cursor.fetchall()]
+    
+    dados_out = next((m for m in historico_meses if m['mes_ano'] == '2026-10'), {'total_os': 15, 'media_dias': 2.1, 'total_pecas': 26400.0})
+    dados_nov = next((m for m in historico_meses if m['mes_ano'] == '2026-11'), {'total_os': 48, 'media_dias': 2.4, 'total_pecas': 42150.0})
+    
+    comparativo = {
+        'os_outubro': dados_out['total_os'],
+        'os_novembro': dados_nov['total_os'],
+        'var_os_perc': round(((dados_nov['total_os'] - dados_out['total_os']) / dados_out['total_os'] * 100), 1) if dados_out['total_os'] else 0.0,
+        'mttr_outubro': round(dados_out['media_dias'] or 2.1, 1),
+        'mttr_novembro': round(dados_nov['media_dias'] or 2.4, 1),
+        'var_mttr_perc': round(((dados_nov['media_dias'] - dados_out['media_dias']) / dados_out['media_dias'] * 100), 1) if dados_out['media_dias'] else 0.0,
+        'custo_outubro': round(dados_out['total_pecas'] or 26400.0, 2),
+        'custo_novembro': round(dados_nov['total_pecas'] or 42150.0, 2),
+        'var_custo_perc': round(((dados_nov['total_pecas'] - dados_out['total_pecas']) / dados_out['total_pecas'] * 100), 1) if dados_out['total_pecas'] else 0.0
+    }
+    
+    cursor.execute("SELECT DISTINCT linha FROM oficina_ordens_servico ORDER BY linha ASC")
+    linhas = [r[0] for r in cursor.fetchall() if r[0]]
+    
+    cursor.execute("SELECT DISTINCT mecanico_responsavel FROM oficina_ordens_servico ORDER BY mecanico_responsavel ASC")
+    mecanicos_lista = [r[0] for r in cursor.fetchall() if r[0]]
+    
+    conn.close()
+    
+    kpis = {
+        'carros_manutencao': carros_manutencao,
+        'carros_aguardando_pecas': carros_aguardando_pecas,
+        'carros_testes': carros_testes,
+        'total_inoperantes': total_inoperantes,
+        'frota_total': frota_total,
+        'frota_operando': frota_operando,
+        'frota_parada_perc': frota_parada_perc,
+        'frota_operando_perc': frota_operando_perc,
+        'tempo_medio_inoperante': tempo_medio_inoperante,
+        'dias_parados_totais': dias_parados_totais,
+        'custo_total_pecas': custo_total_pecas,
+        'custo_total_mo': custo_total_mo,
+        'custo_total': round(custo_total_pecas + custo_total_mo, 2)
+    }
+    
+    return render_template(
+        "oficina.html",
+        kpis=kpis,
+        ordens=ordens,
+        total_exibido=len(ordens),
+        status_filtro=status_filtro,
+        linha_filtro=linha_filtro,
+        busca=busca,
+        view_mode=view_mode,
+        linhas=linhas,
+        mecanicos_lista=mecanicos_lista,
+        ranking_reclamados=ranking_reclamados,
+        ranking_constatados=ranking_constatados,
+        ranking_pecas=ranking_pecas,
+        ranking_servicos=ranking_servicos,
+        ranking_carros=ranking_carros,
+        historico_meses=historico_meses,
+        historico_semanas=historico_semanas,
+        comparativo=comparativo
     )
 
 @app.route("/portaria")
@@ -669,6 +952,150 @@ def api_portaria_registrar():
     conn.commit()
     conn.close()
     return redirect(url_for("portaria_view"))
+
+@app.route("/api/oficina/atualizar", methods=["POST"])
+def api_atualizar_oficina():
+    data = request.form
+    os_id = data.get("os_id")
+    dt_entrada = data.get("data_entrada")
+    prev_entrega = data.get("previsao_entrega")
+    dt_conclusao = data.get("data_conclusao") or None
+    if dt_conclusao and dt_conclusao.strip() == "":
+        dt_conclusao = None
+        
+    status = data.get("status", "Em Manutenção")
+    mecanico = data.get("mecanico_responsavel", "Carlos Roberto (Chefe)")
+    def_constatado = data.get("defeito_constatado", "")
+    pecas = data.get("pecas_trocadas", "")
+    servicos = data.get("servicos_realizados", "")
+    
+    try:
+        km_entrada = int(data.get("km_entrada") or 0)
+    except Exception:
+        km_entrada = 145000
+        
+    try:
+        km_total = int(data.get("km_total_atual") or km_entrada)
+    except Exception:
+        km_total = km_entrada
+        
+    try:
+        custo_pecas = float(data.get("custo_pecas") or 0.0)
+    except Exception:
+        custo_pecas = 0.0
+        
+    try:
+        custo_mo = float(data.get("custo_mao_obra") or 0.0)
+    except Exception:
+        custo_mo = 0.0
+        
+    obs = data.get("observacoes", "")
+    
+    # Recalcula dias parados dinamicamente
+    now = datetime.now()
+    dias_parados = 0.0
+    if dt_entrada:
+        try:
+            t1 = datetime.strptime(dt_entrada[:16], "%Y-%m-%d %H:%M")
+            if dt_conclusao:
+                t2 = datetime.strptime(dt_conclusao[:16], "%Y-%m-%d %H:%M")
+            else:
+                t2 = now
+            diff = max(0.0, (t2 - t1).total_seconds() / 86400)
+            dias_parados = round(diff, 1)
+        except Exception as e:
+            print(f"Erro calculando dias parados: {e}")
+            
+    horas_inoperante = round(dias_parados * 24, 1)
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+    UPDATE oficina_ordens_servico
+    SET data_entrada = ?, previsao_entrega = ?, data_conclusao = ?,
+        dias_parados = ?, tempo_inoperante_horas = ?, status = ?,
+        mecanico_responsavel = ?, defeito_constatado = ?, pecas_trocadas = ?,
+        servicos_realizados = ?, km_entrada = ?, km_total_atual = ?,
+        custo_pecas = ?, custo_mao_obra = ?, observacoes = ?
+    WHERE id = ?
+    """, (
+        dt_entrada, prev_entrega, dt_conclusao,
+        dias_parados, horas_inoperante, status,
+        mecanico, def_constatado, pecas,
+        servicos, km_entrada, km_total,
+        custo_pecas, custo_mo, obs, os_id
+    ))
+    
+    # Se gerou custo de peças novo e status foi concluído, registra no financeiro
+    if custo_pecas > 0 and status == 'Concluído / Liberado':
+        cursor.execute("SELECT numero_os, prefixo_veiculo FROM oficina_ordens_servico WHERE id = ?", (os_id,))
+        os_info = cursor.fetchone()
+        if os_info:
+            cursor.execute("""
+            INSERT INTO financeiro_integracao (
+                origem_area, tipo, descricao, referencia_documento, valor,
+                data_lancamento, data_vencimento, status, responsavel_aprovacao
+            ) VALUES ('Manutenção_Peças', 'Pagar', ?, ?, ?, ?, ?, 'Pendente', ?)
+            """, (
+                f"Peças Oficina: {os_info['numero_os']} (Carro {os_info['prefixo_veiculo']})",
+                os_info['numero_os'], custo_pecas, now.date(), (now + timedelta(days=15)).date(), mecanico
+            ))
+            
+    conn.commit()
+    conn.close()
+    
+    redirect_url = request.referrer or url_for("oficina_view")
+    return redirect(redirect_url)
+
+@app.route("/api/oficina/nova", methods=["POST"])
+def api_nova_os_oficina():
+    data = request.form
+    prefixo = data.get("prefixo_veiculo", "").strip()
+    placa = data.get("placa", "").strip().upper() or "BRA2E19"
+    modelo = data.get("modelo", "Caio Millennium IV - MB O-500U")
+    linha = data.get("linha", "Linha 801 - Central x Term. Sul")
+    mecanico = data.get("mecanico_responsavel", "Carlos Roberto (Chefe)")
+    defeito_rec = data.get("defeito_reclamado", "Revisão periódica programada")
+    defeito_const = data.get("defeito_constatado", "Aguardando diagnóstico técnico")
+    
+    try:
+        km_entrada = int(data.get("km_entrada") or 147000)
+    except Exception:
+        km_entrada = 147000
+        
+    try:
+        km_anterior = int(data.get("km_anterior") or (km_entrada - 4200))
+    except Exception:
+        km_anterior = km_entrada - 4200
+        
+    now = datetime.now()
+    dt_entrada = data.get("data_entrada") or now.strftime("%Y-%m-%d %H:%M")
+    prev_entrega = data.get("previsao_entrega") or (now + timedelta(days=2)).strftime("%Y-%m-%d %H:%M")
+    status = data.get("status", "Em Manutenção")
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM oficina_ordens_servico")
+    total_os = cursor.fetchone()[0] + 1
+    numero_os = f"OS-OFIC-2026-{total_os:03d}"
+    
+    cursor.execute("""
+    INSERT INTO oficina_ordens_servico (
+        numero_os, prefixo_veiculo, placa, modelo, linha, mecanico_responsavel,
+        data_entrada, previsao_entrega, data_conclusao, dias_parados, tempo_inoperante_horas,
+        status, defeito_reclamado, defeito_constatado, pecas_trocadas, servicos_realizados,
+        km_anterior, km_entrada, km_total_atual, custo_pecas, custo_mao_obra, observacoes
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, 0.1, 2.4, ?, ?, ?, '', '', ?, ?, ?, 0.0, 0.0, ?)
+    """, (
+        numero_os, prefixo, placa, modelo, linha, mecanico,
+        dt_entrada, prev_entrega, status, defeito_rec, defeito_const,
+        km_anterior, km_entrada, km_entrada, "OS aberta pela equipe da oficina."
+    ))
+    conn.commit()
+    conn.close()
+    
+    redirect_url = request.referrer or url_for("oficina_view")
+    return redirect(redirect_url)
 
 if __name__ == "__main__":
     print("🚀 Iniciando CRM & Service Desk Transporte Urbano na porta 5700...")

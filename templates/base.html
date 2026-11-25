@@ -74,6 +74,11 @@
         <i class="fa-solid fa-tower-broadcast"></i>
         <span>Frota CCO</span>
       </a>
+      <a href="{{ url_for('oficina_view') }}" class="nav-item {% if '/oficina' in request.path or '/manutencao' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
+        <i class="fa-solid fa-screwdriver-wrench"></i>
+        <span>Manutenção / Oficina</span>
+        <span class="nav-count" style="background: #f59e0b; color: #fff;">{{ carros_manutencao_count|default(13) }}</span>
+      </a>
       <a href="{{ url_for('portaria_view') }}" class="nav-item {% if '/portaria' in request.path %}active{% endif %}" onclick="closeSidebarOnMobile()">
         <i class="fa-solid fa-bus"></i>
         <span>Portaria & Garagem</span>
