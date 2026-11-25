@@ -323,13 +323,134 @@
     color: #10b981;
   }
 
-  /* MAPA AO VIVO */
+  /* MAPA AO VIVO & ITINERÁRIOS */
   #mapaTelemetria {
-    height: 540px;
+    height: 560px;
     width: 100%;
     border-radius: 14px;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* BARRA DE DESTAQUE DOS ITINERÁRIOS (ESTILO VIAÇÃO SA) */
+  .itinerarios-bar {
+    background: #f8fafc;
     border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+  }
+
+  .itinerarios-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .itinerarios-title {
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    color: #0f172a;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .itinerarios-hint {
+    font-size: 11.5px;
+    color: #64748b;
+  }
+
+  .itinerarios-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .itin-chip {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .itin-chip:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    transform: translateY(-1px);
+  }
+
+  .itin-chip.active {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.25);
+  }
+
+  .itin-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* CARD FLUTUANTE DE DETALHES DO ITINERÁRIO */
+  .itin-info-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #ffffff;
+    border-radius: 10px;
+    padding: 10px 18px;
+    margin-top: 10px;
+    font-size: 12px;
+    flex-wrap: wrap;
+    gap: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .itin-info-banner strong {
+    color: #5eead4;
+  }
+
+  .itin-kpis-mini {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .itin-kpi-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .itin-kpi-item span {
+    color: #94a3b8;
+    font-size: 11px;
+  }
+
+  .itin-kpi-item b {
+    color: #ffffff;
+    font-weight: 700;
   }
 
   .map-filter-bar {
@@ -738,6 +859,64 @@
         </div>
       </div>
 
+      <!-- BARRA DE DESTAQUE DOS ITINERÁRIOS & LINHAS (ESTILO PROJETO VIAÇÃO SA) -->
+      <div class="itinerarios-bar">
+        <div class="itinerarios-header">
+          <span class="itinerarios-title">
+            <i class="fa-solid fa-route" style="color: var(--primary);"></i> ITINERÁRIOS MUNICIPAIS & LINHAS EM DESTAQUE (ITAQUAQUECETUBA):
+          </span>
+          <span class="itinerarios-hint">
+            <i class="fa-solid fa-computer-mouse"></i> Clique no itinerário para traçar no mapa, dar zoom e filtrar os veículos
+          </span>
+        </div>
+        <div class="itinerarios-chips">
+          <button type="button" class="itin-chip active" id="btnItinTodas" onclick="destacarItinerario('Todas', this)" style="border-left: 4px solid var(--primary);">
+            <i class="fa-solid fa-network-wired"></i> Todas as Linhas (6)
+          </button>
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 801', this)" style="border-left: 4px solid #059669;">
+            <span class="itin-dot" style="background: #059669;"></span> <strong>801</strong> · Term. Central x Sul
+          </button>
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 703', this)" style="border-left: 4px solid #2563eb;">
+            <span class="itin-dot" style="background: #2563eb;"></span> <strong>703</strong> · Bairro Alto x Manoel Feio
+          </button>
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 602', this)" style="border-left: 4px solid #7c3aed;">
+            <span class="itin-dot" style="background: #7c3aed;"></span> <strong>602</strong> · Circular Hospitais
+          </button>
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 504', this)" style="border-left: 4px solid #d97706;">
+            <span class="itin-dot" style="background: #d97706;"></span> <strong>504</strong> · Vila Progresso x Centro
+          </button>
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 305', this)" style="border-left: 4px solid #0891b2;">
+            <span class="itin-dot" style="background: #0891b2;"></span> <strong>305</strong> · Expresso Term. Leste
+          </button>
+          <button type="button" class="itin-chip" onclick="destacarItinerario('Linha 412', this)" style="border-left: 4px solid #db2777;">
+            <span class="itin-dot" style="background: #db2777;"></span> <strong>412</strong> · Interbairros Norte x Oeste
+          </button>
+        </div>
+
+        <!-- BANNER DE INFORMAÇÕES DA LINHA SELECIONADA -->
+        <div id="itinInfoBanner" class="itin-info-banner">
+          <div>
+            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8;">Itinerário Ativo:</span>
+            <strong id="itinTitulo" style="display: block; font-size: 13.5px; margin-top: 2px;">Todas as Linhas Operacionais da Malha Municipal</strong>
+            <span id="itinDesc" style="font-size: 11.5px; color: #cbd5e1;">6 corredores ativos conectando o Centro aos terminais Manoel Feio, Sul e Leste.</span>
+          </div>
+          <div class="itin-kpis-mini">
+            <div class="itin-kpi-item">
+              <i class="fa-solid fa-arrows-left-right" style="color: #5eead4;"></i>
+              <div><span>Extensão Total:</span> <b id="itinKm">95,4 km</b></div>
+            </div>
+            <div class="itin-kpi-item">
+              <i class="fa-solid fa-bus" style="color: #38bdf8;"></i>
+              <div><span>Frota Programada:</span> <b id="itinFrota">80 carros</b></div>
+            </div>
+            <div class="itin-kpi-item">
+              <i class="fa-solid fa-stopwatch" style="color: #fcd34d;"></i>
+              <div><span>Headway Médio:</span> <b id="itinHeadway">5,8 min</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- MAPA LEAFLET -->
       <div id="mapaTelemetria"></div>
 
@@ -1070,6 +1249,142 @@
     }
   }
 
+  // Base de Dados de Itinerários Operacionais (Itaquaquecetuba / SP)
+  const itinerariosData = {
+    'Linha 801': {
+      nome: 'Linha 801 · Term. Central x Term. Sul',
+      cor: '#059669',
+      extensao_km: 14.8,
+      tempo_ciclo_min: 52,
+      headway_min: 4.0,
+      frota: 18,
+      itinerario: 'Via Av. Ítalo Adami, Estação Aracaré e SP-066 (Rodovia Henrique Eroles)',
+      coords: [
+        [-23.4862, -46.3485],
+        [-23.4880, -46.3465],
+        [-23.4890, -46.3440],
+        [-23.4920, -46.3415],
+        [-23.4950, -46.3390],
+        [-23.4980, -46.3370],
+        [-23.5015, -46.3385],
+        [-23.5050, -46.3360],
+        [-23.5085, -46.3335],
+        [-23.5120, -46.3310]
+      ]
+    },
+    'Linha 703': {
+      nome: 'Linha 703 · Bairro Alto x Estação Manoel Feio',
+      cor: '#2563eb',
+      extensao_km: 18.2,
+      tempo_ciclo_min: 64,
+      headway_min: 6.0,
+      frota: 14,
+      itinerario: 'Via Estrada de Santa Isabel (SP-056), Piratininga e Estação Eng. Manoel Feio',
+      coords: [
+        [-23.4550, -46.3720],
+        [-23.4585, -46.3700],
+        [-23.4610, -46.3680],
+        [-23.4650, -46.3665],
+        [-23.4682, -46.3655],
+        [-23.4720, -46.3610],
+        [-23.4750, -46.3580],
+        [-23.4790, -46.3530],
+        [-23.4830, -46.3505],
+        [-23.4862, -46.3485]
+      ]
+    },
+    'Linha 602': {
+      nome: 'Linha 602 · Circular Hospitais & Centro',
+      cor: '#7c3aed',
+      extensao_km: 12.5,
+      tempo_ciclo_min: 44,
+      headway_min: 8.0,
+      frota: 10,
+      itinerario: 'Via Hospital Geral de Itaquaquecetuba (CSI), Av. Emancipação e Centro',
+      coords: [
+        [-23.4862, -46.3485],
+        [-23.4820, -46.3460],
+        [-23.4800, -46.3410],
+        [-23.4850, -46.3380],
+        [-23.4900, -46.3360],
+        [-23.4950, -46.3390],
+        [-23.4980, -46.3420],
+        [-23.5010, -46.3450],
+        [-23.4970, -46.3490],
+        [-23.4910, -46.3500],
+        [-23.4862, -46.3485]
+      ]
+    },
+    'Linha 504': {
+      nome: 'Linha 504 · Vila Progresso x Centro',
+      cor: '#d97706',
+      extensao_km: 15.6,
+      tempo_ciclo_min: 56,
+      headway_min: 5.0,
+      frota: 12,
+      itinerario: 'Via Av. Uberaba, Vila Virginia e Praça Padre João Álvares (Centro)',
+      coords: [
+        [-23.5120, -46.3310],
+        [-23.5090, -46.3350],
+        [-23.5060, -46.3380],
+        [-23.5020, -46.3440],
+        [-23.4980, -46.3490],
+        [-23.4940, -46.3510],
+        [-23.4900, -46.3500],
+        [-23.4862, -46.3485]
+      ]
+    },
+    'Linha 305': {
+      nome: 'Linha 305 · Expresso Terminal Leste x Manoel Feio',
+      cor: '#0891b2',
+      extensao_km: 16.9,
+      tempo_ciclo_min: 58,
+      headway_min: 6.0,
+      frota: 15,
+      itinerario: 'Via Corredor Norte, Rodovia Ayrton Senna e Estação Eng. Manoel Feio',
+      coords: [
+        [-23.4980, -46.3620],
+        [-23.4920, -46.3710],
+        [-23.4840, -46.3700],
+        [-23.4750, -46.3680],
+        [-23.4682, -46.3655]
+      ]
+    },
+    'Linha 412': {
+      nome: 'Linha 412 · Interbairros Norte x Oeste',
+      cor: '#db2777',
+      extensao_km: 17.4,
+      tempo_ciclo_min: 60,
+      headway_min: 7.0,
+      frota: 11,
+      itinerario: 'Via Estrada do Mandi, Bairro Cuiabá, Garagem Central e Centro',
+      coords: [
+        [-23.4580, -46.3500],
+        [-23.4650, -46.3520],
+        [-23.4730, -46.3550],
+        [-23.4790, -46.3530],
+        [-23.4832, -46.3556],
+        [-23.4862, -46.3485]
+      ]
+    }
+  };
+
+  // Terminais e Pontos Estratégicos de Itaquaquecetuba
+  const terminaisData = [
+    { nome: 'Garagem Central Expresso Planalto (Grupo CSC)', tipo: 'Garagem', icone: 'fa-warehouse', cor: '#00867d', lat: -23.4832, lng: -46.3556, desc: 'Sede operacional, frota de 150 veículos e centro de manutenção.' },
+    { nome: 'Terminal Urbano Central de Itaquaquecetuba', tipo: 'Terminal', icone: 'fa-bus-simple', cor: '#0f172a', lat: -23.4862, lng: -46.3485, desc: 'Principal hub de conexão do transporte municipal.' },
+    { nome: 'Estação CPTM Eng. Manoel Feio (Linha 12 - Safira)', tipo: 'CPTM', icone: 'fa-train-subway', cor: '#0284c7', lat: -23.4682, lng: -46.3655, desc: 'Terminal de integração intermodal com a ferrovia.' },
+    { nome: 'Estação CPTM Aracaré (Linha 12 - Safira)', tipo: 'CPTM', icone: 'fa-train-subway', cor: '#0284c7', lat: -23.5015, lng: -46.3385, desc: 'Estação de transbordo e acesso a Poá.' },
+    { nome: 'Hospital Geral de Itaquaquecetuba (CSI)', tipo: 'Saúde', icone: 'fa-hospital', cor: '#e11d48', lat: -23.4950, lng: -46.3390, desc: 'Atendido pelo corredor da Linha 602.' },
+    { nome: 'Terminal Sul / Vila Progresso', tipo: 'Terminal', icone: 'fa-bus-simple', cor: '#0f172a', lat: -23.5120, lng: -46.3310, desc: 'Terminal de distribuição das linhas da Zona Sul.' }
+  ];
+
+  let polylineObjects = {};
+  let itinerariosLayerGroup = null;
+  let terminaisLayerGroup = null;
+  let statusFiltroAtual = 'Todos';
+  let itinerarioFiltroAtual = 'Todas';
+
   // Inicialização do Mapa Leaflet
   function initTelemetriaMap() {
     if (mapInstance) {
@@ -1080,22 +1395,188 @@
     // Coordenadas centrais em Itaquaquecetuba / SP
     mapInstance = L.map('mapaTelemetria').setView([-23.4862, -46.3485], 13);
 
-    // Camada de mapa CartoDB Positron (Visual limpo e profissional de telemetria)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    // BASEMAP 100% LIVRE DE ERRO DE API KEY (OpenStreetMap Oficial)
+    const osmTile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19
     }).addTo(mapInstance);
 
+    // Basemap alternativo Esri Streets
+    const esriStreets = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri',
+      maxZoom: 19
+    });
+
+    // Basemap alternativo Esri Gray Canvas (Clean Executivo)
+    const esriGray = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri',
+      maxZoom: 16
+    });
+
+    L.control.layers({
+      "OpenStreetMap (Ruas & Avenidas)": osmTile,
+      "Esri Satélite / Vias": esriStreets,
+      "Esri Executivo Claro": esriGray
+    }, null, { position: 'topright' }).addTo(mapInstance);
+
+    itinerariosLayerGroup = L.layerGroup().addTo(mapInstance);
+    terminaisLayerGroup = L.layerGroup().addTo(mapInstance);
     markersLayer = L.layerGroup().addTo(mapInstance);
-    renderMapMarkers('Todos');
+
+    renderItinerarios();
+    renderTerminais();
+    renderMapMarkers();
   }
 
-  function renderMapMarkers(filtroStatus) {
+  // Renderiza as linhas dos itinerários no mapa
+  function renderItinerarios() {
+    if (!itinerariosLayerGroup) return;
+    itinerariosLayerGroup.clearLayers();
+    polylineObjects = {};
+
+    Object.keys(itinerariosData).forEach(chave => {
+      const itin = itinerariosData[chave];
+      
+      // Linha de contorno / brilho inferior
+      const casing = L.polyline(itin.coords, {
+        color: '#ffffff',
+        weight: 8,
+        opacity: 0.9,
+        lineCap: 'round',
+        lineJoin: 'round'
+      });
+      itinerariosLayerGroup.addLayer(casing);
+
+      // Linha principal do itinerário
+      const poly = L.polyline(itin.coords, {
+        color: itin.cor,
+        weight: 5,
+        opacity: 0.88,
+        lineCap: 'round',
+        lineJoin: 'round'
+      });
+
+      poly.bindTooltip(`<strong>${itin.nome}</strong><br><span style="font-size:11px;">${itin.itinerario} · ${itin.extensao_km} km</span>`, {
+        sticky: true,
+        className: 'itin-map-tooltip'
+      });
+
+      poly.on('click', function() {
+        const btn = Array.from(document.querySelectorAll('.itin-chip')).find(b => b.innerText.includes(chave.replace('Linha ', '')));
+        destacarItinerario(chave, btn);
+      });
+
+      itinerariosLayerGroup.addLayer(poly);
+      polylineObjects[chave] = { poly: poly, casing: casing, data: itin };
+    });
+  }
+
+  // Renderiza os terminais e a garagem central
+  function renderTerminais() {
+    if (!terminaisLayerGroup) return;
+    terminaisLayerGroup.clearLayers();
+
+    terminaisData.forEach(t => {
+      const termIcon = L.divIcon({
+        className: 'term-marker-icon',
+        html: `<div style="
+          background: ${t.cor};
+          color: #ffffff;
+          width: 30px;
+          height: 30px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 13px;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+          border: 2px solid #ffffff;
+        ">
+          <i class="fa-solid ${t.icone}"></i>
+        </div>`,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+      });
+
+      const marker = L.marker([t.lat, t.lng], { icon: termIcon, zIndexOffset: 500 });
+      marker.bindPopup(`
+        <div style="font-family: Montserrat, Inter, sans-serif; padding: 4px;">
+          <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: ${t.cor}; background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px;">${t.tipo}</span>
+          <strong style="display: block; font-size: 13px; color: #0f172a; margin: 4px 0 2px;">${t.nome}</strong>
+          <p style="font-size: 11.5px; color: #64748b; margin: 0;">${t.desc}</p>
+        </div>
+      `);
+      terminaisLayerGroup.addLayer(marker);
+    });
+  }
+
+  // Destaque de itinerário com zoom e filtro (estilo Projeto Viação SA)
+  function destacarItinerario(linhaNome, btn) {
+    document.querySelectorAll('.itin-chip').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    itinerarioFiltroAtual = linhaNome;
+
+    const bannerTitulo = document.getElementById('itinTitulo');
+    const bannerDesc = document.getElementById('itinDesc');
+    const bannerKm = document.getElementById('itinKm');
+    const bannerFrota = document.getElementById('itinFrota');
+    const bannerHeadway = document.getElementById('itinHeadway');
+
+    if (linhaNome === 'Todas') {
+      // Restaura todas as linhas
+      Object.keys(polylineObjects).forEach(k => {
+        polylineObjects[k].poly.setStyle({ weight: 5, opacity: 0.88 });
+        polylineObjects[k].casing.setStyle({ weight: 8, opacity: 0.9 });
+      });
+
+      if (bannerTitulo) bannerTitulo.innerText = 'Todas as Linhas Operacionais da Malha Municipal';
+      if (bannerDesc) bannerDesc.innerText = '6 corredores ativos conectando o Centro aos terminais Manoel Feio, Sul e Leste.';
+      if (bannerKm) bannerKm.innerText = '95,4 km';
+      if (bannerFrota) bannerFrota.innerText = '80 carros';
+      if (bannerHeadway) bannerHeadway.innerText = '5,8 min';
+
+      mapInstance.setView([-23.4862, -46.3485], 13);
+    } else {
+      const selItin = itinerariosData[linhaNome];
+      if (selItin && polylineObjects[linhaNome]) {
+        // Destaca a linha selecionada e atenua as demais
+        Object.keys(polylineObjects).forEach(k => {
+          if (k === linhaNome) {
+            polylineObjects[k].poly.setStyle({ weight: 8, opacity: 1.0 });
+            polylineObjects[k].casing.setStyle({ weight: 12, opacity: 1.0 });
+            polylineObjects[k].poly.bringToFront();
+          } else {
+            polylineObjects[k].poly.setStyle({ weight: 2.5, opacity: 0.25 });
+            polylineObjects[k].casing.setStyle({ weight: 4, opacity: 0.25 });
+          }
+        });
+
+        if (bannerTitulo) bannerTitulo.innerHTML = `<span style="color: ${selItin.cor};">●</span> ${selItin.nome}`;
+        if (bannerDesc) bannerDesc.innerText = selItin.itinerario;
+        if (bannerKm) bannerKm.innerText = selItin.extensao_km + ' km';
+        if (bannerFrota) bannerFrota.innerText = selItin.frota + ' carros';
+        if (bannerHeadway) bannerHeadway.innerText = selItin.headway_min + ' min';
+
+        // Zoom automático para os limites da rota
+        const bounds = polylineObjects[linhaNome].poly.getBounds();
+        mapInstance.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+      }
+    }
+
+    renderMapMarkers();
+  }
+
+  function renderMapMarkers() {
     if (!markersLayer) return;
     markersLayer.clearLayers();
 
     veiculosData.forEach(v => {
-      if (filtroStatus !== 'Todos' && v.status !== filtroStatus) {
+      // Filtro de status
+      if (statusFiltroAtual !== 'Todos' && v.status !== statusFiltroAtual) {
+        return;
+      }
+      // Filtro de itinerário / linha
+      if (itinerarioFiltroAtual !== 'Todas' && v.linha !== itinerarioFiltroAtual) {
         return;
       }
 
@@ -1113,8 +1594,9 @@
           justify-content: center;
           font-weight: 800;
           font-size: 13px;
-          box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+          box-shadow: 0 4px 10px rgba(0,0,0,0.35);
           border: 2px solid #ffffff;
+          cursor: pointer;
         ">
           <i class="fa-solid fa-bus"></i>
         </div>`,
@@ -1126,7 +1608,7 @@
 
       // Popup rico com dados de telemetria CAN
       const popupContent = `
-        <div style="font-family: Montserrat, Inter, sans-serif; min-width: 230px; padding: 4px;">
+        <div style="font-family: Montserrat, Inter, sans-serif; min-width: 240px; padding: 4px;">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px;">
             <strong style="font-size: 14px; color: #0f172a;">Carro ${v.prefixo} · ${v.placa}</strong>
             <span style="font-size: 10.5px; padding: 2px 6px; border-radius: 4px; background: ${v.cor}; color: #fff; font-weight: 700;">${v.status}</span>
@@ -1155,7 +1637,8 @@
   function filtrarMapa(status, btn) {
     document.querySelectorAll('.map-chip').forEach(c => c.classList.remove('active'));
     if (btn) btn.classList.add('active');
-    renderMapMarkers(status);
+    statusFiltroAtual = status;
+    renderMapMarkers();
   }
 
   // Inicialização dos Gráficos Chart.js (Idênticos ao modelo do print)
