@@ -387,15 +387,16 @@ def ponto_view():
 @app.route("/oficina")
 @app.route("/manutencao")
 def oficina_view():
-    status_filtro = request.args.get("status", "ativos")  # 'ativos', 'todos', 'Em Manutenção', 'Aguardando Peças', 'Concluído / Liberado'
+    status_filtro = request.args.get("status", "ativos")  # 'ativos', 'todos', 'Em Manutenção', 'Aguardando Peças', 'Em Testes de Pista', 'Concluído / Liberado'
     linha_filtro = request.args.get("linha", "Todas")
     busca = request.args.get("busca", "").strip()
     view_mode = request.args.get("view", "operacional")  # 'operacional' ou 'dashboard'
+    ordenar_sel = request.args.get("ordenar", "dias_desc")  # dias_desc, dias_asc, km_rodados_desc, km_rodados_asc, data_desc, data_asc, carro_asc, carro_desc
     
     conn = get_db()
     cursor = conn.cursor()
     
-    # 1. KPIs Gerais da Oficina
+    # 1. KPIs Gerais da Oficina (Carros em Manutenção, Aguardando Peças, Em Testes)
     cursor.execute("SELECT COUNT(*) FROM oficina_ordens_servico WHERE status = 'Em Manutenção'")
     carros_manutencao = cursor.fetchone()[0]
     
@@ -429,7 +430,31 @@ def oficina_view():
     custo_total_pecas = round(stats_mes['total_pecas'] or 0.0, 2)
     custo_total_mo = round(stats_mes['total_mo'] or 0.0, 2)
     
-    # 2. Rankings Estratégicos Top 5
+    # 2. Rankings Estratégicos Top 5 (Reclamados, Constatados, Peças, Serviços, Carros e Itinerários)
+    
+    # Top 5 Itinerários / Linhas que Mais Ficam na Oficina
+    cursor.execute("""
+    SELECT 
+        linha,
+        COUNT(*) as total_os,
+        ROUND(SUM(dias_parados), 1) as total_dias,
+        ROUND(AVG(dias_parados), 1) as media_dias,
+        COUNT(DISTINCT prefixo_veiculo) as carros_distintos
+    FROM oficina_ordens_servico
+    GROUP BY linha
+    ORDER BY total_dias DESC
+    LIMIT 5
+    """)
+    ranking_itinerarios_raw = cursor.fetchall()
+    max_dias_itinerario = max((r[2] for r in ranking_itinerarios_raw), default=1.0) or 1.0
+    ranking_itinerarios = [{
+        'linha': r[0],
+        'total_os': r[1],
+        'total_dias': r[2],
+        'media_dias': r[3],
+        'carros_distintos': r[4],
+        'perc_barra': round((r[2] / max_dias_itinerario * 100), 1)
+    } for r in ranking_itinerarios_raw]
     
     # Top 5 Defeitos Reclamados
     cursor.execute("""
@@ -536,7 +561,6 @@ def oficina_view():
         sql_os += " AND (prefixo_veiculo LIKE ? OR placa LIKE ? OR numero_os LIKE ? OR mecanico_responsavel LIKE ?)"
         params_os.extend([f"%{busca}%", f"%{busca}%", f"%{busca}%", f"%{busca}%"])
         
-    sql_os += " ORDER BY CASE WHEN status = 'Concluído / Liberado' THEN 2 ELSE 1 END, data_entrada DESC"
     cursor.execute(sql_os, params_os)
     ordens_raw = cursor.fetchall()
     
@@ -557,7 +581,31 @@ def oficina_view():
                 pass
         ordens.append(item)
         
-    # 4. Dados para o Dashboard Estratégico (Histórico Mês a Mês, Semanal e Comparativo)
+    # CLASSIFICAÇÃO DA TABELA (DO MAIOR PARA O MENOR E VICE-VERSA)
+    if ordenar_sel == 'dias_asc':
+        ordens.sort(key=lambda x: (x.get('dias_parados') or 0.0))
+    elif ordenar_sel == 'km_rodados_desc':
+        ordens.sort(key=lambda x: (x.get('km_rodados_desde_anterior') or 0), reverse=True)
+    elif ordenar_sel == 'km_rodados_asc':
+        ordens.sort(key=lambda x: (x.get('km_rodados_desde_anterior') or 0))
+    elif ordenar_sel == 'km_total_desc':
+        ordens.sort(key=lambda x: (x.get('km_total_atual') or 0), reverse=True)
+    elif ordenar_sel == 'km_total_asc':
+        ordens.sort(key=lambda x: (x.get('km_total_atual') or 0))
+    elif ordenar_sel == 'data_asc':
+        ordens.sort(key=lambda x: x.get('data_entrada') or '')
+    elif ordenar_sel == 'data_desc':
+        ordens.sort(key=lambda x: x.get('data_entrada') or '', reverse=True)
+    elif ordenar_sel == 'carro_desc':
+        ordens.sort(key=lambda x: x.get('prefixo_veiculo') or '', reverse=True)
+    elif ordenar_sel == 'carro_asc':
+        ordens.sort(key=lambda x: x.get('prefixo_veiculo') or '')
+    elif ordenar_sel == 'status_asc':
+        ordens.sort(key=lambda x: x.get('status') or '')
+    else:  # 'dias_desc' (padrão: maior tempo parado primeiro)
+        ordens.sort(key=lambda x: (x.get('dias_parados') or 0.0), reverse=True)
+        
+    # 4. Dados para o Dashboard Estratégico (Histórico Mês a Mês Completo, Semanal e Comparativo)
     cursor.execute("""
     SELECT 
         strftime('%Y-%m', data_entrada) as mes_ano,
@@ -570,7 +618,19 @@ def oficina_view():
     GROUP BY mes_ano
     ORDER BY mes_ano ASC
     """)
-    historico_meses = [dict(r) for r in cursor.fetchall()]
+    historico_meses_raw = cursor.fetchall()
+    
+    nomes_meses_abrev = {'08': 'Agosto', '09': 'Setembro', '10': 'Outubro', '11': 'Novembro', '12': 'Dezembro'}
+    historico_meses = []
+    for r in historico_meses_raw:
+        m = dict(r)
+        partes = m['mes_ano'].split('-')
+        mes_cod = partes[1] if len(partes) > 1 else '11'
+        m['label_mes'] = f"{nomes_meses_abrev.get(mes_cod, mes_cod)}/{partes[0]}"
+        m['media_dias'] = round(m['media_dias'] or 0.0, 1)
+        m['total_dias'] = round(m['total_dias'] or 0.0, 1)
+        m['total_pecas'] = round(m['total_pecas'] or 0.0, 2)
+        historico_meses.append(m)
     
     cursor.execute("""
     SELECT 
@@ -638,8 +698,10 @@ def oficina_view():
         linha_filtro=linha_filtro,
         busca=busca,
         view_mode=view_mode,
+        ordenar_sel=ordenar_sel,
         linhas=linhas,
         mecanicos_lista=mecanicos_lista,
+        ranking_itinerarios=ranking_itinerarios,
         ranking_reclamados=ranking_reclamados,
         ranking_constatados=ranking_constatados,
         ranking_pecas=ranking_pecas,

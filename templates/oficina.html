@@ -6,6 +6,41 @@
 {% block extra_head %}
 <!-- Chart.js para o Dashboard Estratégico -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.metric-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.metric-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+.th-sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+.th-sortable:hover {
+  background: #e2e8f0 !important;
+}
+.th-sortable i {
+  margin-left: 4px;
+  font-size: 11px;
+}
+@media (max-width: 1400px) {
+  .metrics-oficina-6 {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+@media (max-width: 768px) {
+  .metrics-oficina-6 {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
 {% endblock %}
 
 {% block topbar_actions %}
@@ -30,65 +65,75 @@
 
   <!-- SELETOR DE VISÃO (OPERACIONAL VS DASHBOARD ESTRATÉGICO) -->
   <div class="oficina-view-switcher">
-    <a href="{{ url_for('oficina_view', view='operacional', status=status_filtro, linha=linha_filtro) }}" class="oficina-view-btn {% if view_mode == 'operacional' %}active{% endif %}">
+    <a href="{{ url_for('oficina_view', view='operacional', status=status_filtro, linha=linha_filtro, ordenar=ordenar_sel, busca=busca) }}" class="oficina-view-btn {% if view_mode == 'operacional' %}active{% endif %}">
       <i class="fa-solid fa-wrench"></i> Visão Operacional & Pátio
     </a>
-    <a href="{{ url_for('oficina_view', view='dashboard', status=status_filtro, linha=linha_filtro) }}" class="oficina-view-btn {% if view_mode == 'dashboard' %}active{% endif %}">
+    <a href="{{ url_for('oficina_view', view='dashboard', status=status_filtro, linha=linha_filtro, ordenar=ordenar_sel, busca=busca) }}" class="oficina-view-btn {% if view_mode == 'dashboard' %}active{% endif %}">
       <i class="fa-solid fa-chart-line"></i> Dashboard Estratégico Gerencial
     </a>
   </div>
 </div>
 
-<!-- 5 CARDS KPI PRINCIPAIS DA OFICINA -->
-<div class="metrics" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 22px;">
+<!-- 6 CARDS KPI PRINCIPAIS DA OFICINA (SEGREGADOS: MANUTENÇÃO, AGUARDANDO PEÇAS, TESTES) -->
+<div class="metrics metrics-oficina-6" style="grid-template-columns: repeat(6, 1fr); margin-bottom: 22px;">
   <!-- CARD 1: CARROS EM MANUTENÇÃO -->
-  <article class="metric" style="border-left: 4px solid #f59e0b;">
+  <a href="{{ url_for('oficina_view', view=view_mode, status='Em Manutenção', linha=linha_filtro, ordenar=ordenar_sel) }}" class="metric metric-link" style="border-left: 4px solid #f59e0b; {% if status_filtro == 'Em Manutenção' %}box-shadow: 0 0 0 2px #f59e0b;{% endif %}" title="Filtrar carros em manutenção ativa no box">
     <div class="metric-top">
       <span>Em Manutenção</span>
       <span class="metric-icon amber"><i class="fa-solid fa-screwdriver-wrench"></i></span>
     </div>
     <strong style="color: #b45309;">{{ kpis.carros_manutencao }} veículos</strong>
-    <p>Intervenção mecânica ativa nos boxes</p>
-  </article>
+    <p>Boxes mecânicos ativos</p>
+  </a>
 
   <!-- CARD 2: AGUARDANDO PEÇAS -->
-  <article class="metric" style="border-left: 4px solid #8b5cf6;">
+  <a href="{{ url_for('oficina_view', view=view_mode, status='Aguardando Peças', linha=linha_filtro, ordenar=ordenar_sel) }}" class="metric metric-link" style="border-left: 4px solid #8b5cf6; {% if status_filtro == 'Aguardando Peças' %}box-shadow: 0 0 0 2px #8b5cf6;{% endif %}" title="Filtrar carros aguardando peças de fornecedores">
     <div class="metric-top">
       <span>Aguardando Peças</span>
       <span class="metric-icon violet"><i class="fa-solid fa-boxes-packing"></i></span>
     </div>
     <strong style="color: #6d28d9;">{{ kpis.carros_aguardando_pecas }} veículos</strong>
-    <p>Aguardando entrega de fornecedor</p>
-  </article>
+    <p>Aguardando estoque / compras</p>
+  </a>
 
-  <!-- CARD 3: TEMPO MÉDIO INOPERANTE -->
-  <article class="metric" style="border-left: 4px solid #0284c7;">
+  <!-- CARD 3: EM TESTES DE PISTA -->
+  <a href="{{ url_for('oficina_view', view=view_mode, status='Em Testes de Pista', linha=linha_filtro, ordenar=ordenar_sel) }}" class="metric metric-link" style="border-left: 4px solid #0284c7; {% if status_filtro == 'Em Testes de Pista' %}box-shadow: 0 0 0 2px #0284c7;{% endif %}" title="Filtrar carros em teste de pista">
     <div class="metric-top">
-      <span>Tempo Médio Inoperante</span>
-      <span class="metric-icon blue"><i class="fa-solid fa-stopwatch-20"></i></span>
+      <span>Em Testes</span>
+      <span class="metric-icon blue"><i class="fa-solid fa-road"></i></span>
     </div>
-    <strong style="color: #0369a1;">{{ kpis.tempo_medio_inoperante }} dias</strong>
-    <p>MTTR médio por veículo na oficina</p>
+    <strong style="color: #0369a1;">{{ kpis.carros_testes }} veículos</strong>
+    <p>Pista / Validação final</p>
+  </a>
+
+  <!-- CARD 4: TEMPO MÉDIO INOPERANTE -->
+  <article class="metric" style="border-left: 4px solid #0d9488;">
+    <div class="metric-top">
+      <span>Tempo Médio (MTTR)</span>
+      <span class="metric-icon teal"><i class="fa-solid fa-stopwatch-20"></i></span>
+    </div>
+    <strong style="color: #0f766e;">{{ kpis.tempo_medio_inoperante }} dias</strong>
+    <p>Média por veículo parado</p>
   </article>
 
-  <!-- CARD 4: DIAS PARADOS TOTAIS -->
+  <!-- CARD 5: DIAS PARADOS TOTAIS -->
   <article class="metric" style="border-left: 4px solid #ef4444;">
     <div class="metric-top">
       <span>Dias Parados Totais</span>
       <span class="metric-icon red"><i class="fa-solid fa-hourglass-half"></i></span>
     </div>
     <strong style="color: #b91c1c;">{{ kpis.dias_parados_totais }} dias</strong>
-    <p>Acumulado da frota inoperante no mês</p>
+    <p>Acumulado da frota no mês</p>
   </article>
 
-  <!-- CARD 5: EFETIVO DA FROTA -->
+  <!-- CARD 6: EFETIVO DA FROTA -->
   <article class="metric" style="border-left: 4px solid #10b981;">
     <div class="metric-top">
-      <span>Disponibilidade da Frota</span>
+      <span>Disponibilidade</span>
       <span class="metric-icon emerald"><i class="fa-solid fa-bus"></i></span>
     </div>
     <strong style="color: #047857;">{{ kpis.frota_operando }} / {{ kpis.frota_total }}</strong>
-    <p>{{ kpis.frota_operando_perc }}% em operação ({{ kpis.frota_parada_perc }}% oficina)</p>
+    <p>{{ kpis.frota_operando_perc }}% em linha ({{ kpis.frota_parada_perc }}% oficina)</p>
   </article>
 </div>
 
@@ -147,9 +192,29 @@
   </div>
 </div>
 
-<!-- GRÁFICOS DO DASHBOARD ESTRATÉGICO -->
+<!-- NOVO GRÁFICO 1: EVOLUÇÃO HISTÓRICA MÊS A MÊS DA OFICINA (AGOSTO A NOVEMBRO) -->
+<div class="panel" style="padding: 20px; margin-bottom: 22px;">
+  <div class="panel-heading" style="padding: 0 0 14px 0; border-bottom: 1px solid #f1f5f9; flex-wrap: wrap; gap: 10px;">
+    <div>
+      <h3 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0;">
+        <i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> Histórico Mês a Mês da Oficina (Volume de OSs & MTTR Médio)
+      </h3>
+      <p style="font-size: 12px; color: #64748b; margin: 3px 0 0 0;">
+        Acompanhamento consolidado quadrimestral (Agosto a Novembro): volume de quebras, tempo médio que os veículos permaneceram parados e custo total de peças.
+      </p>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <span class="status-badge closed" style="font-size: 11px;"><i class="fa-solid fa-calendar-check"></i> Histórico Consolidado 4 Meses</span>
+    </div>
+  </div>
+  <div style="height: 310px; margin-top: 14px;">
+    <canvas id="chartMeses"></canvas>
+  </div>
+</div>
+
+<!-- GRÁFICOS SECUNDÁRIOS: SEMANAL E EFETIVO DA FROTA -->
 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 22px;">
-  <!-- GRÁFICO 1: EVOLUÇÃO SEMANAL DE NOVEMBRO -->
+  <!-- GRÁFICO 2: EVOLUÇÃO SEMANAL DE NOVEMBRO -->
   <div class="panel" style="padding: 20px;">
     <div class="panel-heading" style="padding: 0 0 14px 0; border-bottom: 1px solid #f1f5f9;">
       <div>
@@ -157,12 +222,12 @@
         <p style="font-size: 12px; color: #64748b; margin: 3px 0 0 0;">Volume de quebras e tempo médio que os ônibus ficaram parados semana a semana.</p>
       </div>
     </div>
-    <div style="height: 280px; margin-top: 10px;">
+    <div style="height: 270px; margin-top: 10px;">
       <canvas id="chartSemanas"></canvas>
     </div>
   </div>
 
-  <!-- GRÁFICO 2: EFETIVO DA FROTA (DISPONIBILIDADE) -->
+  <!-- GRÁFICO 3: EFETIVO DA FROTA (DISPONIBILIDADE) -->
   <div class="panel" style="padding: 20px;">
     <div class="panel-heading" style="padding: 0 0 14px 0; border-bottom: 1px solid #f1f5f9;">
       <div>
@@ -170,14 +235,14 @@
         <p style="font-size: 12px; color: #64748b; margin: 3px 0 0 0;">Proporção em operação versus pátio da oficina.</p>
       </div>
     </div>
-    <div style="height: 220px; margin-top: 10px; display: flex; align-items: center; justify-content: center;">
+    <div style="height: 210px; margin-top: 10px; display: flex; align-items: center; justify-content: center;">
       <canvas id="chartEfetivo"></canvas>
     </div>
     <div style="text-align: center; font-size: 11.5px; color: #64748b; margin-top: 8px;">
-      <strong style="color: #10b981;">137 em Linha</strong> &bull;
-      <strong style="color: #f59e0b;">7 Box Ativo</strong> &bull;
-      <strong style="color: #8b5cf6;">4 Aguardando Peças</strong> &bull;
-      <strong style="color: #0284c7;">2 Testes</strong>
+      <strong style="color: #10b981;">{{ kpis.frota_operando }} em Linha</strong> &bull;
+      <strong style="color: #f59e0b;">{{ kpis.carros_manutencao }} Box</strong> &bull;
+      <strong style="color: #8b5cf6;">{{ kpis.carros_aguardando_pecas }} Peças</strong> &bull;
+      <strong style="color: #0284c7;">{{ kpis.carros_testes }} Testes</strong>
     </div>
   </div>
 </div>
@@ -219,18 +284,43 @@
     </div>
   </div>
 </div>
-
 {% endif %}
 
 <!-- ==========================================================================
-     OS 5 RANKINGS ESTRATÉGICOS DA OFICINA (SOLICITADOS PELO USUÁRIO)
+     OS RANKINGS ESTRATÉGICOS DA OFICINA (SOLICITADOS PELO USUÁRIO)
      ========================================================================== -->
 <div class="oficina-rankings-grid">
-  <!-- RANKING 1: MAIORES DEFEITOS RECLAMADOS -->
+  <!-- RANKING 1: ITINERÁRIOS QUE MAIS FICAM NA OFICINA -->
+  <div class="ranking-card">
+    <div class="ranking-card-header">
+      <h3><i class="fa-solid fa-route" style="color: #ea580c;"></i> Linhas que Mais Ficam na Oficina</h3>
+      <span class="ranking-badge-top">Top Itinerários</span>
+    </div>
+    {% for r in ranking_itinerarios %}
+    <div class="ranking-item">
+      <div class="ranking-item-top">
+        <div class="ranking-item-title" title="{{ r.linha }}">
+          <span class="ranking-pos pos-{{ loop.index }}">{{ loop.index }}</span>
+          <span>{{ r.linha }}</span>
+        </div>
+        <span class="ranking-val" style="color: #ea580c; font-weight: 800;">{{ r.total_dias }}d &bull; {{ r.total_os }} OSs</span>
+      </div>
+      <div class="ranking-bar-bg">
+        <div class="ranking-bar-fill" style="width: {{ r.perc_barra }}%; background: #ea580c;"></div>
+      </div>
+      <div style="font-size: 10.5px; color: #64748b; display: flex; justify-content: space-between; margin-top: 2px;">
+        <span>{{ r.carros_distintos }} veículos afetados</span>
+        <span>Média {{ r.media_dias }} dias/OS</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- RANKING 2: MAIORES DEFEITOS RECLAMADOS -->
   <div class="ranking-card">
     <div class="ranking-card-header">
       <h3><i class="fa-solid fa-bullhorn" style="color: #ef4444;"></i> Defeitos Reclamados</h3>
-      <span class="ranking-badge-top">Top 5 Reclamações</span>
+      <span class="ranking-badge-top">Top Reclamações</span>
     </div>
     {% for r in ranking_reclamados %}
     <div class="ranking-item">
@@ -248,7 +338,7 @@
     {% endfor %}
   </div>
 
-  <!-- RANKING 2: MAIORES DEFEITOS CONSTATADOS (DIAGNÓSTICO OFICINA) -->
+  <!-- RANKING 3: MAIORES DEFEITOS CONSTATADOS (DIAGNÓSTICO OFICINA) -->
   <div class="ranking-card">
     <div class="ranking-card-header">
       <h3><i class="fa-solid fa-magnifying-glass-chart" style="color: #f59e0b;"></i> Defeitos Constatados</h3>
@@ -270,7 +360,7 @@
     {% endfor %}
   </div>
 
-  <!-- RANKING 3: PEÇAS MAIS TROCADAS -->
+  <!-- RANKING 4: PEÇAS MAIS TROCADAS -->
   <div class="ranking-card">
     <div class="ranking-card-header">
       <h3><i class="fa-solid fa-gears" style="color: #8b5cf6;"></i> Peças Mais Trocadas</h3>
@@ -292,7 +382,7 @@
     {% endfor %}
   </div>
 
-  <!-- RANKING 4: SERVIÇOS MAIS REALIZADOS -->
+  <!-- RANKING 5: SERVIÇOS MAIS REALIZADOS -->
   <div class="ranking-card">
     <div class="ranking-card-header">
       <h3><i class="fa-solid fa-hand-holding-hand" style="color: #0284c7;"></i> Serviços Mais Realizados</h3>
@@ -314,8 +404,8 @@
     {% endfor %}
   </div>
 
-  <!-- RANKING 5: CARROS QUE MAIS PASSARAM PELA OFICINA (REINCIDÊNCIA & CONTROLE DE KM) -->
-  <div class="ranking-card" style="grid-column: span 2;">
+  <!-- RANKING 6: CARROS QUE MAIS PASSARAM PELA OFICINA (REINCIDÊNCIA & CONTROLE DE KM) -->
+  <div class="ranking-card" style="grid-column: span 3;">
     <div class="ranking-card-header">
       <h3><i class="fa-solid fa-bus-simple" style="color: #dc2626;"></i> Carros com Maior Reincidência na Oficina & Controle de Km</h3>
       <span class="ranking-badge-top">Top 5 Reincidentes</span>
@@ -366,7 +456,7 @@
 </div>
 
 <!-- ==========================================================================
-     TABELA OPERACIONAL COMPLETA DA OFICINA
+     TABELA OPERACIONAL COMPLETA DA OFICINA COM CLASSIFICAÇÃO
      ========================================================================== -->
 <div class="panel">
   <div class="panel-heading" style="flex-wrap: wrap; gap: 14px;">
@@ -375,21 +465,43 @@
         <i class="fa-solid fa-list-check" style="color: var(--primary);"></i>
         Quadro Operacional de Ordens de Serviço da Oficina (Visão Pátio)
       </h2>
-      <p>Exibindo <strong>{{ total_exibido }}</strong> ordens de serviço encontradas. Mecânicos podem atualizar as datas de entrada, conclusão e peças diretamente.</p>
+      <p>Exibindo <strong>{{ total_exibido }}</strong> ordens de serviço. Clique nas colunas para classificar do maior para o menor ou use o seletor rápido.</p>
     </div>
 
-    <!-- FILTROS RÁPIDOS DA TABELA -->
-    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-      <!-- BUSCA POR TEXTO -->
+    <!-- FILTROS & ORDENAÇÃO RÁPIDA DA TABELA -->
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <!-- SELETOR DE ORDENAÇÃO RÁPIDA (MAIOR PARA O MENOR E VICE-VERSA) -->
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <label style="font-size: 11.5px; font-weight: 700; color: #475569; white-space: nowrap;">
+          <i class="fa-solid fa-arrow-down-wide-short" style="color: var(--primary);"></i> Classificar por:
+        </label>
+        <select id="filtroOrdenarOficina" class="form-select" style="height: 34px; font-size: 12px; padding: 0 10px; min-width: 220px; font-weight: 600;" onchange="alterarOrdenacaoOficina(this.value)">
+          <option value="dias_desc" {% if ordenar_sel == 'dias_desc' %}selected{% endif %}>Dias Parados (Maior &rarr; Menor)</option>
+          <option value="dias_asc" {% if ordenar_sel == 'dias_asc' %}selected{% endif %}>Dias Parados (Menor &rarr; Maior)</option>
+          <option value="km_rodados_desc" {% if ordenar_sel == 'km_rodados_desc' %}selected{% endif %}>Km Rodados entre Quebras (Maior &rarr; Menor)</option>
+          <option value="km_rodados_asc" {% if ordenar_sel == 'km_rodados_asc' %}selected{% endif %}>Km Rodados entre Quebras (Menor &rarr; Maior)</option>
+          <option value="km_total_desc" {% if ordenar_sel == 'km_total_desc' %}selected{% endif %}>Km Total do Carro (Maior &rarr; Menor)</option>
+          <option value="km_total_asc" {% if ordenar_sel == 'km_total_asc' %}selected{% endif %}>Km Total do Carro (Menor &rarr; Maior)</option>
+          <option value="data_desc" {% if ordenar_sel == 'data_desc' %}selected{% endif %}>Data de Entrada (Mais Recente)</option>
+          <option value="data_asc" {% if ordenar_sel == 'data_asc' %}selected{% endif %}>Data de Entrada (Mais Antiga)</option>
+          <option value="carro_asc" {% if ordenar_sel == 'carro_asc' %}selected{% endif %}>Prefixo Ônibus (Crescente)</option>
+          <option value="carro_desc" {% if ordenar_sel == 'carro_desc' %}selected{% endif %}>Prefixo Ônibus (Decrescente)</option>
+          <option value="status_asc" {% if ordenar_sel == 'status_asc' %}selected{% endif %}>Status Operacional (A &rarr; Z)</option>
+        </select>
+      </div>
+
+      <!-- BUSCA POR TEXTO & FILTRO STATUS -->
       <form method="GET" action="{{ url_for('oficina_view') }}" style="display: flex; gap: 6px; align-items: center;">
         <input type="hidden" name="view" value="{{ view_mode }}">
         <input type="hidden" name="linha" value="{{ linha_filtro }}">
-        <input type="text" name="busca" class="form-input" placeholder="Buscar Carro, Placa, OS ou Mecânico..." value="{{ busca }}" style="width: 210px; height: 34px; font-size: 12px;">
+        <input type="hidden" name="ordenar" value="{{ ordenar_sel }}">
+        <input type="text" name="busca" class="form-input" placeholder="Buscar Carro, Placa, OS..." value="{{ busca }}" style="width: 190px; height: 34px; font-size: 12px;">
 
         <select name="status" class="form-select" style="height: 34px; font-size: 12px; padding: 0 10px;" onchange="this.form.submit()">
           <option value="ativos" {% if status_filtro == 'ativos' %}selected{% endif %}>Carros Ativos na Oficina ({{ kpis.total_inoperantes }})</option>
           <option value="Em Manutenção" {% if status_filtro == 'Em Manutenção' %}selected{% endif %}>Em Manutenção ({{ kpis.carros_manutencao }})</option>
           <option value="Aguardando Peças" {% if status_filtro == 'Aguardando Peças' %}selected{% endif %}>Aguardando Peças ({{ kpis.carros_aguardando_pecas }})</option>
+          <option value="Em Testes de Pista" {% if status_filtro == 'Em Testes de Pista' %}selected{% endif %}>Em Testes ({{ kpis.carros_testes }})</option>
           <option value="Concluído / Liberado" {% if status_filtro == 'Concluído / Liberado' %}selected{% endif %}>Concluídos / Liberados</option>
           <option value="todos" {% if status_filtro == 'todos' %}selected{% endif %}>Todos os Registros</option>
         </select>
@@ -405,23 +517,39 @@
     <table class="table-ponto-alta-legibilidade" style="font-size: 12.5px;">
       <thead>
         <tr>
-          <th style="min-width: 140px;">CARRO / OS</th>
-          <th style="min-width: 180px;">MODELO & LINHA</th>
-          <th style="min-width: 130px;">MECÂNICO</th>
-          <th style="min-width: 180px;">CONTROLE DE KM (ENTRADA x RETORNO)</th>
+          <!-- CABEÇALHOS CLICÁVEIS PARA CLASSIFICAÇÃO -->
+          <th class="th-sortable" style="min-width: 140px;" onclick="alterarOrdenacaoOficina('{{ 'carro_asc' if ordenar_sel == 'carro_desc' else 'carro_desc' }}')" title="Clique para ordenar por Carro">
+            CARRO / OS 
+            <i class="fa-solid fa-sort{% if ordenar_sel == 'carro_asc' %}-up{% elif ordenar_sel == 'carro_desc' %}-down{% endif %}"></i>
+          </th>
+          <th style="min-width: 170px;">MODELO & LINHA</th>
+          <th style="min-width: 120px;">MECÂNICO</th>
+          <th class="th-sortable" style="min-width: 190px;" onclick="alterarOrdenacaoOficina('{{ 'km_rodados_desc' if ordenar_sel == 'km_rodados_asc' else 'km_rodados_asc' }}')" title="Clique para ordenar por Km Rodados">
+            CONTROLE DE KM (ENTRADA x RETORNO)
+            <i class="fa-solid fa-sort{% if 'km_rodados' in ordenar_sel %}{% if ordenar_sel == 'km_rodados_desc' %}-down{% else %}-up{% endif %}{% endif %}"></i>
+          </th>
           <th style="min-width: 220px;">DEFEITO RECLAMADO & CONSTATADO</th>
-          <th style="min-width: 220px;">PEÇAS & SERVIÇOS REALIZADOS</th>
-          <th style="min-width: 110px; text-align: center;">ENTRADA</th>
+          <th style="min-width: 210px;">PEÇAS & SERVIÇOS REALIZADOS</th>
+          <th class="th-sortable" style="min-width: 110px; text-align: center;" onclick="alterarOrdenacaoOficina('{{ 'data_desc' if ordenar_sel == 'data_asc' else 'data_asc' }}')" title="Clique para ordenar por Data de Entrada">
+            ENTRADA
+            <i class="fa-solid fa-sort{% if 'data' in ordenar_sel %}{% if ordenar_sel == 'data_desc' %}-down{% else %}-up{% endif %}{% endif %}"></i>
+          </th>
           <th style="min-width: 110px; text-align: center;">PREVISÃO</th>
           <th style="min-width: 110px; text-align: center;">CONCLUSÃO</th>
-          <th style="min-width: 90px; text-align: center;">DIAS PARADO</th>
-          <th style="min-width: 130px; text-align: center;">STATUS</th>
-          <th style="min-width: 110px; text-align: center;">AÇÃO MECÂNICO</th>
+          <th class="th-sortable" style="min-width: 110px; text-align: center;" onclick="alterarOrdenacaoOficina('{{ 'dias_desc' if ordenar_sel == 'dias_asc' else 'dias_asc' }}')" title="Clique para ordenar por Dias Parados">
+            DIAS PARADO
+            <i class="fa-solid fa-sort{% if 'dias' in ordenar_sel %}{% if ordenar_sel == 'dias_desc' %}-down{% else %}-up{% endif %}{% endif %}"></i>
+          </th>
+          <th class="th-sortable" style="min-width: 130px; text-align: center;" onclick="alterarOrdenacaoOficina('{{ 'status_asc' if ordenar_sel != 'status_asc' else 'dias_desc' }}')" title="Clique para ordenar por Status">
+            STATUS
+            <i class="fa-solid fa-sort"></i>
+          </th>
+          <th style="min-width: 120px; text-align: center;">AÇÃO MECÂNICO</th>
         </tr>
       </thead>
       <tbody>
         {% for o in ordens %}
-        <tr style="{% if o.status == 'Aguardando Peças' %}background: #fdf4ff;{% elif o.status == 'Em Manutenção' %}background: #fffbeb;{% endif %}">
+        <tr style="{% if o.status == 'Aguardando Peças' %}background: #fdf4ff;{% elif o.status == 'Em Manutenção' %}background: #fffbeb;{% elif o.status == 'Em Testes de Pista' %}background: #f0f9ff;{% endif %}">
           <!-- CARRO E NÚMERO DA OS -->
           <td>
             <strong style="color: #0f172a; font-size: 13.5px; display: block;">🚌 Carro {{ o.prefixo_veiculo }}</strong>
@@ -718,8 +846,9 @@
           <div>
             <label class="form-label">Status Inicial</label>
             <select name="status" class="form-select">
-              <option value="Em Manutenção">Em Manutenção (Box)</option>
+              <option value="Em Manutenção">Em Manutenção (Box Ativo)</option>
               <option value="Aguardando Peças">Aguardando Peças</option>
+              <option value="Em Testes de Pista">Em Testes de Pista</option>
             </select>
           </div>
         </div>
@@ -746,6 +875,13 @@
 </div>
 
 <script>
+  // Função para classificação das tabelas preservando todos os filtros
+  function alterarOrdenacaoOficina(criterio) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('ordenar', criterio);
+    window.location.href = url.toString();
+  }
+
   function abrirModalEditarOS(dados) {
     document.getElementById('editOSId').value = dados.id;
     document.getElementById('lblModalNumeroOS').textContent = dados.numero_os;
@@ -786,7 +922,82 @@
   {% if view_mode == 'dashboard' %}
   // Inicialização dos Gráficos Chart.js do Dashboard Estratégico
   window.addEventListener('DOMContentLoaded', function() {
-    // 1. Gráfico Semanas de Novembro
+    // 1. Gráfico Consolidado Mês a Mês da Oficina (Agosto a Novembro)
+    const ctxMeses = document.getElementById('chartMeses');
+    if (ctxMeses) {
+      new Chart(ctxMeses, {
+        type: 'bar',
+        data: {
+          labels: {{ historico_meses|map(attribute='label_mes')|list|tojson }},
+          datasets: [
+            {
+              label: 'Volume de Ordens de Serviço (OSs)',
+              data: {{ historico_meses|map(attribute='total_os')|list|tojson }},
+              backgroundColor: 'rgba(20, 134, 110, 0.85)',
+              borderColor: '#14866e',
+              borderWidth: 1,
+              borderRadius: 6,
+              yAxisID: 'y'
+            },
+            {
+              label: 'Tempo Médio Inoperante MTTR (Dias)',
+              data: {{ historico_meses|map(attribute='media_dias')|list|tojson }},
+              type: 'line',
+              borderColor: '#ef4444',
+              backgroundColor: '#ef4444',
+              borderWidth: 3,
+              pointRadius: 6,
+              pointHoverRadius: 8,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                boxWidth: 14,
+                font: { family: 'Montserrat, Inter, sans-serif', size: 12, weight: 600 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                afterBody: function(context) {
+                  const idx = context[0].dataIndex;
+                  const meses = {{ historico_meses|tojson }};
+                  if (meses && meses[idx]) {
+                    return 'Custo Peças: R$ ' + Number(meses[idx].total_pecas).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                  }
+                  return '';
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Total de OSs Abertas', font: { weight: 700 } },
+              grid: { color: '#f1f5f9' }
+            },
+            y1: {
+              beginAtZero: true,
+              position: 'right',
+              title: { display: true, text: 'MTTR Médio (Dias Parados)', font: { weight: 700 } },
+              grid: { drawOnChartArea: false }
+            }
+          }
+        }
+      });
+    }
+
+    // 2. Gráfico Semanas de Novembro
     const ctxSemanas = document.getElementById('chartSemanas');
     if (ctxSemanas) {
       new Chart(ctxSemanas, {
@@ -797,7 +1008,7 @@
             {
               label: 'Ordens de Serviço Abertas',
               data: {{ historico_semanas|map(attribute='qtd_os')|list|tojson }},
-              backgroundColor: 'rgba(20, 134, 110, 0.85)',
+              backgroundColor: 'rgba(2, 132, 199, 0.85)',
               borderRadius: 6,
               yAxisID: 'y'
             },
@@ -805,8 +1016,8 @@
               label: 'Tempo Médio Parado (Dias)',
               data: {{ historico_semanas|map(attribute='media_dias')|list|tojson }},
               type: 'line',
-              borderColor: '#ef4444',
-              backgroundColor: '#ef4444',
+              borderColor: '#f59e0b',
+              backgroundColor: '#f59e0b',
               borderWidth: 3,
               pointRadius: 5,
               yAxisID: 'y1'
@@ -816,6 +1027,12 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { boxWidth: 12, font: { family: 'Montserrat, sans-serif', size: 11 } }
+            }
+          },
           scales: {
             y: {
               beginAtZero: true,
@@ -832,7 +1049,7 @@
       });
     }
 
-    // 2. Gráfico Efetivo da Frota (Donut)
+    // 3. Gráfico Efetivo da Frota (Donut)
     const ctxEfetivo = document.getElementById('chartEfetivo');
     if (ctxEfetivo) {
       new Chart(ctxEfetivo, {
