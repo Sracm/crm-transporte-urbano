@@ -453,6 +453,87 @@
     font-weight: 700;
   }
 
+  /* ==========================================================================
+     ANIMAÇÃO DE PULSO SUAVE NAS LINHAS DE ITINERÁRIO (EFEITO RESPIRAÇÃO / NEON)
+     ========================================================================== */
+  @keyframes itinPulseLine {
+    0%, 100% {
+      opacity: 0.95;
+      stroke-opacity: 0.95;
+      filter: drop-shadow(0 0 3px currentColor);
+    }
+    50% {
+      opacity: 0.35;
+      stroke-opacity: 0.35;
+      filter: drop-shadow(0 0 1px currentColor);
+    }
+  }
+
+  @keyframes itinPulseCasing {
+    0%, 100% {
+      opacity: 0.85;
+      stroke-opacity: 0.85;
+    }
+    50% {
+      opacity: 0.20;
+      stroke-opacity: 0.20;
+    }
+  }
+
+  .itinerario-pulse-line {
+    animation: itinPulseLine 3s infinite ease-in-out;
+  }
+
+  .itinerario-pulse-casing {
+    animation: itinPulseCasing 3s infinite ease-in-out;
+  }
+
+  /* Defasagem elegante para que cada itinerário pulse de forma suave e orgânica */
+  .itin-pulse-0 { animation-delay: 0s; }
+  .itin-pulse-1 { animation-delay: 0.5s; }
+  .itin-pulse-2 { animation-delay: 1.0s; }
+  .itin-pulse-3 { animation-delay: 1.5s; }
+  .itin-pulse-4 { animation-delay: 2.0s; }
+  .itin-pulse-5 { animation-delay: 2.5s; }
+
+  /* LINHA EM DESTAQUE SELECIONADA: PULSO MAIS VIBRANTE */
+  .itinerario-foco-line {
+    animation: itinFocoPulse 1.6s infinite ease-in-out !important;
+  }
+  @keyframes itinFocoPulse {
+    0%, 100% {
+      opacity: 1;
+      stroke-opacity: 1;
+      filter: drop-shadow(0 0 7px currentColor);
+    }
+    50% {
+      opacity: 0.55;
+      stroke-opacity: 0.55;
+      filter: drop-shadow(0 0 2px currentColor);
+    }
+  }
+
+  .itinerario-foco-casing {
+    animation: itinFocoCasing 1.6s infinite ease-in-out !important;
+  }
+  @keyframes itinFocoCasing {
+    0%, 100% {
+      opacity: 0.95;
+      stroke-opacity: 0.95;
+    }
+    50% {
+      opacity: 0.35;
+      stroke-opacity: 0.35;
+    }
+  }
+
+  .itinerario-dimmed {
+    animation: none !important;
+    opacity: 0.18 !important;
+    stroke-opacity: 0.18 !important;
+    filter: none !important;
+  }
+
   .map-filter-bar {
     display: flex;
     gap: 10px;
@@ -1434,26 +1515,29 @@
     itinerariosLayerGroup.clearLayers();
     polylineObjects = {};
 
-    Object.keys(itinerariosData).forEach(chave => {
+    Object.keys(itinerariosData).forEach((chave, index) => {
       const itin = itinerariosData[chave];
+      const pulseDelayClass = 'itin-pulse-' + (index % 6);
       
-      // Linha de contorno / brilho inferior
+      // Linha de contorno / brilho inferior com efeito de pulso suave
       const casing = L.polyline(itin.coords, {
         color: '#ffffff',
         weight: 8,
         opacity: 0.9,
         lineCap: 'round',
-        lineJoin: 'round'
+        lineJoin: 'round',
+        className: 'itinerario-pulse-casing ' + pulseDelayClass
       });
       itinerariosLayerGroup.addLayer(casing);
 
-      // Linha principal do itinerário
+      // Linha principal do itinerário com pulso suave e respiração neon
       const poly = L.polyline(itin.coords, {
         color: itin.cor,
         weight: 5,
         opacity: 0.88,
         lineCap: 'round',
-        lineJoin: 'round'
+        lineJoin: 'round',
+        className: 'itinerario-pulse-line ' + pulseDelayClass
       });
 
       poly.bindTooltip(`<strong>${itin.nome}</strong><br><span style="font-size:11px;">${itin.itinerario} · ${itin.extensao_km} km</span>`, {
@@ -1467,7 +1551,7 @@
       });
 
       itinerariosLayerGroup.addLayer(poly);
-      polylineObjects[chave] = { poly: poly, casing: casing, data: itin };
+      polylineObjects[chave] = { poly: poly, casing: casing, data: itin, index: index };
     });
   }
 
@@ -1523,10 +1607,17 @@
     const bannerHeadway = document.getElementById('itinHeadway');
 
     if (linhaNome === 'Todas') {
-      // Restaura todas as linhas
+      // Restaura todas as linhas com a animação de pulso suave defasada
       Object.keys(polylineObjects).forEach(k => {
-        polylineObjects[k].poly.setStyle({ weight: 5, opacity: 0.88 });
-        polylineObjects[k].casing.setStyle({ weight: 8, opacity: 0.9 });
+        const item = polylineObjects[k];
+        item.poly.setStyle({ weight: 5, opacity: 0.88 });
+        item.casing.setStyle({ weight: 8, opacity: 0.9 });
+
+        const delayClass = 'itin-pulse-' + (item.index % 6);
+        const polyEl = item.poly.getElement();
+        const casingEl = item.casing.getElement();
+        if (polyEl) polyEl.setAttribute('class', 'leaflet-interactive itinerario-pulse-line ' + delayClass);
+        if (casingEl) casingEl.setAttribute('class', 'leaflet-interactive itinerario-pulse-casing ' + delayClass);
       });
 
       if (bannerTitulo) bannerTitulo.innerText = 'Todas as Linhas Operacionais da Malha Municipal';
@@ -1541,13 +1632,21 @@
       if (selItin && polylineObjects[linhaNome]) {
         // Destaca a linha selecionada e atenua as demais
         Object.keys(polylineObjects).forEach(k => {
+          const item = polylineObjects[k];
+          const polyEl = item.poly.getElement();
+          const casingEl = item.casing.getElement();
+
           if (k === linhaNome) {
-            polylineObjects[k].poly.setStyle({ weight: 8, opacity: 1.0 });
-            polylineObjects[k].casing.setStyle({ weight: 12, opacity: 1.0 });
-            polylineObjects[k].poly.bringToFront();
+            item.poly.setStyle({ weight: 8, opacity: 1.0 });
+            item.casing.setStyle({ weight: 12, opacity: 1.0 });
+            item.poly.bringToFront();
+            if (polyEl) polyEl.setAttribute('class', 'leaflet-interactive itinerario-foco-line');
+            if (casingEl) casingEl.setAttribute('class', 'leaflet-interactive itinerario-foco-casing');
           } else {
-            polylineObjects[k].poly.setStyle({ weight: 2.5, opacity: 0.25 });
-            polylineObjects[k].casing.setStyle({ weight: 4, opacity: 0.25 });
+            item.poly.setStyle({ weight: 2.5, opacity: 0.25 });
+            item.casing.setStyle({ weight: 4, opacity: 0.25 });
+            if (polyEl) polyEl.setAttribute('class', 'leaflet-interactive itinerario-dimmed');
+            if (casingEl) casingEl.setAttribute('class', 'leaflet-interactive itinerario-dimmed');
           }
         });
 
