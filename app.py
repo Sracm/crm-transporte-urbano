@@ -76,6 +76,42 @@ def get_user_access_policy(user):
         "allowed_routes": ["dashboard", "chamados"]
     }
 
+def user_can_approve_os(sess):
+    """
+    Trava de Segurança: Apenas Administrador, Diretoria e Gerente Operacional
+    possuem permissão para avaliar e aprovar/recusar Ordens de Serviço.
+    Usuários de Oficina, Box, Garagem, Portaria etc. NÃO podem aprovar.
+    """
+    if not sess:
+        return False
+    if sess.get("is_admin"):
+        return True
+    role = sess.get("user_role") or sess.get("perfil_acesso") or ""
+    dept = sess.get("user_dept") or sess.get("departamento") or ""
+    login = sess.get("login_usuario") or ""
+    cargo = sess.get("user_cargo") or ""
+
+    if role in ["admin", "Diretoria"] or login in ["admin", "cco"]:
+        return True
+    if dept in ["Diretor de Operações", "Gerente Operacional", "Diretoria"]:
+        return True
+    if "Gerente Operacional" in cargo or "Diretor" in cargo:
+        return True
+    return False
+
+def parse_date_safe(dt_val):
+    if not dt_val:
+        return None
+    if isinstance(dt_val, datetime):
+        return dt_val
+    s = str(dt_val).strip()
+    for fmt in ("%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(s, fmt)
+        except ValueError:
+            pass
+    return None
+
 @app.before_request
 def require_login():
     public_endpoints = ["static", "login_view", "login_post", "manifest", "service_worker"]
@@ -468,9 +504,13 @@ def login_post():
     
     session["user_id"] = user_dict["id"]
     session["user_name"] = user_dict["nome"]
+    session["nome"] = user_dict["nome"]
     session["user_cargo"] = user_dict["cargo"]
     session["user_dept"] = user_dict["departamento"]
+    session["departamento"] = user_dict["departamento"]
     session["user_role"] = user_dict["perfil_acesso"]
+    session["perfil_acesso"] = user_dict["perfil_acesso"]
+    session["login_usuario"] = user_dict.get("login_usuario", "")
     session["is_admin"] = policy["is_admin"]
     session["allowed_routes"] = policy["allowed_routes"]
     session["default_route"] = policy["default_route"]
@@ -617,9 +657,54 @@ def chamados_view():
         query += " AND (departamento_destino = ? OR departamento_origem = ?)"
         params.extend([dept_filter, dept_filter])
         
-    query += " ORDER BY CASE prioridade WHEN 'Crítica' THEN 1 WHEN 'Alta' THEN 2 WHEN 'Média' THEN 3 ELSE 4 END, data_abertura DESC"
+    query += " ORDER BY data_abertura DESC"
     cursor.execute(query, params)
-    chamados = cursor.fetchall()
+    chamados_raw = cursor.fetchall()
+    
+    now = datetime.now()
+    chamados_processados = []
+    for r in chamados_raw:
+        item = dict(r)
+        dt_abert = parse_date_safe(item.get("data_abertura"))
+        dt_fech = parse_date_safe(item.get("data_fechamento"))
+        status = item.get("status")
+        is_concluido = (status == "Concluído")
+        
+        if is_concluido:
+            item["is_indisponivel"] = False
+            if dt_abert:
+                ref_fim = dt_fech or now
+                diff_seg = max(0.0, (ref_fim - dt_abert).total_seconds())
+                dias = round(diff_seg / 86400.0, 1)
+            else:
+                dias = 0.0
+        else:
+            item["is_indisponivel"] = True
+            if dt_abert:
+                diff_seg = max(0.0, (now - dt_abert).total_seconds())
+                dias = round(diff_seg / 86400.0, 1)
+                if dias < 0.1:
+                    dias = 0.1
+            else:
+                dias = 0.5
+                
+        item["dias_indisponiveis"] = dias
+        if dias >= 1.0:
+            item["dias_indisp_label"] = f"{dias:.1f} dias"
+        else:
+            horas = max(1, int(dias * 24))
+            item["dias_indisp_label"] = f"{dias:.1f} dias ({horas}h)"
+            
+        chamados_processados.append(item)
+        
+    # Classificar sempre do maior para o menor (tempo indisponível do maior para o menor)
+    chamados_processados.sort(
+        key=lambda x: (1 if x["is_indisponivel"] else 0, x["dias_indisponiveis"], x.get("id", 0)),
+        reverse=True
+    )
+    
+    # Trava de segurança: apenas admin, diretoria e gerente operacional podem aprovar
+    pode_aprovar = user_can_approve_os(session)
     
     # Lista de usuários para o formulário de abertura
     cursor.execute("SELECT id, nome, departamento, email FROM usuarios ORDER BY nome ASC")
@@ -641,12 +726,13 @@ def chamados_view():
     conn.close()
     return render_template(
         "chamados.html",
-        chamados=chamados,
+        chamados=chamados_processados,
         usuarios=usuarios,
         status_atual=status_filter,
         dept_atual=dept_filter,
         kpis=kpis_chamados,
-        carros_reserva_sugestao=carros_reserva_sugestao
+        carros_reserva_sugestao=carros_reserva_sugestao,
+        pode_aprovar=pode_aprovar
     )
 
 @app.route("/ponto")
@@ -1403,6 +1489,10 @@ def api_abrir_chamado():
 
 @app.route("/api/chamados/aprovar", methods=["POST"])
 def api_aprovar_chamado():
+    # Trava de Segurança: Apenas Administrador, Diretoria e Gerente Operacional
+    if not user_can_approve_os(session):
+        return redirect(url_for("chamados_view", erro="Acesso restrito. Apenas Administrador, Diretoria e Gerente Operacional podem aprovar OS."))
+
     data = request.form
     chamado_id = data.get("chamado_id")
     decisao = data.get("decisao")  # "aprovar", "reagendar", "recusar"
@@ -1463,8 +1553,16 @@ def api_iniciar_chamado():
     data = request.form
     chamado_id = data.get("chamado_id")
     mecanico_nome = session.get("nome", data.get("mecanico_nome", "Mecânico Responsável"))
+    data_inicio_real = data.get("data_inicio_real")
+    data_fim_prevista = data.get("data_fim_prevista")
+    box_vala = data.get("box_vala", "Vala Técnica")
+    
     now = datetime.now()
     now_str = now.strftime("%Y-%m-%d %H:%M")
+    
+    # Formata dia e hora de início e previsão de entrega
+    dt_inicio = data_inicio_real.replace("T", " ") if data_inicio_real else now_str
+    dt_prev = data_fim_prevista.replace("T", " ") if data_fim_prevista else None
 
     conn = get_db()
     cursor = conn.cursor()
@@ -1474,16 +1572,22 @@ def api_iniciar_chamado():
         conn.close()
         return redirect(url_for("chamados_view"))
 
+    resp_formatado = f"{mecanico_nome} ({box_vala})" if box_vala else mecanico_nome
+
     cursor.execute("""
         UPDATE chamados 
-        SET status = 'Em Execução na Vala', data_inicio_real = ?, responsavel_nome = ?
+        SET status = 'Em Execução na Vala', data_inicio_real = ?, data_fim_prevista = COALESCE(?, data_fim_prevista), responsavel_nome = ?
         WHERE id = ?
-    """, (now_str, mecanico_nome, chamado_id))
+    """, (dt_inicio, dt_prev, resp_formatado, chamado_id))
+
+    obs_historico = f"Mecânico registrou entrada na {box_vala}. Início na vala: {dt_inicio}."
+    if dt_prev:
+        obs_historico += f" Previsão de entrega da OS: {dt_prev}."
 
     cursor.execute("""
         INSERT INTO chamados_historico (chamado_id, usuario_nome, acao, observacao, data_hora)
-        VALUES (?, ?, 'Início dos Trabalhos', 'Mecânico iniciou a manutenção técnica do veículo na vala.', ?)
-    """, (chamado_id, mecanico_nome, now))
+        VALUES (?, ?, 'Início dos Trabalhos na Vala', ?, ?)
+    """, (chamado_id, mecanico_nome, obs_historico, now))
 
     conn.commit()
     conn.close()
