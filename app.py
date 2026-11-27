@@ -20,53 +20,62 @@ def get_user_access_policy(user):
     dept = user.get("departamento", "") or ""
     role = user.get("perfil_acesso", "") or ""
     login = user.get("login_usuario", "") or ""
+    cargo = user.get("cargo", "") or ""
     
-    # 1. ADMIN / DIRETORIA: ACESSO A TUDO
-    if role in ["admin", "Diretoria"] or login == "admin":
+    # 1. DESENVOLVEDOR / ADMIN / DIRETOR OPERACIONAL: ACESSO A TUDO
+    if role in ["admin", "Diretoria"] or login in ["admin", "dev", "diretor.operacional", "diretor"] or dept == "Diretor de Operações" or "Diretor" in cargo:
         return {
             "is_admin": True,
             "default_route": "dashboard",
             "allowed_routes": ["*", "dashboard", "chamados", "ponto", "cco", "telemetria", "oficina", "portaria", "financeiro", "colaboradores", "emails"]
         }
         
-    # 2. MANUTENÇÃO (OFICINA MECÂNICA)
-    if dept == "Manutenção" or login == "manutencao":
+    # 2. GERENTE OPERACIONAL / GERENTE EXECUTIVO / FROTA CCO
+    if dept in ["Gerente Operacional", "Tráfego"] or login in ["cco", "frota.cco", "gerente.operacional", "gerente.executivo"] or "Gerente Geral" in cargo or "Gerente Operacional" in cargo or "Gerente Executivo" in cargo:
+        return {
+            "is_admin": False,
+            "default_route": "cco_view",
+            "allowed_routes": ["cco", "telemetria", "chamados", "oficina", "portaria", "colaboradores"]
+        }
+
+    # 3. GERENTE ADM
+    if dept in ["Gerente Administrativo"] or login in ["gerente.adm"] or "Gerente Administrativo" in cargo or "Gerente ADM" in cargo:
+        return {
+            "is_admin": False,
+            "default_route": "dashboard",
+            "allowed_routes": ["dashboard", "chamados", "financeiro", "colaboradores", "ponto"]
+        }
+        
+    # 4. OFICINA & MANUTENÇÃO (BOX)
+    if dept == "Manutenção" or login in ["manutencao", "oficina"]:
         return {
             "is_admin": False,
             "default_route": "oficina_view",
             "allowed_routes": ["oficina", "telemetria", "chamados"]
         }
         
-    # 3. RH (PONTO ELETRÔNICO & RH)
-    if dept == "RH" or login == "rh":
+    # 5. DHO & TREINAMENTO
+    if dept in ["RH", "Treinamento"] or login in ["rh", "dho", "treinamento"]:
         return {
             "is_admin": False,
             "default_route": "ponto_view",
             "allowed_routes": ["ponto", "colaboradores"]
         }
         
-    # 4. PORTARIA & GARAGEM
-    if dept in ["Portaria", "Garagem"] or login == "portaria":
+    # 6. GARAGEM (PÁTIO & PORTARIA)
+    if dept in ["Portaria", "Garagem"] or login in ["portaria", "garagem"]:
         return {
             "is_admin": False,
             "default_route": "portaria_view",
             "allowed_routes": ["portaria", "cco"]
         }
         
-    # 5. FINANCEIRO
+    # 7. FINANCEIRO
     if "Contas" in dept or role == "Financeiro" or login == "financeiro":
         return {
             "is_admin": False,
             "default_route": "financeiro_view",
             "allowed_routes": ["financeiro"]
-        }
-        
-    # 6. CCO & TRÁFEGO
-    if dept in ["Gerente Operacional", "Tráfego"] or login == "cco":
-        return {
-            "is_admin": False,
-            "default_route": "cco_view",
-            "allowed_routes": ["cco", "telemetria", "chamados"]
         }
         
     # PADRÃO
@@ -482,13 +491,45 @@ def login_post():
     senha_input = request.form.get("senha", "").strip()
     next_url = request.form.get("next", "/")
     
+    # Mapeamento de apelidos e nomes rápidos
+    aliases = {
+        "dev": "admin",
+        "desenvolvedor": "admin",
+        "admin": "admin",
+        "diretor": "diretor.operacional",
+        "diretor operacional": "diretor.operacional",
+        "diretor.operacional": "diretor.operacional",
+        "gerente operacional": "gerente.operacional",
+        "gerente.operacional": "gerente.operacional",
+        "gerente operaccional": "gerente.operacional",
+        "gerente executivo": "gerente.executivo",
+        "gerente.executivo": "gerente.executivo",
+        "gerente adm": "gerente.adm",
+        "gerente.adm": "gerente.adm",
+        "oficina": "manutencao",
+        "oficina & manutenção": "manutencao",
+        "oficina e manutencao": "manutencao",
+        "manutencao": "manutencao",
+        "garagem": "garagem",
+        "portaria": "garagem",
+        "financeiro": "financeiro",
+        "cco": "gerente.operacional",
+        "frota cco": "gerente.operacional",
+        "frota.cco": "gerente.operacional",
+        "rh": "dho",
+        "dho": "dho",
+        "dho & treinamento": "dho",
+        "dho e treinamento": "dho",
+    }
+    usuario_busca = aliases.get(usuario_input.lower(), usuario_input)
+    
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
     SELECT * FROM usuarios 
-    WHERE (login_usuario = ? OR matricula = ? OR email = ? OR nome = ?)
+    WHERE (login_usuario = ? OR login_usuario = ? OR matricula = ? OR email = ? OR nome = ?)
     LIMIT 1
-    """, (usuario_input, usuario_input, usuario_input, usuario_input))
+    """, (usuario_input, usuario_busca, usuario_input, usuario_input, usuario_input))
     user = cursor.fetchone()
     conn.close()
     

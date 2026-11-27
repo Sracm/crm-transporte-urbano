@@ -87,8 +87,8 @@
         {% if current_user.is_admin or 'ponto' in current_user.allowed_routes %}
         <a href="{{ url_for('ponto_view') }}" class="nav-item {% if '/ponto' in request.path %}active{% endif %}"
           onclick="closeSidebarOnMobile()">
-          <i class="fa-solid fa-fingerprint"></i>
-          <span>Ponto Eletrônico</span>
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span>DHO & Treinamento</span>
         </a>
         {% endif %}
 
@@ -114,7 +114,7 @@
           class="nav-item {% if '/oficina' in request.path or '/manutencao' in request.path %}active{% endif %}"
           onclick="closeSidebarOnMobile()">
           <i class="fa-solid fa-screwdriver-wrench"></i>
-          <span>Manutenção / Oficina</span>
+          <span>Oficina & Manutenção</span>
           <span class="nav-count" style="background: #f59e0b; color: #fff;">{{ carros_manutencao_count|default(13)
             }}</span>
         </a>
@@ -123,8 +123,8 @@
         {% if current_user.is_admin or 'portaria' in current_user.allowed_routes %}
         <a href="{{ url_for('portaria_view') }}" class="nav-item {% if '/portaria' in request.path %}active{% endif %}"
           onclick="closeSidebarOnMobile()">
-          <i class="fa-solid fa-bus"></i>
-          <span>Portaria & Garagem</span>
+          <i class="fa-solid fa-warehouse"></i>
+          <span>Garagem & Portaria</span>
         </a>
         {% endif %}
 

@@ -158,7 +158,7 @@
        LADO DIREITO: CARD DE LOGIN & ACESSO RESTRITO
        ========================================================================== */
     .portal-login-pane {
-      width: 490px;
+      width: 530px;
       max-width: 100%;
       height: 100%;
       background: #0e1724;
@@ -166,7 +166,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 36px 42px;
+      padding: 24px 30px;
       box-sizing: border-box;
       z-index: 20;
       box-shadow: -20px 0 50px rgba(0, 0, 0, 0.65);
@@ -334,14 +334,14 @@
     .quick-profiles-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      gap: 6px;
     }
     
     .profile-pill {
       background: #131e2c;
       border: 1px solid #1f2f45;
-      border-radius: 8px;
-      padding: 8px 10px;
+      border-radius: 7px;
+      padding: 6px 9px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -366,12 +366,16 @@
       flex-shrink: 0;
     }
     
-    .icon-admin { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .icon-admin, .icon-dev { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .icon-diretor { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .icon-ger-op { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .icon-ger-exec { background: rgba(14, 165, 233, 0.2); color: #38bdf8; }
+    .icon-ger-adm { background: rgba(139, 92, 246, 0.2); color: #c084fc; }
     .icon-oficina { background: rgba(2, 132, 199, 0.2); color: #38bdf8; }
-    .icon-rh { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-    .icon-portaria { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+    .icon-garagem { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
     .icon-fin { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
     .icon-cco { background: rgba(20, 184, 166, 0.2); color: #2dd4bf; }
+    .icon-dho { background: rgba(16, 185, 129, 0.2); color: #10b981; }
     
     .profile-pill-info strong {
       font-size: 11.5px;
@@ -516,43 +520,52 @@
         </div>
 
         <div class="quick-profiles-grid">
-          <!-- ADMIN (ACESSO A TUDO) -->
-          <div class="profile-pill" onclick="selectQuickUser('admin', '123456')">
-            <div class="profile-pill-icon icon-admin"><i class="fa-solid fa-crown"></i></div>
+          <!-- 1. DHO & TREINAMENTO -->
+          <div class="profile-pill" onclick="selectQuickUser('dho', '123456')">
+            <div class="profile-pill-icon icon-dho"><i class="fa-solid fa-graduation-cap"></i></div>
             <div class="profile-pill-info">
-              <strong>Administrador</strong>
-              <span>Acesso Total a Tudo</span>
+              <strong>DHO & Treinamento</strong>
+              <span>Gente, Ponto & Treinamento</span>
             </div>
           </div>
 
-          <!-- OFICINA -->
+          <!-- 2. DIRETOR OPERACIONAL -->
+          <div class="profile-pill" onclick="selectQuickUser('diretor.operacional', '123456')">
+            <div class="profile-pill-icon icon-diretor"><i class="fa-solid fa-user-tie"></i></div>
+            <div class="profile-pill-info">
+              <strong>Diretor Operacional</strong>
+              <span>Diretoria Geral</span>
+            </div>
+          </div>
+
+          <!-- 3. GERENTE OPERACIONAL -->
+          <div class="profile-pill" onclick="selectQuickUser('gerente.operacional', '123456')">
+            <div class="profile-pill-icon icon-ger-op"><i class="fa-solid fa-clipboard-check"></i></div>
+            <div class="profile-pill-info">
+              <strong>Gerente Operacional</strong>
+              <span>Aprovação OS & Tráfego</span>
+            </div>
+          </div>
+
+          <!-- 4. OFICINA & MANUTENÇÃO -->
           <div class="profile-pill" onclick="selectQuickUser('manutencao', '123456')">
             <div class="profile-pill-icon icon-oficina"><i class="fa-solid fa-wrench"></i></div>
             <div class="profile-pill-info">
-              <strong>Oficina / Box</strong>
-              <span>Manutenção Mecânica</span>
+              <strong>Oficina & Manutenção</strong>
+              <span>Box & Vala Mecânica</span>
             </div>
           </div>
 
-          <!-- PONTO & RH -->
-          <div class="profile-pill" onclick="selectQuickUser('rh', '123456')">
-            <div class="profile-pill-icon icon-rh"><i class="fa-solid fa-fingerprint"></i></div>
+          <!-- 5. GARAGEM -->
+          <div class="profile-pill" onclick="selectQuickUser('garagem', '123456')">
+            <div class="profile-pill-icon icon-garagem"><i class="fa-solid fa-warehouse"></i></div>
             <div class="profile-pill-info">
-              <strong>Ponto & RH</strong>
-              <span>Horas Extras & Banco</span>
+              <strong>Garagem</strong>
+              <span>Pátio & Portaria</span>
             </div>
           </div>
 
-          <!-- PORTARIA -->
-          <div class="profile-pill" onclick="selectQuickUser('portaria', '123456')">
-            <div class="profile-pill-icon icon-portaria"><i class="fa-solid fa-warehouse"></i></div>
-            <div class="profile-pill-info">
-              <strong>Portaria Garagem</strong>
-              <span>Entrada / Saída Frota</span>
-            </div>
-          </div>
-
-          <!-- FINANCEIRO -->
+          <!-- 6. FINANCEIRO -->
           <div class="profile-pill" onclick="selectQuickUser('financeiro', '123456')">
             <div class="profile-pill-icon icon-fin"><i class="fa-solid fa-wallet"></i></div>
             <div class="profile-pill-info">
@@ -561,12 +574,39 @@
             </div>
           </div>
 
-          <!-- CCO -->
+          <!-- 7. FROTA CCO -->
           <div class="profile-pill" onclick="selectQuickUser('cco', '123456')">
             <div class="profile-pill-icon icon-cco"><i class="fa-solid fa-tower-broadcast"></i></div>
             <div class="profile-pill-info">
               <strong>Frota CCO</strong>
               <span>Tráfego & Telemetria</span>
+            </div>
+          </div>
+
+          <!-- 8. GERENTE ADM -->
+          <div class="profile-pill" onclick="selectQuickUser('gerente.adm', '123456')">
+            <div class="profile-pill-icon icon-ger-adm"><i class="fa-solid fa-building-user"></i></div>
+            <div class="profile-pill-info">
+              <strong>Gerente ADM</strong>
+              <span>Facilities & Suprimentos</span>
+            </div>
+          </div>
+
+          <!-- 9. GERENTE EXECUTIVO -->
+          <div class="profile-pill" onclick="selectQuickUser('gerente.executivo', '123456')">
+            <div class="profile-pill-icon icon-ger-exec"><i class="fa-solid fa-briefcase"></i></div>
+            <div class="profile-pill-info">
+              <strong>Gerente Executivo</strong>
+              <span>Operações & Escala</span>
+            </div>
+          </div>
+
+          <!-- 10. DESENVOLVEDOR -->
+          <div class="profile-pill" onclick="selectQuickUser('admin', '123456')">
+            <div class="profile-pill-icon icon-dev"><i class="fa-solid fa-laptop-code"></i></div>
+            <div class="profile-pill-info">
+              <strong>Desenvolvedor</strong>
+              <span>Acesso Total / BI</span>
             </div>
           </div>
         </div>
