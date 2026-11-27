@@ -50,7 +50,7 @@ def get_user_access_policy(user):
     if dept == "Manutenção" or login in ["manutencao", "oficina"]:
         return {
             "is_admin": False,
-            "default_route": "oficina_view",
+            "default_route": "chamados_view",
             "allowed_routes": ["oficina", "telemetria", "chamados"]
         }
         
@@ -59,7 +59,7 @@ def get_user_access_policy(user):
         return {
             "is_admin": False,
             "default_route": "ponto_view",
-            "allowed_routes": ["ponto", "colaboradores"]
+            "allowed_routes": ["ponto", "colaboradores", "chamados"]
         }
         
     # 6. GARAGEM (PÁTIO & PORTARIA)
@@ -67,7 +67,7 @@ def get_user_access_policy(user):
         return {
             "is_admin": False,
             "default_route": "portaria_view",
-            "allowed_routes": ["portaria", "cco"]
+            "allowed_routes": ["portaria", "cco", "chamados"]
         }
         
     # 7. FINANCEIRO
@@ -75,7 +75,7 @@ def get_user_access_policy(user):
         return {
             "is_admin": False,
             "default_route": "financeiro_view",
-            "allowed_routes": ["financeiro"]
+            "allowed_routes": ["financeiro", "chamados"]
         }
         
     # PADRÃO
@@ -819,73 +819,103 @@ def dashboard():
         departamento_atual=departamento
     )
 
+def classificar_departamento_chamado(item):
+    dest = (item.get("departamento_destino") or "").strip()
+    orig = (item.get("departamento_origem") or "").strip()
+    veiculo = item.get("prefixo_veiculo")
+    
+    # 1. Financeiro (Contas a Pagar / Receber)
+    if dest in ("Contas a Pagar", "Contas a Receber", "Financeiro") or orig in ("Contas a Pagar", "Contas a Receber", "Financeiro"):
+        return "Financeiro"
+    # 2. DHO & Treinamento (RH, Ponto, Treinamento, Integração)
+    if dest in ("RH", "Treinamento", "DHO") or orig in ("RH", "Treinamento", "DHO"):
+        return "DHO & Treinamento"
+    # 3. Oficina & Manutenção (Manutenção mecânica, elétrica, vala, veículos em geral)
+    if dest in ("Manutenção", "Oficina", "Mecânica") or orig in ("Manutenção", "Oficina") or veiculo:
+        return "Oficina & Manutenção"
+    # 4. Garagem & Portaria (Pátio, portaria, manutenção predial da garagem)
+    if dest in ("Garagem", "Portaria", "Pátio", "Gerente Administrativo", "Administrativo") or orig in ("Garagem", "Portaria", "Pátio"):
+        return "Garagem & Portaria"
+        
+    return "Oficina & Manutenção"
+
 @app.route("/chamados")
 def chamados_view():
     status_filter = request.args.get("status", "Todos")
-    dept_filter = request.args.get("dept", "Todos")
     
+    # Identificar usuário e departamento na sessão
+    user_login = session.get("login_usuario") or ""
+    user_dept = session.get("departamento") or session.get("user_dept") or ""
+    user_role = session.get("perfil_acesso") or ""
+    is_admin = session.get("is_admin", False)
+    
+    # Filtro de Departamento Inteligente:
+    # Se não houver parâmetro ?dept= na URL, direciona automaticamente para o departamento do usuário!
+    if "dept" in request.args:
+        dept_filter = request.args.get("dept", "Todos")
+    else:
+        if user_login in ("manutencao",):
+            dept_filter = "Oficina & Manutenção"
+        elif user_login in ("garagem", "portaria"):
+            dept_filter = "Garagem & Portaria"
+        elif user_login in ("financeiro",):
+            dept_filter = "Financeiro"
+        elif user_login in ("dho",):
+            dept_filter = "DHO & Treinamento"
+        elif user_login in ("gerente.operacional",):
+            # Gerente operacional foca principalmente na Oficina & Vala para manter a tela limpa
+            dept_filter = "Oficina & Manutenção"
+        elif is_admin or user_role in ("Diretoria", "Gestão"):
+            dept_filter = "Todos"
+        else:
+            dept_filter = "Todos"
+
     conn = get_db()
     cursor = conn.cursor()
     
-    # KPIs do Fluxo Mecânico x Gerente de Operações
-    cursor.execute("SELECT COUNT(*) FROM chamados")
-    total_chamados = cursor.fetchone()[0]
-    
-    cursor.execute("SELECT COUNT(*) FROM chamados WHERE (status_aprovacao = 'Pendente Operação' OR (status = 'Aberto' AND (status_aprovacao IS NULL OR status_aprovacao = ''))) AND status != 'Concluído'")
-    pendentes_aprovacao = cursor.fetchone()[0]
-    
-    cursor.execute("SELECT COUNT(*) FROM chamados WHERE status_aprovacao = 'Liberado Manutenção' AND status NOT IN ('Concluído', 'Em Execução na Vala')")
-    liberados_manutencao = cursor.fetchone()[0]
-    
-    cursor.execute("SELECT COUNT(*) FROM chamados WHERE status = 'Em Execução na Vala' OR status = 'Em Atendimento'")
-    em_execucao = cursor.fetchone()[0]
-    
-    cursor.execute("SELECT COUNT(*) FROM chamados WHERE status = 'Concluído'")
-    concluidos = cursor.fetchone()[0]
-    
-    cursor.execute("SELECT COUNT(*) FROM chamados WHERE carro_reserva IS NOT NULL AND carro_reserva != '' AND status != 'Concluído'")
-    carros_reserva = cursor.fetchone()[0]
-    
-    kpis_chamados = {
-        "total": total_chamados,
-        "pendentes": pendentes_aprovacao,
-        "liberados": liberados_manutencao,
-        "em_execucao": em_execucao,
-        "concluidos": concluidos,
-        "carros_reserva": carros_reserva
-    }
-    
-    query = "SELECT * FROM chamados WHERE 1=1"
-    params = []
-    
-    if status_filter == "Pendente Operação":
-        query += " AND (status_aprovacao = 'Pendente Operação' OR (status = 'Aberto' AND (status_aprovacao IS NULL OR status_aprovacao = ''))) AND status != 'Concluído'"
-    elif status_filter == "Liberado Manutenção":
-        query += " AND status_aprovacao = 'Liberado Manutenção' AND status NOT IN ('Concluído', 'Em Execução na Vala')"
-    elif status_filter == "Em Execução na Vala":
-        query += " AND (status = 'Em Execução na Vala' OR status = 'Em Atendimento')"
-    elif status_filter == "Reagendado":
-        query += " AND status_aprovacao = 'Reagendado Entrepico'"
-    elif status_filter == "Recusado":
-        query += " AND status_aprovacao = 'Recusado Operação'"
-    elif status_filter == "Concluído":
-        query += " AND status = 'Concluído'"
-    elif status_filter != "Todos":
-        query += " AND (status = ? OR status_aprovacao = ?)"
-        params.extend([status_filter, status_filter])
-        
-    if dept_filter != "Todos":
-        query += " AND (departamento_destino = ? OR departamento_origem = ?)"
-        params.extend([dept_filter, dept_filter])
-        
-    query += " ORDER BY data_abertura DESC"
-    cursor.execute(query, params)
+    # Busca todos os chamados para classificação e contagem por departamento
+    cursor.execute("SELECT * FROM chamados ORDER BY data_abertura DESC")
     chamados_raw = cursor.fetchall()
     
     now = datetime.now()
-    chamados_processados = []
+    chamados_processados_todos = []
+    
+    # Contadores de cada departamento
+    dept_counts = {
+        "Todos": 0,
+        "Oficina & Manutenção": 0,
+        "Garagem & Portaria": 0,
+        "Financeiro": 0,
+        "DHO & Treinamento": 0
+    }
+    
     for r in chamados_raw:
         item = dict(r)
+        grupo = classificar_departamento_chamado(item)
+        item["departamento_grupo"] = grupo
+        
+        # Ícones e cores para identificação visual limpa
+        if grupo == "Oficina & Manutenção":
+            item["dept_icone"] = "fa-wrench"
+            item["dept_cor"] = "#0284c7"
+            item["dept_bg"] = "#f0f9ff"
+        elif grupo == "Financeiro":
+            item["dept_icone"] = "fa-wallet"
+            item["dept_cor"] = "#059669"
+            item["dept_bg"] = "#ecfdf5"
+        elif grupo == "DHO & Treinamento":
+            item["dept_icone"] = "fa-graduation-cap"
+            item["dept_cor"] = "#7c3aed"
+            item["dept_bg"] = "#f5f3ff"
+        elif grupo == "Garagem & Portaria":
+            item["dept_icone"] = "fa-warehouse"
+            item["dept_cor"] = "#d97706"
+            item["dept_bg"] = "#fffbeb"
+        else:
+            item["dept_icone"] = "fa-tag"
+            item["dept_cor"] = "#475569"
+            item["dept_bg"] = "#f8fafc"
+            
         dt_abert = parse_date_safe(item.get("data_abertura"))
         dt_fech = parse_date_safe(item.get("data_fechamento"))
         status = item.get("status")
@@ -916,22 +946,96 @@ def chamados_view():
             horas = max(1, int(dias * 24))
             item["dias_indisp_label"] = f"{dias:.1f} dias ({horas}h)"
             
-        chamados_processados.append(item)
+        dept_counts["Todos"] += 1
+        if grupo in dept_counts:
+            dept_counts[grupo] += 1
+            
+        chamados_processados_todos.append(item)
         
-    # Métricas de Dias Indisponíveis e Tempo Médio Total
-    indisp_vals = [ch["dias_indisponiveis"] for ch in chamados_processados if ch["is_indisponivel"]]
-    todos_vals = [ch["dias_indisponiveis"] for ch in chamados_processados]
+    # 1. Filtro por Departamento
+    if dept_filter != "Todos":
+        chamados_filtrados_dept = [ch for ch in chamados_processados_todos if ch["departamento_grupo"] == dept_filter]
+    else:
+        chamados_filtrados_dept = chamados_processados_todos
+
+    # 2. KPIs Dinâmicos calculados sobre os chamados do departamento ativo
+    total_dept = len(chamados_filtrados_dept)
+    pendentes_aprovacao = len([
+        ch for ch in chamados_filtrados_dept 
+        if (ch.get("status_aprovacao") == "Pendente Operação" or (ch.get("status") == "Aberto" and not ch.get("status_aprovacao"))) and ch.get("status") != "Concluído"
+    ])
+    liberados_manutencao = len([
+        ch for ch in chamados_filtrados_dept 
+        if ch.get("status_aprovacao") == "Liberado Manutenção" and ch.get("status") not in ("Concluído", "Em Execução na Vala")
+    ])
+    em_execucao = len([
+        ch for ch in chamados_filtrados_dept 
+        if ch.get("status") in ("Em Execução na Vala", "Em Atendimento")
+    ])
+    concluidos = len([
+        ch for ch in chamados_filtrados_dept 
+        if ch.get("status") == "Concluído"
+    ])
+    carros_reserva = len([
+        ch for ch in chamados_filtrados_dept 
+        if ch.get("carro_reserva") and ch.get("status") != "Concluído"
+    ])
+    
+    indisp_vals = [ch["dias_indisponiveis"] for ch in chamados_filtrados_dept if ch["is_indisponivel"]]
+    todos_vals = [ch["dias_indisponiveis"] for ch in chamados_filtrados_dept]
     
     media_indisponivel = round(sum(indisp_vals) / len(indisp_vals), 1) if indisp_vals else 0.0
     tempo_medio_total = round(sum(todos_vals) / len(todos_vals), 1) if todos_vals else 0.0
     total_dias_acumulado = round(sum(indisp_vals), 1)
     
-    kpis_chamados["media_dias_indisponivel"] = media_indisponivel
-    kpis_chamados["tempo_medio_total"] = tempo_medio_total
-    kpis_chamados["total_dias_acumulado"] = total_dias_acumulado
+    kpis_chamados = {
+        "total": total_dept,
+        "pendentes": pendentes_aprovacao,
+        "liberados": liberados_manutencao,
+        "em_execucao": em_execucao,
+        "concluidos": concluidos,
+        "carros_reserva": carros_reserva,
+        "media_dias_indisponivel": media_indisponivel,
+        "tempo_medio_total": tempo_medio_total,
+        "total_dias_acumulado": total_dias_acumulado
+    }
+    
+    # 3. Filtro por Status
+    if status_filter == "Pendente Operação":
+        chamados_finais = [
+            ch for ch in chamados_filtrados_dept 
+            if (ch.get("status_aprovacao") == "Pendente Operação" or (ch.get("status") == "Aberto" and not ch.get("status_aprovacao"))) and ch.get("status") != "Concluído"
+        ]
+    elif status_filter == "Liberado Manutenção":
+        chamados_finais = [
+            ch for ch in chamados_filtrados_dept 
+            if ch.get("status_aprovacao") == "Liberado Manutenção" and ch.get("status") not in ("Concluído", "Em Execução na Vala")
+        ]
+    elif status_filter == "Em Execução na Vala":
+        chamados_finais = [
+            ch for ch in chamados_filtrados_dept 
+            if ch.get("status") in ("Em Execução na Vala", "Em Atendimento")
+        ]
+    elif status_filter == "Reagendado":
+        chamados_finais = [
+            ch for ch in chamados_filtrados_dept 
+            if ch.get("status_aprovacao") == "Reagendado Entrepico"
+        ]
+    elif status_filter == "Recusado":
+        chamados_finais = [
+            ch for ch in chamados_filtrados_dept 
+            if ch.get("status_aprovacao") == "Recusado Operação"
+        ]
+    elif status_filter == "Concluído":
+        chamados_finais = [
+            ch for ch in chamados_filtrados_dept 
+            if ch.get("status") == "Concluído"
+        ]
+    else:
+        chamados_finais = chamados_filtrados_dept
         
-    # Classificar sempre do maior para o menor (tempo indisponível do maior para o menor)
-    chamados_processados.sort(
+    # Classificar sempre do maior para o menor tempo indisponível
+    chamados_finais.sort(
         key=lambda x: (1 if x["is_indisponivel"] else 0, x["dias_indisponiveis"], x.get("id", 0)),
         reverse=True
     )
@@ -943,7 +1047,7 @@ def chamados_view():
     cursor.execute("SELECT id, nome, departamento, email FROM usuarios ORDER BY nome ASC")
     usuarios = cursor.fetchall()
     
-    # Lista de carros reserva disponíveis (14 carros de reserva da frota)
+    # Lista de carros reserva disponíveis (frota de reserva da concessionária)
     carros_reserva_sugestao = [
         "Carro 1091 (Reserva V. Progresso)",
         "Carro 1092 (Reserva Term. Sul)",
@@ -959,10 +1063,11 @@ def chamados_view():
     conn.close()
     return render_template(
         "chamados.html",
-        chamados=chamados_processados,
+        chamados=chamados_finais,
         usuarios=usuarios,
         status_atual=status_filter,
         dept_atual=dept_filter,
+        dept_counts=dept_counts,
         kpis=kpis_chamados,
         carros_reserva_sugestao=carros_reserva_sugestao,
         pode_aprovar=pode_aprovar
