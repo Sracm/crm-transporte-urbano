@@ -566,12 +566,52 @@ def chamados_view():
     conn = get_db()
     cursor = conn.cursor()
     
+    # KPIs do Fluxo Mecânico x Gerente de Operações
+    cursor.execute("SELECT COUNT(*) FROM chamados")
+    total_chamados = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM chamados WHERE (status_aprovacao = 'Pendente Operação' OR (status = 'Aberto' AND (status_aprovacao IS NULL OR status_aprovacao = ''))) AND status != 'Concluído'")
+    pendentes_aprovacao = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM chamados WHERE status_aprovacao = 'Liberado Manutenção' AND status NOT IN ('Concluído', 'Em Execução na Vala')")
+    liberados_manutencao = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM chamados WHERE status = 'Em Execução na Vala' OR status = 'Em Atendimento'")
+    em_execucao = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM chamados WHERE status = 'Concluído'")
+    concluidos = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM chamados WHERE carro_reserva IS NOT NULL AND carro_reserva != '' AND status != 'Concluído'")
+    carros_reserva = cursor.fetchone()[0]
+    
+    kpis_chamados = {
+        "total": total_chamados,
+        "pendentes": pendentes_aprovacao,
+        "liberados": liberados_manutencao,
+        "em_execucao": em_execucao,
+        "concluidos": concluidos,
+        "carros_reserva": carros_reserva
+    }
+    
     query = "SELECT * FROM chamados WHERE 1=1"
     params = []
     
-    if status_filter != "Todos":
-        query += " AND status = ?"
-        params.append(status_filter)
+    if status_filter == "Pendente Operação":
+        query += " AND (status_aprovacao = 'Pendente Operação' OR (status = 'Aberto' AND (status_aprovacao IS NULL OR status_aprovacao = ''))) AND status != 'Concluído'"
+    elif status_filter == "Liberado Manutenção":
+        query += " AND status_aprovacao = 'Liberado Manutenção' AND status NOT IN ('Concluído', 'Em Execução na Vala')"
+    elif status_filter == "Em Execução na Vala":
+        query += " AND (status = 'Em Execução na Vala' OR status = 'Em Atendimento')"
+    elif status_filter == "Reagendado":
+        query += " AND status_aprovacao = 'Reagendado Entrepico'"
+    elif status_filter == "Recusado":
+        query += " AND status_aprovacao = 'Recusado Operação'"
+    elif status_filter == "Concluído":
+        query += " AND status = 'Concluído'"
+    elif status_filter != "Todos":
+        query += " AND (status = ? OR status_aprovacao = ?)"
+        params.extend([status_filter, status_filter])
         
     if dept_filter != "Todos":
         query += " AND (departamento_destino = ? OR departamento_origem = ?)"
@@ -585,8 +625,29 @@ def chamados_view():
     cursor.execute("SELECT id, nome, departamento, email FROM usuarios ORDER BY nome ASC")
     usuarios = cursor.fetchall()
     
+    # Lista de carros reserva disponíveis (14 carros de reserva da frota)
+    carros_reserva_sugestao = [
+        "Carro 1091 (Reserva V. Progresso)",
+        "Carro 1092 (Reserva Term. Sul)",
+        "Carro 1093 (Reserva Central)",
+        "Carro 1094 (Reserva Radial)",
+        "Carro 1095 (Reserva Perimetral)",
+        "Carro 1096 (Reserva Euro 6)",
+        "Carro 1097 (Reserva Articulado)",
+        "Carro 1098 (Reserva Eixo Leste)",
+        "Carro 1099 (Reserva Geral CCO)"
+    ]
+    
     conn.close()
-    return render_template("chamados.html", chamados=chamados, usuarios=usuarios, status_atual=status_filter, dept_atual=dept_filter)
+    return render_template(
+        "chamados.html",
+        chamados=chamados,
+        usuarios=usuarios,
+        status_atual=status_filter,
+        dept_atual=dept_filter,
+        kpis=kpis_chamados,
+        carros_reserva_sugestao=carros_reserva_sugestao
+    )
 
 @app.route("/ponto")
 def ponto_view():
@@ -1261,27 +1322,32 @@ def api_abrir_chamado():
     protocolo = f"OS-{datetime.now().year}-{total:04d}"
     
     titulo = data.get("titulo")
-    dep_origem = data.get("departamento_origem")
-    dep_destino = data.get("departamento_destino")
-    solicitante_id = data.get("solicitante_id")
+    dep_origem = data.get("departamento_origem", "Manutenção")
+    dep_destino = data.get("departamento_destino", "Gerente Operacional")
+    solicitante_id = data.get("solicitante_id", 1)
     prioridade = data.get("prioridade", "Média")
-    categoria = data.get("categoria", "Geral")
+    categoria = data.get("categoria", "Manutenção Mecânica")
     prefixo = data.get("prefixo_veiculo")
     linha = data.get("linha")
     descricao = data.get("descricao")
+    data_inicio_prevista = data.get("data_inicio_prevista")
+    data_fim_prevista = data.get("data_fim_prevista")
     
     # Busca dados do solicitante
-    cursor.execute("SELECT nome, email FROM usuarios WHERE id = ?", (solicitante_id,))
-    solic = cursor.fetchone()
-    solic_nome = solic["nome"] if solic else "Colaborador Operacional"
-    solic_email = solic["email"] if solic else "operacao@viacaourbana.com.br"
+    solic_nome = session.get("nome")
+    solic_email = session.get("email")
+    if not solic_nome:
+        cursor.execute("SELECT nome, email FROM usuarios WHERE id = ?", (solicitante_id,))
+        solic = cursor.fetchone()
+        solic_nome = solic["nome"] if solic else "Mecânico Operacional"
+        solic_email = solic["email"] if solic else "operacao@viacaourbana.com.br"
     
     # Atribui automaticamente a um responsável do departamento de destino
     cursor.execute("SELECT id, nome, email FROM usuarios WHERE departamento = ? LIMIT 1", (dep_destino,))
     resp = cursor.fetchone()
     resp_id = resp["id"] if resp else None
-    resp_nome = resp["nome"] if resp else "Equipe de Atendimento"
-    resp_email = resp["email"] if resp else "suporte@viacaourbana.com.br"
+    resp_nome = resp["nome"] if resp else "Gerente de Operações"
+    resp_email = resp["email"] if resp else "gerencia.operacoes@viacaourbana.com.br"
     
     now = datetime.now()
     prev = now + timedelta(hours=24)
@@ -1291,21 +1357,26 @@ def api_abrir_chamado():
         protocolo, titulo, departamento_origem, departamento_destino,
         solicitante_id, solicitante_nome, responsavel_id, responsavel_nome,
         prioridade, categoria, prefixo_veiculo, linha, descricao,
-        status, data_abertura, data_previsao, sla_horas, email_abertura_enviado
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Aberto', ?, ?, 24, 1)
+        status, status_aprovacao, data_abertura, data_previsao, sla_horas, email_abertura_enviado,
+        data_inicio_prevista, data_fim_prevista
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Aberto', 'Pendente Operação', ?, ?, 24, 1, ?, ?)
     """, (
         protocolo, titulo, dep_origem, dep_destino,
         solicitante_id, solic_nome, resp_id, resp_nome,
         prioridade, categoria, prefixo, linha, descricao,
-        now, prev
+        now, prev, data_inicio_prevista, data_fim_prevista
     ))
     chamado_id = cursor.lastrowid
     
-    # Histórico
+    # Histórico detalhado
     cursor.execute("""
     INSERT INTO chamados_historico (chamado_id, usuario_nome, acao, observacao, data_hora)
-    VALUES (?, ?, 'Abertura de Chamado', 'Chamado aberto no sistema. E-mail de notificação gerado para a equipe de destino.', ?)
-    """, (chamado_id, solic_nome, now))
+    VALUES (?, ?, 'Abertura de Chamado', ?, ?)
+    """, (
+        chamado_id, solic_nome,
+        f"OS registrada pelo mecânico. Início previsto: {data_inicio_prevista or 'Imediato'}, Término previsto: {data_fim_prevista or 'A apurar'}. Aguardando autorização do Gerente de Operações para liberação do veículo.",
+        now
+    ))
     
     conn.commit()
     conn.close()
@@ -1313,21 +1384,109 @@ def api_abrir_chamado():
     # Dispara e-mail de notificação de ABERTURA
     corpo_email = f"""
     <div style="font-family: Arial, sans-serif; background-color: #0d1424; color: #fff; padding: 20px; border-radius: 8px;">
-      <h2 style="color: #38bdf8; margin-top: 0;">🚀 Nova Ordem de Serviço Aberta: {protocolo}</h2>
+      <h2 style="color: #38bdf8; margin-top: 0;">🚀 Nova OS Aguardando Aprovação: {protocolo}</h2>
       <p>Olá <strong>{resp_nome}</strong>,</p>
-      <p>Uma nova solicitação foi atribuída ao seu departamento (<strong>{dep_destino}</strong>).</p>
+      <p>O mecânico <strong>{solic_nome}</strong> solicitou intervenção na frota e a OS aguarda sua liberação operacional.</p>
       <div style="background: rgba(255,255,255,0.08); padding: 15px; border-radius: 6px; border-left: 4px solid #38bdf8;">
         <p><strong>Título:</strong> {titulo}</p>
-        <p><strong>Solicitante:</strong> {solic_nome} ({dep_origem})</p>
+        <p><strong>Veículo / Linha:</strong> {prefixo or 'N/A'} - {linha or 'N/A'}</p>
         <p><strong>Prioridade:</strong> <span style="color: {'#ef4444' if prioridade == 'Crítica' else '#f59e0b'}; font-weight: bold;">{prioridade}</span></p>
-        <p><strong>Prefixo / Linha:</strong> {prefixo or 'N/A'} - {linha or 'N/A'}</p>
+        <p><strong>Janela Solicitada:</strong> {data_inicio_prevista or 'Agora'} até {data_fim_prevista or 'Não informado'}</p>
         <p><strong>Descrição:</strong> {descricao}</p>
       </div>
       <p style="font-size: 12px; color: #94a3b8; margin-top: 20px;">CCO Transporte Urbano | Sistema de Service Desk Integrado</p>
     </div>
     """
-    send_simulated_email("Abertura_OS", protocolo, resp_nome, resp_email, f"[NOVA OS] {protocolo} - {titulo} ({prioridade})", corpo_email)
+    send_simulated_email("Abertura_OS", protocolo, resp_nome, resp_email, f"[APROVAÇÃO OS] {protocolo} - Carro {prefixo} ({prioridade})", corpo_email)
     
+    return redirect(url_for("chamados_view"))
+
+@app.route("/api/chamados/aprovar", methods=["POST"])
+def api_aprovar_chamado():
+    data = request.form
+    chamado_id = data.get("chamado_id")
+    decisao = data.get("decisao")  # "aprovar", "reagendar", "recusar"
+    carro_reserva = data.get("carro_reserva", "").strip()
+    motivo = data.get("motivo_rejeicao", "").strip()
+    aprovador_nome = session.get("nome", "Gerente de Operações")
+    now = datetime.now()
+    now_str = now.strftime("%Y-%m-%d %H:%M")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM chamados WHERE id = ?", (chamado_id,))
+    chamado = cursor.fetchone()
+    if not chamado:
+        conn.close()
+        return redirect(url_for("chamados_view"))
+
+    if decisao == "aprovar":
+        status_aprov = "Liberado Manutenção"
+        status_os = "Aberto"
+        obs = f"Aprovado pelo Gerente de Operações ({aprovador_nome}). Veículo liberado para início de trabalho pelo mecânico."
+        if carro_reserva:
+            obs += f" [Carro Reserva Alocado: {carro_reserva}]"
+        cursor.execute("""
+            UPDATE chamados 
+            SET status_aprovacao = ?, aprovador_nome = ?, data_aprovacao = ?, carro_reserva = ?
+            WHERE id = ?
+        """, (status_aprov, aprovador_nome, now_str, carro_reserva, chamado_id))
+    elif decisao == "reagendar":
+        status_aprov = "Reagendado Entrepico"
+        obs = f"Reagendado para horário de vale/entrepico por {aprovador_nome}. Justificativa: {motivo or 'Garantir frota de pico em linha.'}"
+        cursor.execute("""
+            UPDATE chamados 
+            SET status_aprovacao = ?, aprovador_nome = ?, data_aprovacao = ?, motivo_rejeicao = ?
+            WHERE id = ?
+        """, (status_aprov, aprovador_nome, now_str, motivo, chamado_id))
+    else:  # recusar
+        status_aprov = "Recusado Operação"
+        status_os = "Cancelado/Recusado"
+        obs = f"OS Recusada pelo Gerente de Operações ({aprovador_nome}). Justificativa: {motivo or 'Veículo em operação prioritária na tabela.'}"
+        cursor.execute("""
+            UPDATE chamados 
+            SET status_aprovacao = ?, status = ?, aprovador_nome = ?, data_aprovacao = ?, motivo_rejeicao = ?
+            WHERE id = ?
+        """, (status_aprov, status_os, aprovador_nome, now_str, motivo, chamado_id))
+
+    cursor.execute("""
+        INSERT INTO chamados_historico (chamado_id, usuario_nome, acao, observacao, data_hora)
+        VALUES (?, ?, ?, ?, ?)
+    """, (chamado_id, aprovador_nome, f"Decisão Gerencial: {status_aprov}", obs, now))
+
+    conn.commit()
+    conn.close()
+    return redirect(url_for("chamados_view"))
+
+@app.route("/api/chamados/iniciar", methods=["POST"])
+def api_iniciar_chamado():
+    data = request.form
+    chamado_id = data.get("chamado_id")
+    mecanico_nome = session.get("nome", data.get("mecanico_nome", "Mecânico Responsável"))
+    now = datetime.now()
+    now_str = now.strftime("%Y-%m-%d %H:%M")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM chamados WHERE id = ?", (chamado_id,))
+    chamado = cursor.fetchone()
+    if not chamado:
+        conn.close()
+        return redirect(url_for("chamados_view"))
+
+    cursor.execute("""
+        UPDATE chamados 
+        SET status = 'Em Execução na Vala', data_inicio_real = ?, responsavel_nome = ?
+        WHERE id = ?
+    """, (now_str, mecanico_nome, chamado_id))
+
+    cursor.execute("""
+        INSERT INTO chamados_historico (chamado_id, usuario_nome, acao, observacao, data_hora)
+        VALUES (?, ?, 'Início dos Trabalhos', 'Mecânico iniciou a manutenção técnica do veículo na vala.', ?)
+    """, (chamado_id, mecanico_nome, now))
+
+    conn.commit()
+    conn.close()
     return redirect(url_for("chamados_view"))
 
 @app.route("/api/chamados/fechar", methods=["POST"])
@@ -1336,17 +1495,18 @@ def api_fechar_chamado():
     chamado_id = data.get("chamado_id")
     resolucao = data.get("resolucao", "Serviço realizado conforme padrão operacional.")
     custo = float(data.get("custo_estimado", 0.0) or 0.0)
-    usuario_nome = data.get("usuario_nome", "Responsável Técnico")
+    usuario_nome = session.get("nome", data.get("usuario_nome", "Responsável Técnico"))
     
     conn = get_db()
     cursor = conn.cursor()
     
     now = datetime.now()
+    now_str = now.strftime("%Y-%m-%d %H:%M")
     cursor.execute("""
     UPDATE chamados 
-    SET status = 'Concluído', resolucao = ?, data_fechamento = ?, custo_estimado = ?, email_fechamento_enviado = 1
+    SET status = 'Concluído', status_aprovacao = 'Liberado para Tráfego / Apto', resolucao = ?, data_fechamento = ?, data_fim_real = ?, custo_estimado = ?, email_fechamento_enviado = 1
     WHERE id = ?
-    """, (resolucao, now, custo, chamado_id))
+    """, (resolucao, now, now_str, custo, chamado_id))
     
     cursor.execute("SELECT * FROM chamados WHERE id = ?", (chamado_id,))
     chamado = cursor.fetchone()
@@ -1355,7 +1515,9 @@ def api_fechar_chamado():
     cursor.execute("""
     INSERT INTO chamados_historico (chamado_id, usuario_nome, acao, observacao, data_hora)
     VALUES (?, ?, 'Conclusão & Fechamento', ?, ?)
-    """, (chamado_id, usuario_nome, f"OS finalizada. Parecer: {resolucao}", now))
+    """, (chamado_id, usuario_nome, f"OS finalizada. Veículo testado e liberado para tráfego. Parecer: {resolucao}", now))
+    
+    # Se gerou custo de peças, cria pendência automática no Contas a Pagar!
     
     # Se gerou custo de peças, cria pendência automática no Contas a Pagar!
     if custo > 0:

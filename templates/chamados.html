@@ -1,47 +1,316 @@
 {% extends "base.html" %}
 
-{% block title %}Chamados & Ordens de Serviço{% endblock %}
-{% block page_breadcrumb %}Chamados & OS{% endblock %}
+{% block title %}Central de OS & Workflow Mecânico x Operação{% endblock %}
+{% block page_breadcrumb %}Central de OS / Workflow{% endblock %}
+
+{% block extra_head %}
+<style>
+.wf-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+@media (max-width: 1300px) {
+  .wf-kpis-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+  .wf-kpis-grid { grid-template-columns: 1fr; }
+}
+
+.wf-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.wf-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+}
+.wf-kpi-card.active-kpi {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+.wf-kpi-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.wf-kpi-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+}
+.wf-kpi-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+}
+.wf-kpi-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+/* Badges Operacionais */
+.badge-wf {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.badge-wf-pendente {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  animation: pulse-border 2s infinite;
+}
+.badge-wf-liberado {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+.badge-wf-execucao {
+  background: #f3e8ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+.badge-wf-reagendado {
+  background: #ffedd5;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+.badge-wf-recusado {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+.badge-wf-apto {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+@keyframes pulse-border {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0); }
+}
+
+.schedule-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.schedule-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #475569;
+}
+.schedule-item strong {
+  color: #0f172a;
+}
+.schedule-real {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px dashed #cbd5e1;
+  color: #166534;
+  font-weight: 600;
+}
+
+/* Modais Específicos */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.is-active {
+  display: flex;
+}
+.modal-card {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  animation: modalFadeIn 0.2s ease-out;
+}
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.modal-head {
+  padding: 16px 20px;
+  background: #0f172a;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-head h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 20px;
+  cursor: pointer;
+}
+.modal-close-btn:hover {
+  color: #ffffff;
+}
+.modal-content-body {
+  padding: 20px;
+}
+.modal-foot {
+  padding: 14px 20px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <!-- HEADING DA PÁGINA -->
-<div class="page-heading">
+<div class="page-heading" style="margin-bottom: 18px;">
   <div>
-    <div class="eyebrow">SERVICE DESK & MANUTENÇÃO</div>
-    <h1>Central de Chamados & Ordens de Serviço</h1>
-    <p>Abertura, acompanhamento de SLA e encerramento com disparo de e-mails automáticos.</p>
+    <div class="eyebrow"><i class="fa-solid fa-arrows-spin"></i> WORKFLOW INTEGRADO DE MANUTENÇÃO & CCO</div>
+    <h1>Central de Chamados & Ordens de Serviço (OS)</h1>
+    <p>Fluxo Operacional: Mecânico solicita intervenção com janela prevista ⇄ Gerente de Operações autoriza ou aloca carro reserva ⇄ Execução na vala ⇄ Liberação de Tráfego.</p>
   </div>
 
-  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-    <select class="form-select" style="width: auto; padding: 7px 12px; font-size: 12.5px;" onchange="window.location.href='/chamados?status=' + this.value">
-      <option value="Todos" {% if status_atual == 'Todos' %}selected{% endif %}>Todos os Status</option>
-      <option value="Aberto" {% if status_atual == 'Aberto' %}selected{% endif %}>Abertos</option>
-      <option value="Em Atendimento" {% if status_atual == 'Em Atendimento' %}selected{% endif %}>Em Atendimento</option>
-      <option value="Concluído" {% if status_atual == 'Concluído' %}selected{% endif %}>Concluídos</option>
+  <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+    <select class="form-select" style="width: auto; padding: 7px 12px; font-size: 12.5px;"
+      onchange="window.location.href='/chamados?status=' + encodeURIComponent(this.value)">
+      <option value="Todos" {% if status_atual=='Todos' %}selected{% endif %}>Todos os Status ({{ kpis.total }})</option>
+      <option value="Pendente Operação" {% if status_atual=='Pendente Operação' %}selected{% endif %}>Aguardando Aprovação ({{ kpis.pendentes }})</option>
+      <option value="Liberado Manutenção" {% if status_atual=='Liberado Manutenção' %}selected{% endif %}>Liberado para Oficina ({{ kpis.liberados }})</option>
+      <option value="Em Execução na Vala" {% if status_atual=='Em Execução na Vala' %}selected{% endif %}>Em Execução na Vala ({{ kpis.em_execucao }})</option>
+      <option value="Reagendado" {% if status_atual=='Reagendado' %}selected{% endif %}>Reagendado Entrepico</option>
+      <option value="Recusado" {% if status_atual=='Recusado' %}selected{% endif %}>Recusado Operação</option>
+      <option value="Concluído" {% if status_atual=='Concluído' %}selected{% endif %}>Concluídos / Aptos ({{ kpis.concluidos }})</option>
     </select>
 
-    <button class="btn-primary" onclick="openModalNovaOS()">
+    <button class="btn-primary" onclick="openModalNovaOS()" style="background: #14866e; border-color: #14866e;">
       <i class="fa-solid fa-plus"></i> Abrir Nova OS
     </button>
   </div>
 </div>
 
-<!-- LIVE BANNER -->
-<div class="demo-banner">
-  <span class="demo-label"><span></span> SLA ATIVO</span>
-  <p>Chamados críticos (ônibus retido na oficina) disparam e-mail imediato com prazo máximo de resolução de 4 horas.</p>
+<!-- 6 KPIS DO WORKFLOW OPERACIONAL -->
+<div class="wf-kpis-grid">
+  <!-- TOTAL -->
+  <a href="/chamados?status=Todos" class="wf-kpi-card {% if status_atual == 'Todos' %}active-kpi{% endif %}" style="border-left: 4px solid #3b82f6;">
+    <div class="wf-kpi-top">
+      <span class="wf-kpi-title">Total de OSs</span>
+      <i class="fa-solid fa-list-check" style="color: #3b82f6;"></i>
+    </div>
+    <div class="wf-kpi-val">{{ kpis.total }}</div>
+    <div class="wf-kpi-sub">Ordens registradas</div>
+  </a>
+
+  <!-- PENDENTE APROVAÇÃO -->
+  <a href="/chamados?status=Pendente+Operação" class="wf-kpi-card {% if status_atual == 'Pendente Operação' %}active-kpi{% endif %}" style="border-left: 4px solid #f59e0b;">
+    <div class="wf-kpi-top">
+      <span class="wf-kpi-title" style="color: #b45309;">Aguardando Operação</span>
+      <i class="fa-solid fa-hourglass-start" style="color: #f59e0b;"></i>
+    </div>
+    <div class="wf-kpi-val" style="color: #b45309;">{{ kpis.pendentes }}</div>
+    <div class="wf-kpi-sub">Aprovação do Gerente</div>
+  </a>
+
+  <!-- LIBERADO MANUTENÇÃO -->
+  <a href="/chamados?status=Liberado+Manutenção" class="wf-kpi-card {% if status_atual == 'Liberado Manutenção' %}active-kpi{% endif %}" style="border-left: 4px solid #10b981;">
+    <div class="wf-kpi-top">
+      <span class="wf-kpi-title" style="color: #047857;">Liberado p/ Vala</span>
+      <i class="fa-solid fa-unlock-keyhole" style="color: #10b981;"></i>
+    </div>
+    <div class="wf-kpi-val" style="color: #047857;">{{ kpis.liberados }}</div>
+    <div class="wf-kpi-sub">Pronto p/ Mecânico iniciar</div>
+  </a>
+
+  <!-- EM EXECUÇÃO -->
+  <a href="/chamados?status=Em+Execução+na+Vala" class="wf-kpi-card {% if status_atual == 'Em Execução na Vala' %}active-kpi{% endif %}" style="border-left: 4px solid #8b5cf6;">
+    <div class="wf-kpi-top">
+      <span class="wf-kpi-title" style="color: #6d28d9;">Em Execução</span>
+      <i class="fa-solid fa-wrench" style="color: #8b5cf6;"></i>
+    </div>
+    <div class="wf-kpi-val" style="color: #6d28d9;">{{ kpis.em_execucao }}</div>
+    <div class="wf-kpi-sub">Mecânico trabalhando</div>
+  </a>
+
+  <!-- CARROS RESERVA ALOCADOS -->
+  <div class="wf-kpi-card" style="border-left: 4px solid #06b6d4;">
+    <div class="wf-kpi-top">
+      <span class="wf-kpi-title" style="color: #0891b2;">Reservas em Linha</span>
+      <i class="fa-solid fa-bus" style="color: #06b6d4;"></i>
+    </div>
+    <div class="wf-kpi-val" style="color: #0891b2;">{{ kpis.carros_reserva }}</div>
+    <div class="wf-kpi-sub">Garantindo cumprimento ICV</div>
+  </div>
+
+  <!-- CONCLUÍDOS / APTOS -->
+  <a href="/chamados?status=Concluído" class="wf-kpi-card {% if status_atual == 'Concluído' %}active-kpi{% endif %}" style="border-left: 4px solid #14866e;">
+    <div class="wf-kpi-top">
+      <span class="wf-kpi-title" style="color: #14866e;">Aptos p/ Tráfego</span>
+      <i class="fa-solid fa-circle-check" style="color: #14866e;"></i>
+    </div>
+    <div class="wf-kpi-val" style="color: #14866e;">{{ kpis.concluidos }}</div>
+    <div class="wf-kpi-sub">Veículos liberados ao CCO</div>
+  </a>
 </div>
 
-<!-- TABELA DE CHAMADOS -->
+<!-- BANNER INFORMATIVO DO FLUXO -->
+<div class="demo-banner" style="background: linear-gradient(90deg, rgba(20, 134, 110, 0.08), rgba(59, 130, 246, 0.06)); border-color: #cbd5e1;">
+  <span class="demo-label" style="background: #14866e; color: #fff;"><span></span> REGRA OPERACIONAL</span>
+  <p><strong>Nenhum veículo pode ser recolhido ou ter manutenção iniciada sem autorização do Gerente de Operações</strong>. Quando liberado, o mecânico clica em <em>Iniciar Trabalho</em> (carimbando horário real) e encerra ao liberar o ônibus para a escala.</p>
+</div>
+
+<!-- TABELA DE CHAMADOS & WORKFLOW -->
 <div class="panel">
   <div class="panel-heading">
     <div>
-      <h2>Fila de Atendimento Operacional</h2>
-      <p>Gerencie o ciclo de vida de cada ordem de serviço aberta na empresa.</p>
+      <h2>Fila de Atendimento & Controle de Vala</h2>
+      <p>Gerencie o ciclo de aprovação operacional, execução mecânica e liberação técnica de cada veículo.</p>
     </div>
-    <div class="search-field" style="max-width: 250px;">
+    <div class="search-field" style="max-width: 280px;">
       <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" id="buscaChamados" placeholder="Buscar por protocolo ou veículo..." onkeyup="filtrarChamados()">
+      <input type="text" id="buscaChamados" placeholder="Buscar veículo, OS, mecânico..." onkeyup="filtrarChamados()">
     </div>
   </div>
 
@@ -49,83 +318,309 @@
     <table class="jobs-table" id="tabelaChamados">
       <thead>
         <tr>
-          <th>PROTOCOLO / TÍTULO</th>
-          <th>DEPARTAMENTO DESTINO</th>
-          <th>SOLICITANTE</th>
-          <th>RESPONSÁVEL</th>
-          <th>VEÍCULO / LINHA</th>
-          <th>PRIORIDADE</th>
-          <th>STATUS</th>
-          <th>DATA ABERTURA</th>
-          <th>AÇÃO</th>
+          <th>OS / VEÍCULO / LINHA</th>
+          <th>DEFEITO & DESCRIÇÃO</th>
+          <th>SOLICITANTE / MECÂNICO</th>
+          <th>JANELA OPERACIONAL (PREVISTO x REAL)</th>
+          <th>APROVAÇÃO OPERAÇÃO</th>
+          <th>STATUS OS</th>
+          <th style="text-align: right;">AÇÕES</th>
         </tr>
       </thead>
       <tbody>
         {% for ch in chamados %}
         <tr>
-          <td>
-            <strong style="color: #0f172a; font-size: 13px; display: block;">{{ ch.protocolo }} - {{ ch.titulo }}</strong>
-            <span style="font-size: 11.5px; color: #64748b; max-width: 280px; display: block; white-space: normal;">
+          <!-- 1. OS / VEÍCULO -->
+          <td style="min-width: 170px;">
+            <strong style="color: #0f172a; font-size: 13px; display: block; font-family: monospace;">{{ ch.protocolo }}</strong>
+            
+            {% if ch.prefixo_veiculo %}
+            <span class="badge-wf" style="background: #e0f2fe; color: #0284c7; margin-top: 3px; font-size: 11px;">
+              <i class="fa-solid fa-bus"></i> Carro {{ ch.prefixo_veiculo }}
+            </span>
+            {% else %}
+            <span style="font-size: 11px; color: #94a3b8;">Frota Geral</span>
+            {% endif %}
+
+            {% if ch.linha %}
+            <span style="font-size: 11px; color: #64748b; display: block; margin-top: 2px;">
+              {{ ch.linha }}
+            </span>
+            {% endif %}
+
+            {% if ch.carro_reserva %}
+            <span class="badge-wf" style="background: #cffafe; color: #0e7490; margin-top: 4px; display: inline-flex;" title="Carro reserva cobrindo escala">
+              <i class="fa-solid fa-repeat"></i> {{ ch.carro_reserva }}
+            </span>
+            {% endif %}
+          </td>
+
+          <!-- 2. DEFEITO & DESCRIÇÃO -->
+          <td style="max-width: 260px;">
+            <strong style="color: #1e293b; font-size: 12.5px; display: block;">{{ ch.titulo }}</strong>
+            <span style="font-size: 11.5px; color: #64748b; display: block; line-height: 1.35; margin-top: 2px;">
               {{ ch.descricao }}
             </span>
+            {% if ch.prioridade == 'Crítica' %}
+            <span class="badge-wf badge-wf-recusado" style="margin-top: 4px; font-size: 10px;">
+              <i class="fa-solid fa-bolt"></i> Prioridade Crítica (SLA 4h)
+            </span>
+            {% endif %}
           </td>
+
+          <!-- 3. SOLICITANTE / MECÂNICO -->
           <td>
-            <span style="font-weight: 600; color: #334155; font-size: 12px;">{{ ch.departamento_destino }}</span>
+            <div style="font-size: 12px; font-weight: 600; color: #0f172a;">{{ ch.solicitante_nome }}</div>
+            <div style="font-size: 11px; color: #64748b;">De: {{ ch.departamento_origem }}</div>
+            <div style="font-size: 11px; color: #475569; margin-top: 4px;">
+              <i class="fa-solid fa-user-gear"></i> Resp: <strong>{{ ch.responsavel_nome or 'Não atribuído' }}</strong>
+            </div>
           </td>
-          <td>
-            <span style="font-size: 12px; color: #0f172a;">{{ ch.solicitante_nome }}</span>
+
+          <!-- 4. JANELA OPERACIONAL (PREVISTO x REAL) -->
+          <td style="min-width: 190px;">
+            <div class="schedule-box">
+              <div class="schedule-item">
+                <i class="fa-regular fa-calendar-plus" style="color: #3b82f6;"></i>
+                <span>Início Prev: <strong>{{ ch.data_inicio_prevista[11:16] if ch.data_inicio_prevista and 'T' in ch.data_inicio_prevista else (ch.data_inicio_prevista or '--:--') }}</strong></span>
+              </div>
+              <div class="schedule-item" style="margin-top: 2px;">
+                <i class="fa-regular fa-clock" style="color: #f59e0b;"></i>
+                <span>Término Prev: <strong>{{ ch.data_fim_prevista[11:16] if ch.data_fim_prevista and 'T' in ch.data_fim_prevista else (ch.data_fim_prevista or '--:--') }}</strong></span>
+              </div>
+
+              {% if ch.data_inicio_real %}
+              <div class="schedule-real">
+                <i class="fa-solid fa-play" style="font-size: 9px;"></i> Início Real: {{ ch.data_inicio_real[11:16] if ' ' in ch.data_inicio_real else ch.data_inicio_real }}
+              </div>
+              {% endif %}
+
+              {% if ch.data_fim_real %}
+              <div style="color: #047857; font-weight: 700; font-size: 10.5px; margin-top: 2px;">
+                <i class="fa-solid fa-check-double" style="font-size: 9px;"></i> Fim Real: {{ ch.data_fim_real[11:16] if ' ' in ch.data_fim_real else ch.data_fim_real }}
+              </div>
+              {% endif %}
+            </div>
           </td>
+
+          <!-- 5. STATUS APROVAÇÃO OPERAÇÃO -->
           <td>
-            <span style="font-size: 12px; color: #475569; font-weight: 500;">{{ ch.responsavel_nome or 'Não Atribuído' }}</span>
-          </td>
-          <td>
-            {% if ch.prefixo_veiculo %}
-              <span class="status-badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700; font-family: monospace;">
-                <i class="fa-solid fa-bus"></i> {{ ch.prefixo_veiculo }}
+            {% set aprov = ch.status_aprovacao or 'Pendente Operação' %}
+            {% if aprov == 'Liberado Manutenção' %}
+              <span class="badge-wf badge-wf-liberado">
+                <i class="fa-solid fa-circle-check"></i> Liberado Manutenção
+              </span>
+              {% if ch.aprovador_nome %}
+              <div style="font-size: 10px; color: #64748b; margin-top: 3px;">
+                Por: {{ ch.aprovador_nome }}
+              </div>
+              {% endif %}
+            {% elif aprov == 'Reagendado Entrepico' %}
+              <span class="badge-wf badge-wf-reagendado">
+                <i class="fa-solid fa-clock-rotate-left"></i> Reagendado Entrepico
+              </span>
+              {% if ch.motivo_rejeicao %}
+              <div style="font-size: 10px; color: #c2410c; margin-top: 2px;" title="{{ ch.motivo_rejeicao }}">
+                {{ ch.motivo_rejeicao[:28] }}...
+              </div>
+              {% endif %}
+            {% elif aprov == 'Recusado Operação' %}
+              <span class="badge-wf badge-wf-recusado">
+                <i class="fa-solid fa-ban"></i> Recusado Operação
+              </span>
+              {% if ch.motivo_rejeicao %}
+              <div style="font-size: 10px; color: #b91c1c; margin-top: 2px;" title="{{ ch.motivo_rejeicao }}">
+                {{ ch.motivo_rejeicao[:28] }}...
+              </div>
+              {% endif %}
+            {% elif aprov == 'Liberado para Tráfego / Apto' %}
+              <span class="badge-wf badge-wf-apto">
+                <i class="fa-solid fa-shield-halved"></i> Apto p/ Tráfego
               </span>
             {% else %}
-              <span style="color: #94a3b8; font-size: 12px;">Geral</span>
+              <span class="badge-wf badge-wf-pendente">
+                <i class="fa-solid fa-clock"></i> Pendente Operação
+              </span>
+              <div style="font-size: 10px; color: #b45309; margin-top: 2px;">
+                Aguardando Gerente
+              </div>
             {% endif %}
-            {% if ch.linha %}<span style="font-size: 11px; color: #64748b; display: block; margin-top: 2px;">{{ ch.linha }}</span>{% endif %}
           </td>
+
+          <!-- 6. STATUS OS -->
           <td>
-            {% if ch.prioridade == 'Crítica' %}
-              <span class="status-badge critical"><i class="fa-solid fa-bolt"></i> Crítica</span>
-            {% elif ch.prioridade == 'Alta' %}
-              <span class="status-badge open"><i class="fa-solid fa-triangle-exclamation"></i> Alta</span>
+            {% if ch.status == 'Concluído' %}
+              <span class="badge-wf badge-wf-apto"><i class="fa-solid fa-check"></i> Concluído</span>
+            {% elif ch.status == 'Em Execução na Vala' or ch.status == 'Em Atendimento' %}
+              <span class="badge-wf badge-wf-execucao"><i class="fa-solid fa-spinner fa-spin"></i> Em Vala</span>
+            {% elif ch.status == 'Cancelado/Recusado' %}
+              <span class="badge-wf badge-wf-recusado"><i class="fa-solid fa-xmark"></i> Cancelado</span>
             {% else %}
-              <span style="font-size: 12px; color: #64748b;">Normal</span>
+              <span class="badge-wf" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">
+                <i class="fa-solid fa-circle" style="font-size: 7px;"></i> Aberto
+              </span>
             {% endif %}
           </td>
-          <td>
-            {% if ch.status == 'Aberto' %}
-              <span class="status-badge open"><i class="fa-solid fa-circle" style="font-size: 6px;"></i> Aberto</span>
-            {% elif ch.status == 'Em Atendimento' or ch.status == 'Em Andamento' %}
-              <span class="status-badge in_progress"><i class="fa-solid fa-spinner" style="font-size: 8px;"></i> Em Atendimento</span>
-            {% else %}
-              <span class="status-badge closed"><i class="fa-solid fa-check" style="font-size: 8px;"></i> Concluído</span>
+
+          <!-- 7. AÇÕES INTEGRADAS (MECÂNICO x GERENTE) -->
+          <td style="text-align: right; white-space: nowrap;">
+            <!-- SE PENDENTE OPERAÇÃO: BOTÃO DO GERENTE DE OPERAÇÕES -->
+            {% if (ch.status_aprovacao == 'Pendente Operação' or not ch.status_aprovacao) and ch.status != 'Concluído' and ch.status != 'Cancelado/Recusado' %}
+            <button class="btn-primary" style="padding: 5px 10px; font-size: 11px; background: #f59e0b; border-color: #d97706;"
+              onclick="abrirModalAvaliacaoGerente('{{ ch.id }}', '{{ ch.protocolo }}', '{{ ch.prefixo_veiculo or 'Geral' }}', '{{ ch.titulo|escape }}', '{{ ch.data_inicio_prevista or '' }}', '{{ ch.data_fim_prevista or '' }}')">
+              <i class="fa-solid fa-user-check"></i> Avaliar OS
+            </button>
             {% endif %}
-          </td>
-          <td>
-            <span style="font-size: 11.5px; color: #64748b;">{{ ch.data_abertura[:16] }}</span>
-          </td>
-          <td>
-            {% if ch.status != 'Concluído' %}
-            <form action="{{ url_for('api_fechar_chamado') }}" method="POST" style="display:inline;" onsubmit="return confirm('Concluir esta Ordem de Serviço e disparar e-mail automático ao solicitante?')">
+
+            <!-- SE LIBERADO MANUTENÇÃO E AINDA NÃO INICIADO: MECÂNICO INICIA TRABALHO -->
+            {% if ch.status_aprovacao == 'Liberado Manutenção' and ch.status != 'Em Execução na Vala' and ch.status != 'Concluído' %}
+            <form action="{{ url_for('api_iniciar_chamado') }}" method="POST" style="display:inline;"
+              onsubmit="return confirm('Confirmar início imediato dos trabalhos mecânicos no veículo {{ ch.prefixo_veiculo }}?')">
               <input type="hidden" name="chamado_id" value="{{ ch.id }}">
-              <input type="hidden" name="resolucao" value="Serviço executado e testado pelo responsável.">
-              <button type="submit" class="btn-primary" style="padding: 4px 8px; font-size: 11px; background: #10b981; border-color: #10b981;">
-                <i class="fa-solid fa-check"></i> Fechar OS
+              <button type="submit" class="btn-primary"
+                style="padding: 5px 10px; font-size: 11px; background: #8b5cf6; border-color: #7c3aed;">
+                <i class="fa-solid fa-play"></i> Iniciar Trabalho
               </button>
             </form>
-            {% else %}
-              <span style="font-size: 11px; color: #10b981; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Concluído</span>
+            {% endif %}
+
+            <!-- SE EM EXECUÇÃO NA VALA: MECÂNICO FINALIZA A OS -->
+            {% if ch.status == 'Em Execução na Vala' or (ch.status == 'Em Atendimento' and ch.status_aprovacao == 'Liberado Manutenção') %}
+            <button class="btn-primary" style="padding: 5px 10px; font-size: 11px; background: #10b981; border-color: #059669;"
+              onclick="abrirModalConcluirOS('{{ ch.id }}', '{{ ch.protocolo }}', '{{ ch.prefixo_veiculo or 'Geral' }}')">
+              <i class="fa-solid fa-check-double"></i> Concluir OS
+            </button>
+            {% endif %}
+
+            <!-- SE JÁ CONCLUÍDO -->
+            {% if ch.status == 'Concluído' %}
+            <span style="font-size: 11px; color: #047857; font-weight: 700;">
+              <i class="fa-solid fa-circle-check"></i> Liberado CCO
+            </span>
             {% endif %}
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL 1: AVALIAÇÃO DO GERENTE DE OPERAÇÕES (LIBERAR / REAGENDAR / RECUSAR) -->
+<!-- ========================================================================= -->
+<div class="modal-overlay" id="modalAvaliacaoGerente">
+  <div class="modal-card">
+    <div class="modal-head" style="background: #1e293b;">
+      <h3><i class="fa-solid fa-shield-halved" style="color: #38bdf8;"></i> Decisão Operacional do Gerente</h3>
+      <button class="modal-close-btn" onclick="fecharModalAvaliacaoGerente()">&times;</button>
+    </div>
+    <form action="{{ url_for('api_aprovar_chamado') }}" method="POST">
+      <input type="hidden" name="chamado_id" id="gerenteChamadoId">
+      <input type="hidden" name="decisao" id="gerenteDecisao" value="aprovar">
+
+      <div class="modal-content-body">
+        <div style="background: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #e2e8f0;">
+          <div style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700;">Solicitação de Manutenção:</div>
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; margin-top: 2px;" id="gerenteModalTitulo"></div>
+          <div style="display: flex; gap: 14px; margin-top: 6px; font-size: 12px; color: #334155;">
+            <div><i class="fa-solid fa-bus" style="color: #0284c7;"></i> <strong id="gerenteModalVeiculo"></strong></div>
+            <div><i class="fa-regular fa-clock" style="color: #f59e0b;"></i> Janela: <span id="gerenteModalJanela"></span></div>
+          </div>
+        </div>
+
+        <!-- SELETOR DE CARRO RESERVA (OPCIONAL QUANDO LIBERAR) -->
+        <div class="form-group" id="grupoCarroReserva">
+          <label class="form-label" style="font-weight: 700; color: #0369a1;">
+            <i class="fa-solid fa-repeat"></i> Alocar Carro Reserva da Frota (Opcional):
+          </label>
+          <select name="carro_reserva" class="form-select" style="border-color: #7dd3fc;">
+            <option value="">Nenhum (Veículo reserva não necessário / Linha coberta)</option>
+            {% for res in carros_reserva_sugestao %}
+            <option value="{{ res }}">{{ res }}</option>
+            {% endfor %}
+          </select>
+          <p style="font-size: 11px; color: #64748b; margin-top: 4px;">
+            Ao alocar um carro reserva, a escala do CCO é automaticamente atualizada mantendo 100% das partidas.
+          </p>
+        </div>
+
+        <!-- CAMPO DE JUSTIFICATIVA (OBRIGATÓRIO SE REAGENDAR OU RECUSAR) -->
+        <div class="form-group" id="grupoJustificativa" style="margin-top: 14px;">
+          <label class="form-label">Justificativa Operacional / Observações:</label>
+          <textarea name="motivo_rejeicao" id="gerenteMotivo" class="form-textarea" rows="2" placeholder="Ex: Liberado veículo para vala. Reserva 1099 cobrindo a tabela 04 no Corredor Sul."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-foot" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; gap: 6px;">
+          <!-- RECUSAR -->
+          <button type="button" class="btn-primary" style="background: #ef4444; border-color: #dc2626; padding: 6px 12px; font-size: 12px;" onclick="submeterDecisaoGerente('recusar')">
+            <i class="fa-solid fa-ban"></i> Recusar
+          </button>
+          <!-- REAGENDAR -->
+          <button type="button" class="btn-primary" style="background: #f97316; border-color: #ea580c; padding: 6px 12px; font-size: 12px;" onclick="submeterDecisaoGerente('reagendar')">
+            <i class="fa-solid fa-clock-rotate-left"></i> Reagendar
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-limpar-filtros" onclick="fecharModalAvaliacaoGerente()">Cancelar</button>
+          <!-- APROVAR & LIBERAR -->
+          <button type="button" class="btn-primary" style="background: #10b981; border-color: #059669; padding: 6px 16px; font-size: 12px;" onclick="submeterDecisaoGerente('aprovar')">
+            <i class="fa-solid fa-check"></i> Liberar Veículo p/ Manutenção
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL 2: CONCLUSÃO DE SERVIÇO PELO MECÂNICO & LIBERAÇÃO DE TRÁFEGO        -->
+<!-- ========================================================================= -->
+<div class="modal-overlay" id="modalConcluirOS">
+  <div class="modal-card">
+    <div class="modal-head" style="background: #065f46;">
+      <h3><i class="fa-solid fa-circle-check" style="color: #6ee7b7;"></i> Finalização de OS & Liberação para Tráfego</h3>
+      <button class="modal-close-btn" onclick="fecharModalConcluirOS()">&times;</button>
+    </div>
+    <form action="{{ url_for('api_fechar_chamado') }}" method="POST">
+      <input type="hidden" name="chamado_id" id="concluirChamadoId">
+
+      <div class="modal-content-body">
+        <div style="background: #ecfdf5; padding: 12px; border-radius: 8px; margin-bottom: 14px; border: 1px solid #a7f3d0;">
+          <div style="font-size: 11px; color: #047857; font-weight: 700; text-transform: uppercase;">Veículo sob Intervenção:</div>
+          <div style="font-size: 14px; font-weight: 800; color: #064e3b; margin-top: 2px;" id="concluirModalInfo"></div>
+          <div style="font-size: 11.5px; color: #047857; margin-top: 4px;">
+            Ao confirmar, a data/hora real de término será registrada e o veículo ficará com status <strong>Apto para Tráfego</strong> no CCO.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Parecer Técnico / Serviços Realizados</label>
+          <textarea name="resolucao" class="form-textarea" rows="3" required placeholder="Ex: Substituição das pastilhas de freio dianteiras e sangria do circuito pneumático. Testado na pista da garagem e apto para operação normal."></textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Custo Estimado Peças (R$)</label>
+            <input type="number" step="0.01" name="custo_estimado" class="form-input" placeholder="0.00" value="0.00">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mecânico Responsável</label>
+            <input type="text" name="usuario_nome" class="form-input" value="{{ session.get('nome', 'Carlos Roberto (Mecânico)') }}">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" class="btn-limpar-filtros" onclick="fecharModalConcluirOS()">Cancelar</button>
+        <button type="submit" class="btn-primary" style="background: #10b981; border-color: #059669;">
+          <i class="fa-solid fa-check-double"></i> Concluir OS & Liberar Ônibus
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -136,6 +631,46 @@
     for (let i = 1; i < rows.length; i++) {
       rows[i].style.display = rows[i].textContent.toLowerCase().includes(val) ? '' : 'none';
     }
+  }
+
+  // Modal Gerente
+  function abrirModalAvaliacaoGerente(id, protocolo, veiculo, titulo, inicioPrev, fimPrev) {
+    document.getElementById('gerenteChamadoId').value = id;
+    document.getElementById('gerenteModalTitulo').textContent = protocolo + ' - ' + titulo;
+    document.getElementById('gerenteModalVeiculo').textContent = 'Veículo ' + veiculo;
+    document.getElementById('gerenteModalJanela').textContent = (inicioPrev ? inicioPrev.replace('T', ' ') : 'Imediato') + ' até ' + (fimPrev ? fimPrev.replace('T', ' ') : 'A definir');
+    document.getElementById('gerenteMotivo').value = 'Liberado veículo para oficina. Manutenção autorizada pelo Gerente de Operações.';
+    document.getElementById('modalAvaliacaoGerente').classList.add('is-active');
+  }
+
+  function fecharModalAvaliacaoGerente() {
+    document.getElementById('modalAvaliacaoGerente').classList.remove('is-active');
+  }
+
+  function submeterDecisaoGerente(decisao) {
+    document.getElementById('gerenteDecisao').value = decisao;
+    const motivoInput = document.getElementById('gerenteMotivo');
+    
+    if (decisao === 'recusar' || decisao === 'reagendar') {
+      if (!motivoInput.value.trim() || motivoInput.value.includes('Liberado veículo')) {
+        const justificativa = prompt('Digite a justificativa operacional para ' + (decisao === 'recusar' ? 'RECUSAR' : 'REAGENDAR') + ' esta OS:');
+        if (!justificativa) return;
+        motivoInput.value = justificativa;
+      }
+    }
+    
+    document.getElementById('modalAvaliacaoGerente').querySelector('form').submit();
+  }
+
+  // Modal Conclusão
+  function abrirModalConcluirOS(id, protocolo, veiculo) {
+    document.getElementById('concluirChamadoId').value = id;
+    document.getElementById('concluirModalInfo').textContent = protocolo + ' - Veículo ' + veiculo;
+    document.getElementById('modalConcluirOS').classList.add('is-active');
+  }
+
+  function fecharModalConcluirOS() {
+    document.getElementById('modalConcluirOS').classList.remove('is-active');
   }
 </script>
 {% endblock %}
