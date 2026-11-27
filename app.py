@@ -738,6 +738,18 @@ def chamados_view():
             
         chamados_processados.append(item)
         
+    # Métricas de Dias Indisponíveis e Tempo Médio Total
+    indisp_vals = [ch["dias_indisponiveis"] for ch in chamados_processados if ch["is_indisponivel"]]
+    todos_vals = [ch["dias_indisponiveis"] for ch in chamados_processados]
+    
+    media_indisponivel = round(sum(indisp_vals) / len(indisp_vals), 1) if indisp_vals else 0.0
+    tempo_medio_total = round(sum(todos_vals) / len(todos_vals), 1) if todos_vals else 0.0
+    total_dias_acumulado = round(sum(indisp_vals), 1)
+    
+    kpis_chamados["media_dias_indisponivel"] = media_indisponivel
+    kpis_chamados["tempo_medio_total"] = tempo_medio_total
+    kpis_chamados["total_dias_acumulado"] = total_dias_acumulado
+        
     # Classificar sempre do maior para o menor (tempo indisponível do maior para o menor)
     chamados_processados.sort(
         key=lambda x: (1 if x["is_indisponivel"] else 0, x["dias_indisponiveis"], x.get("id", 0)),
