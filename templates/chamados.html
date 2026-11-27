@@ -532,38 +532,39 @@
 <!-- 7 KPIS DO WORKFLOW OPERACIONAL (CUSTOMIZADOS POR DEPARTAMENTO) -->
 <div class="wf-kpis-grid">
   {% for card in kpi_cards %}
-    {% if card.link %}
-    <a href="{{ card.link }}"
-      class="wf-kpi-card {% if card.is_active %}active-kpi{% endif %}" style="border-left: 4px solid {{ card.cor }};">
-      <div class="wf-kpi-top">
-        <span class="wf-kpi-title" style="color: {{ card.cor }};">{{ card.titulo }}</span>
-        <i class="fa-solid {{ card.icone }}" style="color: {{ card.cor }}; font-size: 13px;"></i>
-      </div>
-      <div class="wf-kpi-val" style="color: #0f172a;">{{ card.valor }}</div>
-      <div class="wf-kpi-sub">{{ card.sub }}</div>
-    </a>
-    {% else %}
-    <div class="wf-kpi-card"
-      style="border-left: 4px solid {{ card.cor }}; background: {% if card.cor == '#ef4444' %}linear-gradient(180deg, #ffffff 0%, #fffbfb 100%){% else %}#ffffff{% endif %};">
-      <div class="wf-kpi-top">
-        <span class="wf-kpi-title" style="color: {{ card.cor }};">{{ card.titulo }}</span>
-        <i class="fa-solid {{ card.icone }}" style="color: {{ card.cor }}; font-size: 13px;"></i>
-      </div>
-      <div class="wf-kpi-val" style="color: {% if card.cor == '#ef4444' %}#b91c1c{% else %}#0f172a{% endif %};">
-        {{ card.valor }}
-      </div>
-      <div class="wf-kpi-sub" style="{% if card.cor == '#ef4444' %}color: #991b1b; font-weight: 600;{% endif %}">
-        {{ card.sub }}
-      </div>
+  {% if card.link %}
+  <a href="{{ card.link }}" class="wf-kpi-card {% if card.is_active %}active-kpi{% endif %}"
+    style="border-left: 4px solid {{ card.cor }};">
+    <div class="wf-kpi-top">
+      <span class="wf-kpi-title" style="color: {{ card.cor }};">{{ card.titulo }}</span>
+      <i class="fa-solid {{ card.icone }}" style="color: {{ card.cor }}; font-size: 13px;"></i>
     </div>
-    {% endif %}
+    <div class="wf-kpi-val" style="color: #0f172a;">{{ card.valor }}</div>
+    <div class="wf-kpi-sub">{{ card.sub }}</div>
+  </a>
+  {% else %}
+  <div class="wf-kpi-card"
+    style="border-left: 4px solid {{ card.cor }}; background: {% if card.cor == '#ef4444' %}linear-gradient(180deg, #ffffff 0%, #fffbfb 100%){% else %}#ffffff{% endif %};">
+    <div class="wf-kpi-top">
+      <span class="wf-kpi-title" style="color: {{ card.cor }};">{{ card.titulo }}</span>
+      <i class="fa-solid {{ card.icone }}" style="color: {{ card.cor }}; font-size: 13px;"></i>
+    </div>
+    <div class="wf-kpi-val" style="color: {% if card.cor == '#ef4444' %}#b91c1c{% else %}#0f172a{% endif %};">
+      {{ card.valor }}
+    </div>
+    <div class="wf-kpi-sub" style="{% if card.cor == '#ef4444' %}color: #991b1b; font-weight: 600;{% endif %}">
+      {{ card.sub }}
+    </div>
+  </div>
+  {% endif %}
   {% endfor %}
 </div>
 
 <!-- AVISO DE SEGURANÇA & REGRAS -->
 <div class="demo-banner"
   style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 14px; margin-bottom: 14px; border-radius: 8px;">
-  <span class="demo-label" style="background: #0f172a; color: #fff; font-size: 10.5px;"><span></span> {{ dept_info.banner_tag }}</span>
+  <span class="demo-label" style="background: #0f172a; color: #fff; font-size: 10.5px;"><span></span> {{
+    dept_info.banner_tag }}</span>
   <p style="font-size: 12px; margin: 0; color: #475569;">
     {{ dept_info.banner_texto }}
   </p>
@@ -574,11 +575,13 @@
   <div class="panel-heading" style="margin-bottom: 12px;">
     <div>
       <h2 style="font-size: 16px; margin: 0;">Fila de Chamados & Ordens de Serviço ({{ dept_atual }})</h2>
-      <p style="font-size: 11.5px; color: #64748b; margin-top: 2px;">Classificado por tempo de atendimento/indisponibilidade (maior para o menor).</p>
+      <p style="font-size: 11.5px; color: #64748b; margin-top: 2px;">Classificado por tempo de
+        atendimento/indisponibilidade (maior para o menor).</p>
     </div>
     <div class="search-field" style="max-width: 300px;">
       <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" id="buscaChamados" placeholder="Buscar veículo, OS, responsável..." onkeyup="filtrarChamados()">
+      <input type="text" id="buscaChamados" placeholder="Buscar veículo, OS, responsável..."
+        onkeyup="filtrarChamados()">
     </div>
   </div>
 
@@ -608,19 +611,23 @@
               <i class="fa-solid fa-bus"></i> Carro {{ ch.prefixo_veiculo }}
             </span>
             {% elif ch.departamento_grupo == 'DHO & Treinamento' %}
-            <span style="font-size: 11px; color: #7c3aed; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px;">
+            <span
+              style="font-size: 11px; color: #7c3aed; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px;">
               <i class="fa-solid fa-users"></i> Colaboradores / Gente
             </span>
             {% elif ch.departamento_grupo == 'Financeiro' %}
-            <span style="font-size: 11px; color: #059669; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px;">
+            <span
+              style="font-size: 11px; color: #059669; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px;">
               <i class="fa-solid fa-file-invoice-dollar"></i> Contas & Títulos
             </span>
             {% elif ch.departamento_grupo == 'Garagem & Portaria' %}
-            <span style="font-size: 11px; color: #d97706; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px;">
+            <span
+              style="font-size: 11px; color: #d97706; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px;">
               <i class="fa-solid fa-warehouse"></i> Infra / Pátio
             </span>
             {% else %}
-            <span style="font-size: 11px; color: #94a3b8; margin-top: 3px; display: inline-block;">Geral / Operação</span>
+            <span style="font-size: 11px; color: #94a3b8; margin-top: 3px; display: inline-block;">Geral /
+              Operação</span>
             {% endif %}
 
             {% if ch.linha %}
@@ -650,14 +657,16 @@
             </div>
             <div
               style="font-size: 9.5px; color: #dc2626; font-weight: 800; text-transform: uppercase; margin-top: 3px;">
-              {% if dept_atual == 'DHO & Treinamento' %}PENDENTE RH{% elif dept_atual == 'Financeiro' %}A LIQUIDAR{% elif dept_atual == 'Garagem & Portaria' %}EM REPARO{% else %}INDISPONÍVEL{% endif %}
+              {% if dept_atual == 'DHO & Treinamento' %}PENDENTE RH{% elif dept_atual == 'Financeiro' %}A LIQUIDAR{%
+              elif dept_atual == 'Garagem & Portaria' %}EM REPARO{% else %}INDISPONÍVEL{% endif %}
             </div>
             {% else %}
             <div class="badge-dias-liberado">
               <i class="fa-solid fa-check"></i> {{ ch.dias_indisp_label }}
             </div>
             <div style="font-size: 9.5px; color: #047857; font-weight: 700; margin-top: 2px;">
-              {% if dept_atual == 'DHO & Treinamento' %}Regularizado{% elif dept_atual == 'Financeiro' %}Quitado{% else %}Liberado{% endif %}
+              {% if dept_atual == 'DHO & Treinamento' %}Regularizado{% elif dept_atual == 'Financeiro' %}Quitado{% else
+              %}Liberado{% endif %}
             </div>
             {% endif %}
           </td>
