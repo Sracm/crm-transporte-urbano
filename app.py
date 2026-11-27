@@ -9,6 +9,7 @@ Manutenção, RH, Treinamento, Contas a Pagar, Contas a Receber, Garagem, Portar
 import os
 import sqlite3
 import calendar
+import urllib.parse
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory, session
 
@@ -1043,7 +1044,133 @@ def chamados_view():
     # Trava de segurança: apenas admin, diretoria e gerente operacional podem aprovar
     pode_aprovar = user_can_approve_os(session)
     
-    # Lista de usuários para o formulário de abertura
+    # 4. Configurações de Cabeçalhos e Metadados por Departamento
+    dept_info_map = {
+        "DHO & Treinamento": {
+            "eyebrow": "FLUXO INTEGRADO DE DHO, GENTE & TREINAMENTO",
+            "titulo": "Gestão de Solicitações de DHO & Treinamento",
+            "subtitulo": "Demandas de ponto eletrônico, reciclagens obrigatórias de motoristas (CNH/MOPP), integração e atendimento a colaboradores.",
+            "banner_tag": "DHO & GESTÃO DE PESSOAS",
+            "banner_texto": "Solicitações de RH, ajustes de ponto eletrônico e reciclagens obrigatórias de condutores de transporte urbano. Aprovadas pela gerência e lançadas na folha e escala.",
+            "col_os": "PROTOCOLO / SOLICITAÇÃO",
+            "col_indisp": "TEMPO ABERTO",
+            "col_defeito": "DEMANDA & DETALHAMENTO",
+            "col_solic": "SOLICITANTE / ANALISTA",
+            "col_janela": "PRAZO / PREVISÃO",
+            "col_aprov": "STATUS GESTÃO"
+        },
+        "Financeiro": {
+            "eyebrow": "FLUXO FINANCEIRO DE FORNECEDORES & FATURAMENTO",
+            "titulo": "Gestão Financeira, Contas a Pagar & Repasses",
+            "subtitulo": "Controle de notas fiscais de diesel S-10, peças de manutenção mecânica e conciliação de repasses tarifários.",
+            "banner_tag": "FINANCEIRO & CONTROLADORIA",
+            "banner_texto": "Faturas de diesel e peças com aprovação da diretoria e conferência contábil para liberação de pagamento e quitação.",
+            "col_os": "PROTOCOLO / FATURA",
+            "col_indisp": "DIAS PENDENTE",
+            "col_defeito": "DESCRIÇÃO DA FATURA / TÍTULO",
+            "col_solic": "SOLICITANTE / RESP",
+            "col_janela": "VENCIMENTO / PRAZO",
+            "col_aprov": "STATUS GESTÃO"
+        },
+        "Garagem & Portaria": {
+            "eyebrow": "FLUXO OPERACIONAL DE GARAGEM, PÁTIO & PORTARIA",
+            "titulo": "Manutenção Predial de Garagem & Portaria",
+            "subtitulo": "Controle de infraestrutura de pátio, bombas de diesel, lavadores automáticos e catracas de acesso.",
+            "banner_tag": "GARAGEM & INFRAESTRUTURA",
+            "banner_texto": "Demandas de infraestrutura e segurança patrimonial da garagem de transporte coletivo. Intervenções autorizadas para manter o pátio operacional.",
+            "col_os": "PROTOCOLO / PÁTIO",
+            "col_indisp": "TEMPO ABERTO",
+            "col_defeito": "OCORRÊNCIA & INFRAESTRUTURA",
+            "col_solic": "SOLICITANTE / RESP",
+            "col_janela": "PRAZO DE EXECUÇÃO",
+            "col_aprov": "STATUS GESTÃO"
+        },
+        "Oficina & Manutenção": {
+            "eyebrow": "WORKFLOW INTEGRADO DE MANUTENÇÃO & CCO",
+            "titulo": "Central de Ordens de Serviço da Frota (OS)",
+            "subtitulo": "Abertura pelo mecânico com previsão ⇄ Trava de segurança: Aprovação exclusiva da Diretoria & Gerente Operacional ⇄ Liberação de Vala com horário real ⇄ Liberação de Tráfego.",
+            "banner_tag": "TRAVA DE SEGURANÇA",
+            "banner_texto": "Aprovação de recolhimento de veículos é exclusiva da Diretoria e Gerente Operacional. Usuários de Oficina/Box incluem ordens de serviço, e após aprovação, registram o início e a previsão de entrega. A tabela está classificada do maior tempo indisponível para o menor.",
+            "col_os": "OS / VEÍCULO",
+            "col_indisp": "DIAS INDISPONÍVEIS",
+            "col_defeito": "DEFEITO & DESCRIÇÃO",
+            "col_solic": "SOLICITANTE / RESP",
+            "col_janela": "JANELA OPERACIONAL",
+            "col_aprov": "APROVAÇÃO"
+        },
+        "Todos": {
+            "eyebrow": "CENTRAL INTEGRADA DE OPERAÇÕES & CHAMADOS",
+            "titulo": "Central de Chamados & Ordens de Serviço (OS)",
+            "subtitulo": "Visão consolidada de todas as áreas: Manutenção de Frota, Garagem, Financeiro e DHO.",
+            "banner_tag": "VISÃO GLOBAL",
+            "banner_texto": "Exibindo todas as ordens e chamados de todos os setores integrados da concessionária de transporte urbano.",
+            "col_os": "OS / DEPARTAMENTO",
+            "col_indisp": "TEMPO PENDENTE",
+            "col_defeito": "ASSUNTO & DETALHES",
+            "col_solic": "SOLICITANTE / RESP",
+            "col_janela": "JANELA / PRAZO",
+            "col_aprov": "STATUS GESTÃO"
+        }
+    }
+    
+    current_dept_info = dept_info_map.get(dept_filter, dept_info_map["Todos"])
+    
+    # 5. Cards de KPIs específicos e customizados por departamento
+    if dept_filter == "DHO & Treinamento":
+        ponto_count = len([ch for ch in chamados_filtrados_dept if "ponto" in (ch.get("titulo","")+ch.get("descricao","")).lower() or ch.get("categoria") in ("Ponto", "RH")])
+        treinamento_count = len([ch for ch in chamados_filtrados_dept if "treinamento" in (ch.get("titulo","")+ch.get("descricao","")).lower() or "cnh" in (ch.get("titulo","")+ch.get("descricao","")).lower() or ch.get("categoria") in ("Treinamento", "Curso")])
+        em_analise = len([ch for ch in chamados_filtrados_dept if ch.get("status") in ("Em Atendimento", "Em Execução na Vala", "Em Análise")])
+        
+        cards_customizados = [
+            {"titulo": "Total Demandas", "valor": total_dept, "sub": "DHO & Treinamento", "icone": "fa-list-check", "cor": "#3b82f6", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Todos", "is_active": (status_filter == "Todos")},
+            {"titulo": "Aguardando Gestão", "valor": pendentes_aprovacao, "sub": "Aprovação de Chefia", "icone": "fa-hourglass-start", "cor": "#f59e0b", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Pendente+Operação", "is_active": (status_filter == "Pendente Operação")},
+            {"titulo": "Ponto & Banco Horas", "valor": ponto_count, "sub": "Ajuste Catraca / Espelho", "icone": "fa-fingerprint", "cor": "#8b5cf6", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter), "is_active": False},
+            {"titulo": "Reciclagem & CNH", "valor": treinamento_count, "sub": "MOPP & Direção Defensiva", "icone": "fa-graduation-cap", "cor": "#0ea5e9", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter), "is_active": False},
+            {"titulo": "Média Resolução", "valor": f"{media_indisponivel} dias", "sub": f"Tempo médio: {tempo_medio_total}d", "icone": "fa-stopwatch-20", "cor": "#ef4444", "link": None, "is_active": False},
+            {"titulo": "Em Análise RH", "valor": em_analise, "sub": "Equipe tratando", "icone": "fa-user-clock", "cor": "#6366f1", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Em+Execução+na+Vala", "is_active": (status_filter == "Em Execução na Vala")},
+            {"titulo": "Regularizados", "valor": concluidos, "sub": "Lançados na Folha", "icone": "fa-circle-check", "cor": "#10b981", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Concluído", "is_active": (status_filter == "Concluído")},
+        ]
+    elif dept_filter == "Financeiro":
+        pagar_count = len([ch for ch in chamados_filtrados_dept if ch.get("departamento_destino") == "Contas a Pagar" or "diesel" in (ch.get("titulo","")+ch.get("descricao","")).lower() or "nota fiscal" in (ch.get("titulo","")+ch.get("descricao","")).lower()])
+        receber_count = len([ch for ch in chamados_filtrados_dept if ch.get("departamento_destino") == "Contas a Receber" or "repasse" in (ch.get("titulo","")+ch.get("descricao","")).lower() or "tarifa" in (ch.get("titulo","")+ch.get("descricao","")).lower()])
+        em_conciliacao = len([ch for ch in chamados_filtrados_dept if ch.get("status") in ("Em Atendimento", "Em Execução na Vala")])
+        
+        cards_customizados = [
+            {"titulo": "Total Demandas", "valor": total_dept, "sub": "Contas Pagar / Receber", "icone": "fa-list-check", "cor": "#3b82f6", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Todos", "is_active": (status_filter == "Todos")},
+            {"titulo": "Aguardando Gestão", "valor": pendentes_aprovacao, "sub": "Aprovação Diretoria", "icone": "fa-hourglass-start", "cor": "#f59e0b", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Pendente+Operação", "is_active": (status_filter == "Pendente Operação")},
+            {"titulo": "Contas a Pagar", "valor": pagar_count, "sub": "Diesel & Peças", "icone": "fa-file-invoice-dollar", "cor": "#dc2626", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter), "is_active": False},
+            {"titulo": "Contas a Receber", "valor": receber_count, "sub": "Repasses SPTrans & Tarifas", "icone": "fa-hand-holding-dollar", "cor": "#059669", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter), "is_active": False},
+            {"titulo": "Tempo Médio Fatura", "valor": f"{media_indisponivel} dias", "sub": f"Tempo médio: {tempo_medio_total}d", "icone": "fa-stopwatch-20", "cor": "#ef4444", "link": None, "is_active": False},
+            {"titulo": "Em Conciliação", "valor": em_conciliacao, "sub": "Análise Contábil", "icone": "fa-calculator", "cor": "#0284c7", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Em+Execução+na+Vala", "is_active": (status_filter == "Em Execução na Vala")},
+            {"titulo": "Quitados / Pagos", "valor": concluidos, "sub": "Títulos Baixados", "icone": "fa-circle-check", "cor": "#10b981", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Concluído", "is_active": (status_filter == "Concluído")},
+        ]
+    elif dept_filter == "Garagem & Portaria":
+        portaria_count = len([ch for ch in chamados_filtrados_dept if "portaria" in (ch.get("departamento_origem","")+ch.get("departamento_destino","")).lower() or "catraca" in (ch.get("titulo","")+ch.get("descricao","")).lower()])
+        patio_count = len([ch for ch in chamados_filtrados_dept if "garagem" in (ch.get("departamento_origem","")+ch.get("departamento_destino","")).lower() or "pátio" in (ch.get("titulo","")+ch.get("descricao","")).lower() or "lâmpada" in (ch.get("titulo","")+ch.get("descricao","")).lower()])
+        em_reparo = len([ch for ch in chamados_filtrados_dept if ch.get("status") in ("Em Atendimento", "Em Execução na Vala")])
+        
+        cards_customizados = [
+            {"titulo": "Total Garagem", "valor": total_dept, "sub": "Pátio & Portaria", "icone": "fa-list-check", "cor": "#3b82f6", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Todos", "is_active": (status_filter == "Todos")},
+            {"titulo": "Aguardando Gestor", "valor": pendentes_aprovacao, "sub": "Aprovação Manutenção", "icone": "fa-hourglass-start", "cor": "#f59e0b", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Pendente+Operação", "is_active": (status_filter == "Pendente Operação")},
+            {"titulo": "Portaria & Catracas", "valor": portaria_count, "sub": "Controle de Acesso", "icone": "fa-door-open", "cor": "#0891b2", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter), "is_active": False},
+            {"titulo": "Pátio & Abastecimento", "valor": patio_count, "sub": "Estrutura & Iluminação", "icone": "fa-gas-pump", "cor": "#d97706", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter), "is_active": False},
+            {"titulo": "Tempo Médio Reparo", "valor": f"{media_indisponivel} dias", "sub": f"Tempo médio: {tempo_medio_total}d", "icone": "fa-stopwatch-20", "cor": "#ef4444", "link": None, "is_active": False},
+            {"titulo": "Em Reparo", "valor": em_reparo, "sub": "Equipe de Apoio", "icone": "fa-tools", "cor": "#8b5cf6", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Em+Execução+na+Vala", "is_active": (status_filter == "Em Execução na Vala")},
+            {"titulo": "Concluídos", "valor": concluidos, "sub": "Pátio 100% Ok", "icone": "fa-circle-check", "cor": "#10b981", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Concluído", "is_active": (status_filter == "Concluído")},
+        ]
+    else:
+        # Oficina & Manutenção / Todos os Departamentos
+        cards_customizados = [
+            {"titulo": "Total de OSs", "valor": total_dept, "sub": "Ordens Registradas", "icone": "fa-list-check", "cor": "#3b82f6", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Todos", "is_active": (status_filter == "Todos")},
+            {"titulo": "Aguardando Gestão", "valor": pendentes_aprovacao, "sub": "Aprovação do Gerente", "icone": "fa-hourglass-start", "cor": "#f59e0b", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Pendente+Operação", "is_active": (status_filter == "Pendente Operação")},
+            {"titulo": "Liberado p/ Vala", "valor": liberados_manutencao, "sub": "Mecânico agendar início", "icone": "fa-unlock-keyhole", "cor": "#10b981", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Liberado+Manuten%C3%A7%C3%A3o", "is_active": (status_filter == "Liberado Manutenção")},
+            {"titulo": "Em Execução", "valor": em_execucao, "sub": "Trabalho na vala", "icone": "fa-wrench", "cor": "#8b5cf6", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Em+Execu%C3%A7%C3%A3o+na+Vala", "is_active": (status_filter == "Em Execução na Vala")},
+            {"titulo": "Média Indisponível", "valor": f"{media_indisponivel} dias", "sub": f"Tempo médio total: {tempo_medio_total}d", "icone": "fa-stopwatch-20", "cor": "#ef4444", "link": None, "is_active": False},
+            {"titulo": "Reservas em Linha", "valor": carros_reserva, "sub": "Cumprimento do ICV", "icone": "fa-bus", "cor": "#06b6d4", "link": None, "is_active": False},
+            {"titulo": "Aptos p/ Tráfego", "valor": concluidos, "sub": "Liberados para linha", "icone": "fa-circle-check", "cor": "#14866e", "link": "/chamados?dept=" + urllib.parse.quote(dept_filter) + "&status=Conclu%C3%ADdo", "is_active": (status_filter == "Concluído")},
+        ]
+    
+    # 6. Lista de usuários para o formulário de abertura
     cursor.execute("SELECT id, nome, departamento, email FROM usuarios ORDER BY nome ASC")
     usuarios = cursor.fetchall()
     
@@ -1068,6 +1195,8 @@ def chamados_view():
         status_atual=status_filter,
         dept_atual=dept_filter,
         dept_counts=dept_counts,
+        dept_info=current_dept_info,
+        kpi_cards=cards_customizados,
         kpis=kpis_chamados,
         carros_reserva_sugestao=carros_reserva_sugestao,
         pode_aprovar=pode_aprovar

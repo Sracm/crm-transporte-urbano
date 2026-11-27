@@ -231,7 +231,7 @@
     border-radius: 10px;
     padding: 10px 14px;
     margin-bottom: 14px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
   }
 
   .wf-dept-pill {
@@ -457,12 +457,9 @@
 <!-- HEADING DA PÁGINA -->
 <div class="page-heading" style="margin-bottom: 16px;">
   <div>
-    <div class="eyebrow"><i class="fa-solid fa-arrows-spin"></i> WORKFLOW INTEGRADO DE MANUTENÇÃO & CCO</div>
-    <h1 style="font-size: 22px; margin-bottom: 4px;">Central de Chamados & Ordens de Serviço (OS)</h1>
-    <p style="font-size: 12.5px; margin: 0;">
-      Abertura pelo mecânico com previsão ⇄ Trava de segurança: Aprovação exclusiva da <strong>Diretoria & Gerente
-        Operacional</strong> ⇄ Liberação de Vala com horário real ⇄ Liberação de Tráfego.
-    </p>
+    <div class="eyebrow"><i class="fa-solid fa-arrows-spin"></i> {{ dept_info.eyebrow }}</div>
+    <h1 style="font-size: 22px; margin-bottom: 4px;">{{ dept_info.titulo }}</h1>
+    <p style="font-size: 12.5px; margin: 0;">{{ dept_info.subtitulo }}</p>
   </div>
 
   <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
@@ -491,135 +488,84 @@
 
 <!-- BARRA DE FILTROS POR DEPARTAMENTO (VISÃO LIMPA SEM POLUIÇÃO) -->
 <div class="wf-dept-pills-bar">
-  <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: flex; align-items: center; gap: 6px; margin-right: 4px;">
+  <div
+    style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: flex; align-items: center; gap: 6px; margin-right: 4px;">
     <i class="fa-solid fa-filter"></i> Departamento:
   </div>
 
-  <a href="/chamados?dept=Todos&status={{ status_atual }}" 
-     class="wf-dept-pill {% if dept_atual == 'Todos' %}active{% endif %}"
-     title="Exibir chamados de todos os setores integrados">
-    <i class="fa-solid fa-layer-group"></i> Todos os Departamentos 
+  <a href="/chamados?dept=Todos&status={{ status_atual }}"
+    class="wf-dept-pill {% if dept_atual == 'Todos' %}active{% endif %}"
+    title="Exibir chamados de todos os setores integrados">
+    <i class="fa-solid fa-layer-group"></i> Todos os Departamentos
     <span class="wf-pill-badge">{{ dept_counts['Todos'] }}</span>
   </a>
 
-  <a href="/chamados?dept={{ 'Oficina & Manutenção'|urlencode }}&status={{ status_atual }}" 
-     class="wf-dept-pill wf-dept-pill-oficina {% if dept_atual == 'Oficina & Manutenção' %}active{% endif %}"
-     title="Ordens de serviço de mecânica, elétrica, vala e manutenção preventiva da frota">
-    <i class="fa-solid fa-wrench"></i> Oficina & Manutenção 
+  <a href="/chamados?dept={{ 'Oficina & Manutenção'|urlencode }}&status={{ status_atual }}"
+    class="wf-dept-pill wf-dept-pill-oficina {% if dept_atual == 'Oficina & Manutenção' %}active{% endif %}"
+    title="Ordens de serviço de mecânica, elétrica, vala e manutenção preventiva da frota">
+    <i class="fa-solid fa-wrench"></i> Oficina & Manutenção
     <span class="wf-pill-badge">{{ dept_counts['Oficina & Manutenção'] }}</span>
   </a>
 
-  <a href="/chamados?dept={{ 'Garagem & Portaria'|urlencode }}&status={{ status_atual }}" 
-     class="wf-dept-pill wf-dept-pill-garagem {% if dept_atual == 'Garagem & Portaria' %}active{% endif %}"
-     title="Chamados operacionais de pátio, portaria, bombas de diesel e infraestrutura de garagem">
-    <i class="fa-solid fa-warehouse"></i> Garagem & Portaria 
+  <a href="/chamados?dept={{ 'Garagem & Portaria'|urlencode }}&status={{ status_atual }}"
+    class="wf-dept-pill wf-dept-pill-garagem {% if dept_atual == 'Garagem & Portaria' %}active{% endif %}"
+    title="Chamados operacionais de pátio, portaria, bombas de diesel e infraestrutura de garagem">
+    <i class="fa-solid fa-warehouse"></i> Garagem & Portaria
     <span class="wf-pill-badge">{{ dept_counts['Garagem & Portaria'] }}</span>
   </a>
 
-  <a href="/chamados?dept={{ 'Financeiro'|urlencode }}&status={{ status_atual }}" 
-     class="wf-dept-pill wf-dept-pill-financeiro {% if dept_atual == 'Financeiro' %}active{% endif %}"
-     title="Demandas de notas fiscais de peças, diesel e conciliação de repasses tarifários">
-    <i class="fa-solid fa-wallet"></i> Financeiro 
+  <a href="/chamados?dept={{ 'Financeiro'|urlencode }}&status={{ status_atual }}"
+    class="wf-dept-pill wf-dept-pill-financeiro {% if dept_atual == 'Financeiro' %}active{% endif %}"
+    title="Demandas de notas fiscais de peças, diesel e conciliação de repasses tarifários">
+    <i class="fa-solid fa-wallet"></i> Financeiro
     <span class="wf-pill-badge">{{ dept_counts['Financeiro'] }}</span>
   </a>
 
-  <a href="/chamados?dept={{ 'DHO & Treinamento'|urlencode }}&status={{ status_atual }}" 
-     class="wf-dept-pill wf-dept-pill-dho {% if dept_atual == 'DHO & Treinamento' %}active{% endif %}"
-     title="Ajustes de ponto eletrônico, cursos obrigatórios de CNH, integração e direção defensiva">
-    <i class="fa-solid fa-graduation-cap"></i> DHO & Treinamento 
+  <a href="/chamados?dept={{ 'DHO & Treinamento'|urlencode }}&status={{ status_atual }}"
+    class="wf-dept-pill wf-dept-pill-dho {% if dept_atual == 'DHO & Treinamento' %}active{% endif %}"
+    title="Ajustes de ponto eletrônico, cursos obrigatórios de CNH, integração e direção defensiva">
+    <i class="fa-solid fa-graduation-cap"></i> DHO & Treinamento
     <span class="wf-pill-badge">{{ dept_counts['DHO & Treinamento'] }}</span>
   </a>
 </div>
 
-<!-- 7 KPIS DO WORKFLOW OPERACIONAL (FILTRADOS POR DEPARTAMENTO) -->
+<!-- 7 KPIS DO WORKFLOW OPERACIONAL (CUSTOMIZADOS POR DEPARTAMENTO) -->
 <div class="wf-kpis-grid">
-  <a href="/chamados?dept={{ dept_atual|urlencode }}&status=Todos" class="wf-kpi-card {% if status_atual == 'Todos' %}active-kpi{% endif %}"
-    style="border-left: 4px solid #3b82f6;">
-    <div class="wf-kpi-top">
-      <span class="wf-kpi-title">Total de OSs</span>
-      <i class="fa-solid fa-list-check" style="color: #3b82f6; font-size: 13px;"></i>
+  {% for card in kpi_cards %}
+    {% if card.link %}
+    <a href="{{ card.link }}"
+      class="wf-kpi-card {% if card.is_active %}active-kpi{% endif %}" style="border-left: 4px solid {{ card.cor }};">
+      <div class="wf-kpi-top">
+        <span class="wf-kpi-title" style="color: {{ card.cor }};">{{ card.titulo }}</span>
+        <i class="fa-solid {{ card.icone }}" style="color: {{ card.cor }}; font-size: 13px;"></i>
+      </div>
+      <div class="wf-kpi-val" style="color: #0f172a;">{{ card.valor }}</div>
+      <div class="wf-kpi-sub">{{ card.sub }}</div>
+    </a>
+    {% else %}
+    <div class="wf-kpi-card"
+      style="border-left: 4px solid {{ card.cor }}; background: {% if card.cor == '#ef4444' %}linear-gradient(180deg, #ffffff 0%, #fffbfb 100%){% else %}#ffffff{% endif %};">
+      <div class="wf-kpi-top">
+        <span class="wf-kpi-title" style="color: {{ card.cor }};">{{ card.titulo }}</span>
+        <i class="fa-solid {{ card.icone }}" style="color: {{ card.cor }}; font-size: 13px;"></i>
+      </div>
+      <div class="wf-kpi-val" style="color: {% if card.cor == '#ef4444' %}#b91c1c{% else %}#0f172a{% endif %};">
+        {{ card.valor }}
+      </div>
+      <div class="wf-kpi-sub" style="{% if card.cor == '#ef4444' %}color: #991b1b; font-weight: 600;{% endif %}">
+        {{ card.sub }}
+      </div>
     </div>
-    <div class="wf-kpi-val">{{ kpis.total }}</div>
-    <div class="wf-kpi-sub">{{ dept_atual }}</div>
-  </a>
-
-  <a href="/chamados?dept={{ dept_atual|urlencode }}&status=Pendente+Operação"
-    class="wf-kpi-card {% if status_atual == 'Pendente Operação' %}active-kpi{% endif %}"
-    style="border-left: 4px solid #f59e0b;">
-    <div class="wf-kpi-top">
-      <span class="wf-kpi-title" style="color: #b45309;">Aguardando Gestão</span>
-      <i class="fa-solid fa-hourglass-start" style="color: #f59e0b; font-size: 13px;"></i>
-    </div>
-    <div class="wf-kpi-val" style="color: #b45309;">{{ kpis.pendentes }}</div>
-    <div class="wf-kpi-sub">Aprovação do Gerente</div>
-  </a>
-
-  <a href="/chamados?dept={{ dept_atual|urlencode }}&status=Liberado+Manutenção"
-    class="wf-kpi-card {% if status_atual == 'Liberado Manutenção' %}active-kpi{% endif %}"
-    style="border-left: 4px solid #10b981;">
-    <div class="wf-kpi-top">
-      <span class="wf-kpi-title" style="color: #047857;">Liberado p/ Vala</span>
-      <i class="fa-solid fa-unlock-keyhole" style="color: #10b981; font-size: 13px;"></i>
-    </div>
-    <div class="wf-kpi-val" style="color: #047857;">{{ kpis.liberados }}</div>
-    <div class="wf-kpi-sub">Mecânico agendar início</div>
-  </a>
-
-  <a href="/chamados?dept={{ dept_atual|urlencode }}&status=Em+Execução+na+Vala"
-    class="wf-kpi-card {% if status_atual == 'Em Execução na Vala' %}active-kpi{% endif %}"
-    style="border-left: 4px solid #8b5cf6;">
-    <div class="wf-kpi-top">
-      <span class="wf-kpi-title" style="color: #6d28d9;">Em Execução</span>
-      <i class="fa-solid fa-wrench" style="color: #8b5cf6; font-size: 13px;"></i>
-    </div>
-    <div class="wf-kpi-val" style="color: #6d28d9;">{{ kpis.em_execucao }}</div>
-    <div class="wf-kpi-sub">Trabalho na vala</div>
-  </a>
-
-  <!-- CARD: MÉDIA DE DIAS INDISPONÍVEL / TEMPO MÉDIO TOTAL -->
-  <div class="wf-kpi-card"
-    style="border-left: 4px solid #ef4444; background: linear-gradient(180deg, #ffffff 0%, #fffbfb 100%);">
-    <div class="wf-kpi-top">
-      <span class="wf-kpi-title" style="color: #dc2626;">Média Indisponível</span>
-      <i class="fa-solid fa-stopwatch-20" style="color: #ef4444; font-size: 13px;"></i>
-    </div>
-    <div class="wf-kpi-val" style="color: #b91c1c;">
-      {{ kpis.media_dias_indisponivel }} <span style="font-size: 12px; font-weight: 700;">dias</span>
-    </div>
-    <div class="wf-kpi-sub" style="color: #991b1b; font-weight: 600;">
-      Tempo médio total: {{ kpis.tempo_medio_total }}d
-    </div>
-  </div>
-
-  <div class="wf-kpi-card" style="border-left: 4px solid #06b6d4;">
-    <div class="wf-kpi-top">
-      <span class="wf-kpi-title" style="color: #0891b2;">Reservas em Linha</span>
-      <i class="fa-solid fa-bus" style="color: #06b6d4; font-size: 13px;"></i>
-    </div>
-    <div class="wf-kpi-val" style="color: #0891b2;">{{ kpis.carros_reserva }}</div>
-    <div class="wf-kpi-sub">Cumprimento do ICV</div>
-  </div>
-
-  <a href="/chamados?dept={{ dept_atual|urlencode }}&status=Concluído" class="wf-kpi-card {% if status_atual == 'Concluído' %}active-kpi{% endif %}"
-    style="border-left: 4px solid #14866e;">
-    <div class="wf-kpi-top">
-      <span class="wf-kpi-title" style="color: #14866e;">Aptos p/ Tráfego</span>
-      <i class="fa-solid fa-circle-check" style="color: #14866e; font-size: 13px;"></i>
-    </div>
-    <div class="wf-kpi-val" style="color: #14866e;">{{ kpis.concluidos }}</div>
-    <div class="wf-kpi-sub">Liberados para linha</div>
-  </a>
+    {% endif %}
+  {% endfor %}
 </div>
 
 <!-- AVISO DE SEGURANÇA & REGRAS -->
 <div class="demo-banner"
   style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 14px; margin-bottom: 14px; border-radius: 8px;">
-  <span class="demo-label" style="background: #0f172a; color: #fff; font-size: 10.5px;"><span></span> TRAVA DE
-    SEGURANÇA</span>
+  <span class="demo-label" style="background: #0f172a; color: #fff; font-size: 10.5px;"><span></span> {{ dept_info.banner_tag }}</span>
   <p style="font-size: 12px; margin: 0; color: #475569;">
-    Aprovação de recolhimento de veículos é <strong>exclusiva da Diretoria e Gerente Operacional</strong>. Usuários de
-    Oficina/Box incluem ordens de serviço, e após aprovação, registram o início e a previsão de entrega. A tabela está
-    classificada <strong>do maior tempo indisponível para o menor</strong>.
+    {{ dept_info.banner_texto }}
   </p>
 </div>
 
@@ -627,13 +573,12 @@
 <div class="panel" style="padding: 16px; border-radius: 8px;">
   <div class="panel-heading" style="margin-bottom: 12px;">
     <div>
-      <h2 style="font-size: 16px; margin: 0;">Fila de Ordens de Serviço & Controle de Indisponibilidade</h2>
-      <p style="font-size: 11.5px; color: #64748b; margin-top: 2px;">Classificado por tempo de indisponibilidade (maior
-        para o menor).</p>
+      <h2 style="font-size: 16px; margin: 0;">Fila de Chamados & Ordens de Serviço ({{ dept_atual }})</h2>
+      <p style="font-size: 11.5px; color: #64748b; margin-top: 2px;">Classificado por tempo de atendimento/indisponibilidade (maior para o menor).</p>
     </div>
     <div class="search-field" style="max-width: 300px;">
       <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" id="buscaChamados" placeholder="Buscar veículo, OS, mecânico..." onkeyup="filtrarChamados()">
+      <input type="text" id="buscaChamados" placeholder="Buscar veículo, OS, responsável..." onkeyup="filtrarChamados()">
     </div>
   </div>
 
@@ -641,12 +586,12 @@
     <table class="tabela-workflow" id="tabelaChamados">
       <thead>
         <tr>
-          <th class="col-os">OS / VEÍCULO</th>
-          <th class="col-indisp">DIAS INDISPONÍVEIS</th>
-          <th class="col-defeito">DEFEITO & DESCRIÇÃO</th>
-          <th class="col-solic">SOLICITANTE / RESP</th>
-          <th class="col-janela">JANELA OPERACIONAL</th>
-          <th class="col-aprov">APROVAÇÃO</th>
+          <th class="col-os">{{ dept_info.col_os }}</th>
+          <th class="col-indisp">{{ dept_info.col_indisp }}</th>
+          <th class="col-defeito">{{ dept_info.col_defeito }}</th>
+          <th class="col-solic">{{ dept_info.col_solic }}</th>
+          <th class="col-janela">{{ dept_info.col_janela }}</th>
+          <th class="col-aprov">{{ dept_info.col_aprov }}</th>
           <th class="col-acoes">AÇÕES</th>
         </tr>
       </thead>
@@ -662,8 +607,20 @@
             <span class="badge-wf" style="background: #e0f2fe; color: #0284c7; margin-top: 3px; font-size: 11px;">
               <i class="fa-solid fa-bus"></i> Carro {{ ch.prefixo_veiculo }}
             </span>
+            {% elif ch.departamento_grupo == 'DHO & Treinamento' %}
+            <span style="font-size: 11px; color: #7c3aed; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px;">
+              <i class="fa-solid fa-users"></i> Colaboradores / Gente
+            </span>
+            {% elif ch.departamento_grupo == 'Financeiro' %}
+            <span style="font-size: 11px; color: #059669; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px;">
+              <i class="fa-solid fa-file-invoice-dollar"></i> Contas & Títulos
+            </span>
+            {% elif ch.departamento_grupo == 'Garagem & Portaria' %}
+            <span style="font-size: 11px; color: #d97706; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px;">
+              <i class="fa-solid fa-warehouse"></i> Infra / Pátio
+            </span>
             {% else %}
-            <span style="font-size: 11px; color: #94a3b8;">Frota Geral</span>
+            <span style="font-size: 11px; color: #94a3b8; margin-top: 3px; display: inline-block;">Geral / Operação</span>
             {% endif %}
 
             {% if ch.linha %}
@@ -678,7 +635,8 @@
             {% endif %}
 
             <div style="margin-top: 4px;">
-              <span style="background: {{ ch.dept_bg }}; color: {{ ch.dept_cor }}; border: 1px solid {{ ch.dept_cor }}33; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+              <span
+                style="background: {{ ch.dept_bg }}; color: {{ ch.dept_cor }}; border: 1px solid {{ ch.dept_cor }}33; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
                 <i class="fa-solid {{ ch.dept_icone }}"></i> {{ ch.departamento_grupo }}
               </span>
             </div>
@@ -687,19 +645,19 @@
           <!-- 2. CAMPO COM DIAS INDISPONÍVEIS (PISCANDO EM VERMELHO COM LETRA BRANCA) -->
           <td class="col-indisp">
             {% if ch.is_indisponivel %}
-            <div class="badge-dias-indisponivel" title="Veículo parado sob intervenção">
+            <div class="badge-dias-indisponivel" title="Demanda pendente de conclusão">
               <i class="fa-solid fa-triangle-exclamation"></i> {{ ch.dias_indisp_label }}
             </div>
             <div
               style="font-size: 9.5px; color: #dc2626; font-weight: 800; text-transform: uppercase; margin-top: 3px;">
-              INDISPONÍVEL
+              {% if dept_atual == 'DHO & Treinamento' %}PENDENTE RH{% elif dept_atual == 'Financeiro' %}A LIQUIDAR{% elif dept_atual == 'Garagem & Portaria' %}EM REPARO{% else %}INDISPONÍVEL{% endif %}
             </div>
             {% else %}
             <div class="badge-dias-liberado">
               <i class="fa-solid fa-check"></i> {{ ch.dias_indisp_label }}
             </div>
             <div style="font-size: 9.5px; color: #047857; font-weight: 700; margin-top: 2px;">
-              Liberado
+              {% if dept_atual == 'DHO & Treinamento' %}Regularizado{% elif dept_atual == 'Financeiro' %}Quitado{% else %}Liberado{% endif %}
             </div>
             {% endif %}
           </td>
@@ -839,10 +797,13 @@
         {% if chamados|length == 0 %}
         <tr>
           <td colspan="7" style="text-align: center; padding: 40px 20px; color: #64748b;">
-            <i class="fa-solid fa-folder-open" style="font-size: 32px; color: #cbd5e1; margin-bottom: 10px; display: block;"></i>
+            <i class="fa-solid fa-folder-open"
+              style="font-size: 32px; color: #cbd5e1; margin-bottom: 10px; display: block;"></i>
             <strong style="font-size: 14px; color: #334155; display: block;">Nenhum chamado encontrado</strong>
-            <p style="font-size: 12px; margin: 4px 0 14px 0;">Não há ordens registradas no departamento <strong>{{ dept_atual }}</strong> com o status <strong>{{ status_atual }}</strong>.</p>
-            <a href="/chamados?dept=Todos&status=Todos" class="btn-secondary" style="font-size: 11.5px; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+            <p style="font-size: 12px; margin: 4px 0 14px 0;">Não há ordens registradas no departamento <strong>{{
+                dept_atual }}</strong> com o status <strong>{{ status_atual }}</strong>.</p>
+            <a href="/chamados?dept=Todos&status=Todos" class="btn-secondary"
+              style="font-size: 11.5px; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
               <i class="fa-solid fa-layer-group"></i> Ver Todos os Departamentos
             </a>
           </td>
