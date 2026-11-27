@@ -6,7 +6,11 @@
 {% block extra_head %}
 <style>
   /* Bloquear qualquer rolagem horizontal na guia Visão Geral */
-  html, body, .app-shell, .main-shell, .main-content {
+  html,
+  body,
+  .app-shell,
+  .main-shell,
+  .main-content {
     overflow-x: hidden !important;
     max-width: 100vw;
   }
@@ -17,6 +21,7 @@
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
   }
+
   .operations-grid .table-scroll::-webkit-scrollbar {
     display: none !important;
     width: 0 !important;

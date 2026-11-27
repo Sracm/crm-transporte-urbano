@@ -9,14 +9,16 @@
   <div>
     <div class="eyebrow">AUDITORIA & COMUNICAÇÃO OPERACIONAL</div>
     <h1>Histórico de Notificações por E-mail</h1>
-    <p>Registro em tempo real de todos os e-mails disparados automaticamente pelo sistema (Abertura de Chamado, Fechamento de OS e Alertas).</p>
+    <p>Registro em tempo real de todos os e-mails disparados automaticamente pelo sistema (Abertura de Chamado,
+      Fechamento de OS e Alertas).</p>
   </div>
 </div>
 
 <!-- LIVE BANNER -->
 <div class="demo-banner">
   <span class="demo-label"><span></span> SMTP ATIVO</span>
-  <p>Todos os eventos operacionais de abertura e fechamento disparam e-mails com protocolo, SLA e links de rastreio aos envolvidos.</p>
+  <p>Todos os eventos operacionais de abertura e fechamento disparam e-mails com protocolo, SLA e links de rastreio aos
+    envolvidos.</p>
 </div>
 
 <!-- 4 KPI CARDS -->
@@ -92,13 +94,13 @@
           </td>
           <td>
             {% if 'Abertura' in e.tipo_evento %}
-              <span class="status-badge in_progress" style="font-weight: 700;">
-                <i class="fa-solid fa-paper-plane"></i> Abertura OS
-              </span>
+            <span class="status-badge in_progress" style="font-weight: 700;">
+              <i class="fa-solid fa-paper-plane"></i> Abertura OS
+            </span>
             {% else %}
-              <span class="status-badge closed" style="font-weight: 700;">
-                <i class="fa-solid fa-check-double"></i> Conclusão OS
-              </span>
+            <span class="status-badge closed" style="font-weight: 700;">
+              <i class="fa-solid fa-check-double"></i> Conclusão OS
+            </span>
             {% endif %}
           </td>
           <td>
@@ -138,7 +140,8 @@
       <h3><i class="fa-solid fa-envelope" style="color: var(--primary);"></i> Notificação por E-mail Disparada</h3>
       <button style="font-size: 20px; color: #94a3b8;" onclick="closeModalEmail()">&times;</button>
     </div>
-    <div class="modal-body" id="conteudoModalEmail" style="background: #f8fafc; border-radius: 8px; margin: 16px; padding: 20px; border: 1px solid #e2e8f0; max-height: 450px; overflow-y: auto;">
+    <div class="modal-body" id="conteudoModalEmail"
+      style="background: #f8fafc; border-radius: 8px; margin: 16px; padding: 20px; border: 1px solid #e2e8f0; max-height: 450px; overflow-y: auto;">
       <!-- Preenchido via JS -->
     </div>
     <div class="modal-footer">
