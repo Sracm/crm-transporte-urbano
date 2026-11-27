@@ -205,17 +205,197 @@ def mobile_view():
 
 @app.route("/cco")
 def cco_view():
-    linhas_cco = [
-        {"linha": "Linha 801", "nome": "Central x Term. Sul", "frota": 32, "intervalo": "4 min", "pontualidade": 99.1, "status": "Normal", "velocidade": "21 km/h", "corredor": "Corredor Sul"},
-        {"linha": "Linha 703", "nome": "Bairro Alto x Metrô", "frota": 26, "intervalo": "6 min", "pontualidade": 94.8, "status": "Atenção", "velocidade": "16 km/h", "corredor": "Eixo Radial Leste"},
-        {"linha": "Linha 602", "nome": "Circular Hospitais", "frota": 18, "intervalo": "8 min", "pontualidade": 98.2, "status": "Normal", "velocidade": "24 km/h", "corredor": "Anel Viário Central"},
-        {"linha": "Linha 504", "nome": "Vila Progresso x Centro", "frota": 24, "intervalo": "5 min", "pontualidade": 97.9, "status": "Normal", "velocidade": "19 km/h", "corredor": "Corredor Norte"},
-        {"linha": "Linha 305", "nome": "Expresso Terminal Leste", "frota": 22, "intervalo": "6 min", "pontualidade": 96.5, "status": "Normal", "velocidade": "22 km/h", "corredor": "Pista Exclusiva Leste"},
-        {"linha": "Linha 412", "nome": "Interbairros Norte x Oeste", "frota": 20, "intervalo": "7 min", "pontualidade": 97.2, "status": "Normal", "velocidade": "18 km/h", "corredor": "Avenida Perimetral"}
+    # 1. KPIs Estratégicos da Frota (Padrão Diretoria de Operações & Concessão Municipal)
+    kpis_frota = {
+        "total_frota": 150,
+        "em_operacao": 142,
+        "em_operacao_perc": 94.7,
+        "reserva_tecnica": 5,
+        "reserva_perc": 3.3,
+        "oficina_manutencao": 3,
+        "oficina_perc": 2.0,
+        "disponibilidade_perc": 98.0,  # (142 + 5) / 150 = 98.0%
+        "indisponibilidade_perc": 2.0,  # 3 / 150 = 2.0%
+        "meta_disponibilidade": 95.0,
+        "diff_meta_disp": "+3.0 p.p.",
+        
+        # Idade da Frota
+        "idade_media": 3.8,  # anos
+        "meta_idade_max": 5.0,  # anos (edital de concessão municipal)
+        "veiculo_mais_novo": "2024 (Euro 6 - Proconve P8)",
+        "veiculo_mais_antigo": "2018 (Euro 5 - Bluetec 5)",
+        "conformidade_edital": "100% Conforme",
+        
+        # Quilometragem da Frota
+        "km_medio_diario": 268.4,  # km/veículo/dia
+        "km_total_frota_dia": "38.112 km",
+        "km_total_frota_mes": "1.143.360 km",
+        "odometro_medio": "218.450 km",
+        "km_morta_perc": 1.8,  # meta < 2.5%
+        "economia_km_morta": "R$ 42.800/mês",
+        
+        # Performance Operacional e Mecânica de Ponta
+        "mkbf_km": "18.420",  # Mean KM Between Failures (Km médio entre falhas mecânicas)
+        "meta_mkbf": "15.000",
+        "icv_perc": 99.4,  # Índice de Cumprimento de Viagens (meta: 98.5%)
+        "ipk": 2.42,  # Índice de Passageiros por KM
+        "passageiros_dia": "142.850",
+        "headway_medio": "5.2 min",
+        "consumo_diesel": 2.68,  # km/L
+        "meta_consumo_diesel": 2.65,
+        "socorros_linha_mes": 2,  # Quebras com guincho em via pública
+        "tempo_medio_socorro_min": 24,  # MTTR em minutos
+    }
+
+    # 2. Distribuição da Idade da Frota (Euro 6 vs Euro 5)
+    idade_distribuicao = [
+        {"faixa": "0 a 2 anos (Euro 6 P8)", "qtd": 45, "perc": 30.0, "status": "Excelente", "cor": "#10b981"},
+        {"faixa": "3 a 5 anos (Euro 5 Bluetec 5)", "qtd": 78, "perc": 52.0, "status": "Padrão Concessão", "cor": "#0ea5e9"},
+        {"faixa": "6 a 8 anos (Euro 5)", "qtd": 27, "perc": 18.0, "status": "Planejar Renovação", "cor": "#f59e0b"},
+        {"faixa": "Acima de 8 anos (Fora Edital)", "qtd": 0, "perc": 0.0, "status": "Zero Carros", "cor": "#64748b"}
     ]
+
+    # 3. Disponibilidade e Indisponibilidade Operacional por Dia da Semana (Seg a Dom)
+    dados_semana = [
+        {"dia": "Segunda-feira", "dia_abrev": "Seg", "disp_perc": 96.0, "indisp_perc": 4.0, "operando": 144, "indisp": 6, "meta": 95.0, "regime": "Pico Duplo (Manhã/Tarde)"},
+        {"dia": "Terça-feira",   "dia_abrev": "Ter", "disp_perc": 95.3, "indisp_perc": 4.7, "operando": 143, "indisp": 7, "meta": 95.0, "regime": "Pico Normal"},
+        {"dia": "Quarta-feira",  "dia_abrev": "Qua", "disp_perc": 96.7, "indisp_perc": 3.3, "operando": 145, "indisp": 5, "meta": 95.0, "regime": "Pico Normal"},
+        {"dia": "Quinta-feira",  "dia_abrev": "Qui", "disp_perc": 94.7, "indisp_perc": 5.3, "operando": 142, "indisp": 8, "meta": 95.0, "regime": "Entrepico c/ Revisões"},
+        {"dia": "Sexta-feira",   "dia_abrev": "Sex", "disp_perc": 94.0, "indisp_perc": 6.0, "operando": 141, "indisp": 9, "meta": 95.0, "regime": "Pico Estendido de Volta"},
+        {"dia": "Sábado",        "dia_abrev": "Sáb", "disp_perc": 98.0, "indisp_perc": 2.0, "operando": 147, "indisp": 3, "meta": 95.0, "regime": "Escala Especial Fim de Semana"},
+        {"dia": "Domingo",       "dia_abrev": "Dom", "disp_perc": 98.7, "indisp_perc": 1.3, "operando": 148, "indisp": 2, "meta": 95.0, "regime": "Escala Reduzida & Preventivas"}
+    ]
+
+    # 4. Plano de Manutenção Preventiva (PMP - Ciclos 10.000 / 20.000 / 40.000 km)
+    pmp_resumo = {
+        "em_dia": 141,
+        "em_dia_perc": 94.0,
+        "atencao_proxima": 6,
+        "atencao_perc": 4.0,
+        "vencida_bloqueada": 3,
+        "vencida_perc": 2.0,
+        "conformidade_plano_perc": 98.0
+    }
+
+    proximas_revisoes = [
+        {
+            "carro": "5014",
+            "chassi": "Mercedes-Benz OF-1721 Euro 6",
+            "ano": 2023,
+            "linha": "Linha 801 (Central x Term. Sul)",
+            "tipo_revisao": "Revisão P1 (10.000 km) - Óleo, Filtros & Válvulas",
+            "km_atual": 89450,
+            "km_revisao": 90000,
+            "km_restante": 550,
+            "previsao_parada": "Hoje (Entrepico 14:00)",
+            "status": "Urgente",
+            "box_designado": "Vala 02 - Mecânica Rápida",
+            "bloqueio": False
+        },
+        {
+            "carro": "5028",
+            "chassi": "Mercedes-Benz OF-1721 Bluetec 5",
+            "ano": 2020,
+            "linha": "Linha 703 (Bairro Alto x Metrô)",
+            "tipo_revisao": "Revisão P2 (20.000 km) - Freios Pneumáticos & Correias",
+            "km_atual": 199320,
+            "km_revisao": 200000,
+            "km_restante": 680,
+            "previsao_parada": "Amanhã 08:30",
+            "status": "Alerta",
+            "box_designado": "Vala 01 - Freios & Suspensão",
+            "bloqueio": False
+        },
+        {
+            "carro": "5045",
+            "chassi": "Volkswagen 17-230 OD",
+            "ano": 2019,
+            "linha": "Linha 602 (Circular Hospitais)",
+            "tipo_revisao": "Revisão P4 (40.000 km) - Diferencial, Cardan & Injeção",
+            "km_atual": 240180,
+            "km_revisao": 240000,
+            "km_restante": -180,
+            "previsao_parada": "IMEDIATO (Carro Retido)",
+            "status": "Vencida",
+            "box_designado": "Box 03 - Pesada",
+            "bloqueio": True
+        },
+        {
+            "carro": "5062",
+            "chassi": "Mercedes-Benz OF-1721 Euro 6",
+            "ano": 2024,
+            "linha": "Linha 504 (Vila Progresso x Centro)",
+            "tipo_revisao": "Revisão P1 (10.000 km) - Garantia de Fábrica",
+            "km_atual": 29150,
+            "km_revisao": 30000,
+            "km_restante": 850,
+            "previsao_parada": "Em 2 dias",
+            "status": "Planejada",
+            "box_designado": "Vala 02 - Mecânica Rápida",
+            "bloqueio": False
+        },
+        {
+            "carro": "5088",
+            "chassi": "Mercedes-Benz OF-1721 Bluetec 5",
+            "ano": 2021,
+            "linha": "Linha 305 (Expresso Terminal Leste)",
+            "tipo_revisao": "Revisão P3 (30.000 km) - Climatização & Elétrica CAN",
+            "km_atual": 149200,
+            "km_revisao": 150000,
+            "km_restante": 800,
+            "previsao_parada": "Em 2 dias",
+            "status": "Planejada",
+            "box_designado": "Box 05 - Elétrica / Ar",
+            "bloqueio": False
+        },
+        {
+            "carro": "5102",
+            "chassi": "Volkswagen 17-230 OD",
+            "ano": 2021,
+            "linha": "Linha 412 (Interbairros Norte x Oeste)",
+            "tipo_revisao": "Revisão P1 (10.000 km) - Lubrificação & Filtros",
+            "km_atual": 119850,
+            "km_revisao": 120000,
+            "km_restante": 150,
+            "previsao_parada": "Hoje Noturno (22:30)",
+            "status": "Urgente",
+            "box_designado": "Vala 04 - Lubrificação",
+            "bloqueio": False
+        }
+    ]
+
+    # 5. Corredores & Linhas Monitoradas
+    linhas_cco = [
+        {"linha": "Linha 801", "nome": "Central x Term. Sul", "frota": 32, "intervalo": "4 min", "pontualidade": 99.1, "status": "Normal", "velocidade": "21 km/h", "corredor": "Corredor Sul", "icv": 100.0, "km_dia": 8640},
+        {"linha": "Linha 703", "nome": "Bairro Alto x Metrô", "frota": 26, "intervalo": "6 min", "pontualidade": 94.8, "status": "Atenção", "velocidade": "16 km/h", "corredor": "Eixo Radial Leste", "icv": 98.6, "km_dia": 6820},
+        {"linha": "Linha 602", "nome": "Circular Hospitais", "frota": 18, "intervalo": "8 min", "pontualidade": 98.2, "status": "Normal", "velocidade": "24 km/h", "corredor": "Anel Viário Central", "icv": 99.5, "km_dia": 4910},
+        {"linha": "Linha 504", "nome": "Vila Progresso x Centro", "frota": 24, "intervalo": "5 min", "pontualidade": 97.9, "status": "Normal", "velocidade": "19 km/h", "corredor": "Corredor Norte", "icv": 99.2, "km_dia": 6250},
+        {"linha": "Linha 305", "nome": "Expresso Terminal Leste", "frota": 22, "intervalo": "6 min", "pontualidade": 96.5, "status": "Normal", "velocidade": "22 km/h", "corredor": "Pista Exclusiva Leste", "icv": 99.1, "km_dia": 5890},
+        {"linha": "Linha 412", "nome": "Interbairros Norte x Oeste", "frota": 20, "intervalo": "7 min", "pontualidade": 97.2, "status": "Normal", "velocidade": "18 km/h", "corredor": "Avenida Perimetral", "icv": 99.8, "km_dia": 5600}
+    ]
+
+    # 6. Telemetria CAN Bus J1939 - Alertas Preditivos
+    telemetria_can_score = {
+        "score_medio": 96.8,
+        "frota_saudavel": 142,
+        "frota_alerta_amarelo": 5,
+        "frota_alerta_vermelho": 3,
+        "alertas_ativos": [
+            {"carro": "5045", "sensor": "Pressão Circuito de Freio Traseiro", "valor": "5.8 bar (Crítico < 6.5)", "gravidade": "vermelho", "acao": "OS #0842 Aberta"},
+            {"carro": "5014", "sensor": "Temperatura Líquido Arrefecimento", "valor": "98°C (Atenção > 95°C)", "gravidade": "amarelo", "acao": "Monitorando Termostato"},
+            {"carro": "5033", "sensor": "Nível de Arla 32", "valor": "12% (Reserva)", "gravidade": "amarelo", "acao": "Abastecimento no Recolhimento"}
+        ]
+    }
+
     return render_template(
         "cco.html",
+        kpis=kpis_frota,
+        idade_distribuicao=idade_distribuicao,
+        dados_semana=dados_semana,
+        pmp=pmp_resumo,
+        proximas_revisoes=proximas_revisoes,
         linhas=linhas_cco,
+        telemetria_can=telemetria_can_score,
         total_em_linha=142,
         total_programado=150,
         pontualidade_geral=98.4

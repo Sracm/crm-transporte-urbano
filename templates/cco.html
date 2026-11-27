@@ -1,194 +1,819 @@
 {% extends "base.html" %}
 
-{% block title %}Frota CCO & Telemetria ao Vivo{% endblock %}
+{% block title %}Frota CCO & Gestão Estratégica da Frota{% endblock %}
 {% block page_breadcrumb %}Frota CCO{% endblock %}
 
+{% block extra_head %}
+<!-- Chart.js 4.4 -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+/* ESTILOS EXECUTIVOS DA CENTRAL ESTRATÉGICA DE FROTA */
+.cco-header-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.cco-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.cco-tag-success {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.cco-tag-blue {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.cco-tag-purple {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border: 1px solid #ddd6fe;
+}
+
+/* GRID DE 7 CARDS ESTRATÉGICOS SUPERIORES */
+.kpis-estrategicos-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1500px) {
+  .kpis-estrategicos-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .kpis-estrategicos-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 550px) {
+  .kpis-estrategicos-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card-kpi-estrat {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 14px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-kpi-estrat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+
+.card-kpi-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.card-kpi-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+}
+
+.card-kpi-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.card-kpi-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.card-kpi-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* GRÁFICOS CONTAINER */
+.charts-grid-duo {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+@media (max-width: 1100px) {
+  .charts-grid-duo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel-chart {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.panel-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.panel-chart-header h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-chart-header p {
+  font-size: 12px;
+  color: #64748b;
+  margin: 3px 0 0 0;
+}
+
+/* TABELA DE REVISÃO PREVENTIVA (PMP) */
+.tabela-pmp-wrapper {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  margin-bottom: 22px;
+}
+
+.tabela-pmp {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.tabela-pmp th {
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 2px solid #334155;
+}
+
+.tabela-pmp td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  color: #334155;
+}
+
+.tabela-pmp tbody tr:hover td {
+  background: #f8fafc;
+}
+
+/* ANIMAÇÃO PISCAR PARA REVISÃO VENCIDA */
+@keyframes pulse-vencida {
+  0%, 100% {
+    background-color: #dc2626;
+    color: #ffffff;
+    box-shadow: 0 0 8px rgba(220, 38, 38, 0.6);
+  }
+  50% {
+    background-color: #991b1b;
+    color: #ffffff;
+    box-shadow: 0 0 2px rgba(153, 27, 27, 0.3);
+  }
+}
+
+.badge-status-vencida {
+  animation: pulse-vencida 1.2s infinite ease-in-out;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.badge-status-urgente {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.badge-status-planejada {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* GRID OPERACIONAL LINHAS & HEALTH SCORE */
+.bottom-sections-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 1100px) {
+  .bottom-sections-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<!-- HEADING DA PÁGINA -->
-<div class="page-heading">
+<!-- HEADING DA PÁGINA COM META-DADOS ESTRATÉGICOS -->
+<div class="page-heading" style="margin-bottom: 16px;">
   <div>
-    <div class="eyebrow">CENTRO DE CONTROLE OPERACIONAL (CCO)</div>
-    <h1>Frota CCO & Telemetria em Tempo Real</h1>
-    <p>Monitoramento contínuo de 150 ônibus, intervalos entre veículos (headway), pontualidade e ocorrências de tráfego.</p>
+    <div class="eyebrow"><i class="fa-solid fa-chart-line"></i> PAINEL ESTRATÉGICO DO DIRETOR DE OPERAÇÕES</div>
+    <h1 style="font-size: 22px; margin-bottom: 4px;">Frota CCO & Gestão de Performance da Frota</h1>
+    <p style="font-size: 12.5px; margin: 0; color: #475569;">
+      Monitoramento executivo de disponibilidade, confiabilidade mecânica (MKBF), idade média, controle de revisões preventivas (PMP) e telemetria J1939.
+    </p>
+    <div class="cco-header-meta">
+      <span class="cco-tag cco-tag-success"><i class="fa-solid fa-circle-check"></i> DISPONIBILIDADE FROTA: {{ kpis.disponibilidade_perc }}% (Meta ≥ 95%)</span>
+      <span class="cco-tag cco-tag-blue"><i class="fa-solid fa-calendar-check"></i> IDADE MÉDIA: {{ kpis.idade_media }} ANOS (Edital ≤ 5.0)</span>
+      <span class="cco-tag cco-tag-purple"><i class="fa-solid fa-wrench"></i> MKBF: {{ kpis.mkbf_km }} KM/QUEBRA</span>
+    </div>
   </div>
 
-  <div style="display: flex; gap: 8px;">
-    <button class="btn-primary" onclick="window.location.reload()">
-      <i class="fa-solid fa-arrows-rotate"></i> Atualizar Telemetria
+  <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+    <button class="btn-primary" onclick="window.location.reload()" style="font-size: 12px; padding: 7px 14px;">
+      <i class="fa-solid fa-arrows-rotate"></i> Atualizar Dados
     </button>
-    <a href="http://10.11.1.100:5600" target="_blank" class="btn-mobile-badge" style="background:#fff; color:#475569; border:1px solid #cbd5e1;">
-      <i class="fa-solid fa-desktop"></i> Servidor 5600
+    <a href="/telemetria" class="btn-secondary" style="font-size: 12px; padding: 7px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-microchip"></i> Telemetria CAN
+    </a>
+    <a href="/chamados" class="btn-secondary" style="font-size: 12px; padding: 7px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-screwdriver-wrench"></i> Ordens de Serviço
     </a>
   </div>
 </div>
 
-<!-- LIVE STATUS BANNER -->
-<div class="demo-banner">
-  <span class="demo-label"><span></span> GPS OPERACIONAL</span>
-  <p>Todos os 142 veículos em tráfego transmitem coordenadas a cada 15 segundos. Pontualidade média da frota operando acima da meta contratual de 95%.</p>
+<!-- TOP BANNER DE STATUS OPERACIONAL AO VIVO -->
+<div class="demo-banner" style="margin-bottom: 18px; border-left: 4px solid #10b981; background: #f0fdf4; padding: 12px 18px;">
+  <span class="demo-label" style="background: #10b981; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 800;">
+    <i class="fa-solid fa-satellite-dish"></i> CCO AO VIVO
+  </span>
+  <p style="font-size: 12px; color: #065f46; margin: 0 0 0 10px; display: inline-block;">
+    <strong>Concessão Municipal Itaquaquecetuba · Grupo CSC:</strong> 150 veículos cadastrados no sistema. <strong>142 em linha ativa</strong>, <strong>5 na reserva de tráfego</strong> e <strong>3 em intervenção na oficina</strong>. 100% de conformidade com as regras operacionais.
+  </p>
 </div>
 
-<!-- 4 KPI CARDS -->
-<div class="metrics">
-  <article class="metric">
-    <div class="metric-top">
-      <span>Frota em Operação</span>
-      <span class="metric-icon emerald"><i class="fa-solid fa-bus"></i></span>
-    </div>
-    <strong>142 / 150</strong>
-    <p>94.6% dos veículos escalados em linha ativa</p>
-  </article>
+<!-- ========================================== -->
+<!-- 1. RIBBON DE 7 KPIS ESTRATÉGICOS DA FROTA -->
+<!-- ========================================== -->
+<div class="kpis-estrategicos-grid">
 
-  <article class="metric">
-    <div class="metric-top">
-      <span>Pontualidade Geral</span>
-      <span class="metric-icon blue"><i class="fa-solid fa-satellite-dish"></i></span>
+  <!-- 1. DISPONIBILIDADE DA FROTA -->
+  <div class="card-kpi-estrat" style="border-left: 4px solid #10b981;">
+    <div class="card-kpi-top">
+      <span class="card-kpi-title">Disponibilidade</span>
+      <span class="card-kpi-icon" style="background: #ecfdf5; color: #10b981;"><i class="fa-solid fa-bus"></i></span>
     </div>
-    <strong style="color: #10b981;">98.4%</strong>
-    <p>Meta contratual de concessão: 95.0%</p>
-  </article>
+    <div class="card-kpi-val" style="color: #065f46;">{{ kpis.disponibilidade_perc }}%</div>
+    <div class="card-kpi-sub">
+      <span>147 de 150 ônibus</span>
+      <strong style="color: #059669;">{{ kpis.diff_meta_disp }}</strong>
+    </div>
+  </div>
 
-  <article class="metric">
-    <div class="metric-top">
-      <span>Headway Médio</span>
-      <span class="metric-icon violet"><i class="fa-solid fa-stopwatch"></i></span>
+  <!-- 2. FROTA EM OPERAÇÃO X RESERVA -->
+  <div class="card-kpi-estrat" style="border-left: 4px solid #0284c7;">
+    <div class="card-kpi-top">
+      <span class="card-kpi-title">Frota em Linha</span>
+      <span class="card-kpi-icon" style="background: #f0f9ff; color: #0284c7;"><i class="fa-solid fa-road"></i></span>
     </div>
-    <strong>5.2 min</strong>
-    <p>Tempo médio de espera nos pontos de parada</p>
-  </article>
+    <div class="card-kpi-val" style="color: #0369a1;">{{ kpis.em_operacao }} <span style="font-size: 12px; font-weight: 600; color: #64748b;">/ 150</span></div>
+    <div class="card-kpi-sub">
+      <span>Reserva: <strong>{{ kpis.reserva_tecnica }} carros</strong></span>
+      <span style="color: #dc2626;">Oficina: <strong>{{ kpis.oficina_manutencao }}</strong></span>
+    </div>
+  </div>
 
-  <article class="metric">
-    <div class="metric-top">
-      <span>Passageiros Transportados</span>
-      <span class="metric-icon amber"><i class="fa-solid fa-users"></i></span>
+  <!-- 3. IDADE MÉDIA DA FROTA -->
+  <div class="card-kpi-estrat" style="border-left: 4px solid #6366f1;">
+    <div class="card-kpi-top">
+      <span class="card-kpi-title">Idade da Frota</span>
+      <span class="card-kpi-icon" style="background: #eef2ff; color: #6366f1;"><i class="fa-solid fa-calendar-days"></i></span>
     </div>
-    <strong>142.850</strong>
-    <p>Registrados na catraca até o momento</p>
-  </article>
+    <div class="card-kpi-val" style="color: #4338ca;">{{ kpis.idade_media }} <span style="font-size: 12px; font-weight: 600; color: #64748b;">anos</span></div>
+    <div class="card-kpi-sub">
+      <span>Meta Edital: ≤ {{ kpis.meta_idade_max }} anos</span>
+      <strong style="color: #10b981;">100% Ok</strong>
+    </div>
+  </div>
+
+  <!-- 4. MÉDIA KM DIÁRIA POR CARRO -->
+  <div class="card-kpi-estrat" style="border-left: 4px solid #f59e0b;">
+    <div class="card-kpi-top">
+      <span class="card-kpi-title">Média KM / Dia</span>
+      <span class="card-kpi-icon" style="background: #fffbeb; color: #f59e0b;"><i class="fa-solid fa-gauge-high"></i></span>
+    </div>
+    <div class="card-kpi-val" style="color: #b45309;">{{ kpis.km_medio_diario }} <span style="font-size: 12px; font-weight: 600; color: #64748b;">km/dia</span></div>
+    <div class="card-kpi-sub">
+      <span>Frota Mês: {{ kpis.km_total_frota_mes }}</span>
+    </div>
+  </div>
+
+  <!-- 5. KM MORTA (DESLOCAMENTO OCIOSO) -->
+  <div class="card-kpi-estrat" style="border-left: 4px solid #14b8a6;">
+    <div class="card-kpi-top">
+      <span class="card-kpi-title">KM Morta</span>
+      <span class="card-kpi-icon" style="background: #f0fdfa; color: #14b8a6;"><i class="fa-solid fa-route"></i></span>
+    </div>
+    <div class="card-kpi-val" style="color: #0f766e;">{{ kpis.km_morta_perc }}%</div>
+    <div class="card-kpi-sub">
+      <span>Meta: &lt; 2.5%</span>
+      <strong style="color: #059669;">Econ: {{ kpis.economia_km_morta }}</strong>
+    </div>
+  </div>
+
+  <!-- 6. MKBF (KM MÉDIO ENTRE QUEBRAS) -->
+  <div class="card-kpi-estrat" style="border-left: 4px solid #8b5cf6;">
+    <div class="card-kpi-top">
+      <span class="card-kpi-title">MKBF (Confiabilidade)</span>
+      <span class="card-kpi-icon" style="background: #f5f3ff; color: #8b5cf6;"><i class="fa-solid fa-shield-halved"></i></span>
+    </div>
+    <div class="card-kpi-val" style="color: #6d28d9;">{{ kpis.mkbf_km }} <span style="font-size: 12px; font-weight: 600; color: #64748b;">km</span></div>
+    <div class="card-kpi-sub">
+      <span>Meta: ≥ {{ kpis.meta_mkbf }} km</span>
+      <strong style="color: #10b981;">+22.8%</strong>
+    </div>
+  </div>
+
+  <!-- 7. PONTUALIDADE & ICV -->
+  <div class="card-kpi-estrat" style="border-left: 4px solid #ec4899;">
+    <div class="card-kpi-top">
+      <span class="card-kpi-title">ICV & Pontualidade</span>
+      <span class="card-kpi-icon" style="background: #fdf2f8; color: #ec4899;"><i class="fa-solid fa-stopwatch"></i></span>
+    </div>
+    <div class="card-kpi-val" style="color: #be185d;">{{ kpis.icv_perc }}%</div>
+    <div class="card-kpi-sub">
+      <span>Pontualidade CCO: <strong>{{ pontualidade_geral }}%</strong></span>
+    </div>
+  </div>
+
 </div>
 
-<!-- SEÇÃO: CORREDORES & LINHAS DE TRANSPORTE -->
-<div class="section-heading">
-  <h2>Corredores & Linhas Monitoradas</h2>
-  <span>Status operacional de cada itinerário em tempo real</span>
-</div>
+<!-- ============================================================== -->
+<!-- 2. SEÇÃO DE GRÁFICOS: DISPONIBILIDADE/DIA DA SEMANA E IDADE DA FROTA -->
+<!-- ============================================================== -->
+<div class="charts-grid-duo">
 
-<div class="routine-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
-  {% for l in linhas %}
-  <div class="routine-card" style="padding-bottom: 16px;">
-    <div class="routine-card-top">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span class="type-icon {% if l.pontualidade >= 98 %}emerald{% elif l.pontualidade >= 95 %}blue{% else %}amber{% endif %}">
-          <i class="fa-solid fa-route"></i>
+  <!-- GRÁFICO 1: DISPONIBILIDADE X INDISPONIBILIDADE POR DIA DA SEMANA -->
+  <div class="panel-chart">
+    <div class="panel-chart-header">
+      <div>
+        <h3><i class="fa-solid fa-chart-column" style="color: #0284c7;"></i> Disponibilidade & Indisponibilidade Operacional por Dia da Semana</h3>
+        <p>Acompanhamento diário de Segunda a Domingo vs Meta Contratual de Concessão (95%).</p>
+      </div>
+      <div style="text-align: right;">
+        <span style="font-size: 11px; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-weight: 700; color: #475569;">
+          Média Semanal: 96.1%
         </span>
-        <div>
-          <strong style="font-size: 15px; color: #0f172a; display: block;">{{ l.linha }}</strong>
-          <span style="font-size: 11.5px; color: #64748b;">{{ l.nome }}</span>
+      </div>
+    </div>
+
+    <!-- CANVAS CHART.JS -->
+    <div style="position: relative; height: 260px; width: 100%;">
+      <canvas id="chartDisponibilidadeSemana"></canvas>
+    </div>
+
+    <!-- TABELA RESUMO COMPACTA INLINE DOS DIAS DA SEMANA -->
+    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 14px; text-align: center;">
+      {% for d in dados_semana %}
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 4px;">
+        <div style="font-size: 10.5px; font-weight: 700; color: #64748b;">{{ d.dia_abrev }}</div>
+        <div style="font-size: 12.5px; font-weight: 800; color: #0f172a; margin-top: 2px;">{{ d.disp_perc }}%</div>
+        <div style="font-size: 10px; color: {% if d.indisp_perc > 5.0 %}#dc2626{% else %}#10b981{% endif %}; font-weight: 600;">
+          {{ d.operando }} / {{ d.indisp }} ind.
         </div>
       </div>
-      <span class="status-badge {% if l.pontualidade >= 98 %}closed{% elif l.pontualidade >= 95 %}in_progress{% else %}open{% endif %}" style="font-weight: 700;">
-        {{ l.pontualidade }}% Pontual
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- GRÁFICO 2: IDADE DA FROTA E COMPOSIÇÃO DE TECNOLOGIA -->
+  <div class="panel-chart">
+    <div class="panel-chart-header">
+      <div>
+        <h3><i class="fa-solid fa-chart-pie" style="color: #6366f1;"></i> Perfil de Idade & Tecnologia da Frota</h3>
+        <p>Média Global: <strong>{{ kpis.idade_media }} anos</strong> (Concessão: max 5.0)</p>
+      </div>
+      <span class="cco-tag cco-tag-success" style="font-size: 10.5px;">
+        <i class="fa-solid fa-check"></i> 100% Regular
       </span>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
-      <div>
-        <span style="font-size: 10.5px; color: #64748b; font-weight: 600; display: block;">CARROS EM LINHA</span>
-        <strong style="font-size: 14px; color: #0f172a;">{{ l.frota }} Veículos</strong>
-      </div>
-      <div>
-        <span style="font-size: 10.5px; color: #64748b; font-weight: 600; display: block;">INTERVALO MÉDIO</span>
-        <strong style="font-size: 14px; color: #0284c7;">{{ l.intervalo }}</strong>
-      </div>
-      <div>
-        <span style="font-size: 10.5px; color: #64748b; font-weight: 600; display: block;">VELOCIDADE COMERCIAL</span>
-        <strong style="font-size: 14px; color: #10b981;">{{ l.velocidade }}</strong>
-      </div>
-      <div>
-        <span style="font-size: 10.5px; color: #64748b; font-weight: 600; display: block;">CORREDOR</span>
-        <span style="font-size: 12px; color: #475569; font-weight: 600;">{{ l.corredor }}</span>
-      </div>
+    <!-- CANVAS CHART.JS DONUT -->
+    <div style="position: relative; height: 200px; width: 100%; display: flex; justify-content: center;">
+      <canvas id="chartIdadeFrota"></canvas>
     </div>
 
-    <!-- BARRA DE PROGRESSO DE PONTUALIDADE -->
-    <div style="margin-top: 4px;">
-      <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; color: #64748b;">
-        <span>Índice de Pontualidade</span>
-        <strong style="color: #0f172a;">{{ l.pontualidade }}%</strong>
+    <!-- LEGENDA DETALHADA DAS FAIXAS DE IDADE -->
+    <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 6px;">
+      {% for f in idade_distribuicao %}
+      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; padding: 4px 8px; background: #f8fafc; border-radius: 4px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="width: 10px; height: 10px; border-radius: 50%; background: {{ f.cor }};"></span>
+          <span style="font-weight: 600; color: #334155;">{{ f.faixa }}</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <strong style="color: #0f172a;">{{ f.qtd }} carros</strong>
+          <span style="color: #64748b; font-size: 10.5px;">({{ f.perc }}%)</span>
+        </div>
       </div>
-      <div style="height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
-        <div style="height: 100%; width: {{ l.pontualidade }}%; background: {% if l.pontualidade >= 98 %}#10b981{% elif l.pontualidade >= 95 %}#0284c7{% else %}#f59e0b{% endif %}; border-radius: 3px;"></div>
-      </div>
+      {% endfor %}
     </div>
   </div>
-  {% endfor %}
+
 </div>
 
-<!-- PAINEL DE OCORRÊNCIAS & STATUS DE FROTA -->
-<div class="operations-grid">
-  <!-- STATUS DOS BOXES E OFICINA -->
-  <div class="panel">
-    <div class="panel-heading">
-      <div>
-        <h2>Status de Disponibilidade da Frota (150 Veículos)</h2>
-        <p>Distribuição de veículos em tráfego, reservas de guarnição e manutenção.</p>
-      </div>
-    </div>
-    <div style="padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
-      <div style="border: 1px solid #d1fae5; background: #ecfdf5; border-radius: 10px; padding: 14px;">
-        <span style="font-size: 11.5px; font-weight: 700; color: #047857; text-transform: uppercase;">Em Linha / Tráfego</span>
-        <strong style="font-size: 26px; color: #065f46; display: block; margin-top: 6px;">142 Ônibus</strong>
-        <span style="font-size: 11px; color: #047857;">Operação normal</span>
-      </div>
-      <div style="border: 1px solid #e0e7ff; background: #eef2ff; border-radius: 10px; padding: 14px;">
-        <span style="font-size: 11.5px; font-weight: 700; color: #3730a3; text-transform: uppercase;">Reserva Pronta</span>
-        <strong style="font-size: 26px; color: #312e81; display: block; margin-top: 6px;">6 Ônibus</strong>
-        <span style="font-size: 11px; color: #3730a3;">Guarita Central</span>
-      </div>
-      <div style="border: 1px solid #fee2e2; background: #fef2f2; border-radius: 10px; padding: 14px;">
-        <span style="font-size: 11.5px; font-weight: 700; color: #991b1b; text-transform: uppercase;">Oficina / Baixados</span>
-        <strong style="font-size: 26px; color: #7f1d1d; display: block; margin-top: 6px;">2 Ônibus</strong>
-        <span style="font-size: 11px; color: #991b1b;">OS Preventiva</span>
-      </div>
-    </div>
+<!-- ========================================================= -->
+<!-- 3. PLANO DE MANUTENÇÃO PREVENTIVA (PMP) & PRÓXIMAS REVISÕES -->
+<!-- ========================================================= -->
+<div class="section-heading" style="margin-top: 8px; margin-bottom: 12px;">
+  <div>
+    <h2 style="font-size: 17px; margin-bottom: 2px;"><i class="fa-solid fa-clipboard-list" style="color: #10b981;"></i> Plano de Manutenção Preventiva (PMP) & Ciclo de Vala</h2>
+    <span style="font-size: 12px; color: #64748b;">
+      Controle preditivo por hodômetro a cada 10.000 km, 20.000 km e 40.000 km para prevenir quebras na linha e garantir disponibilidade máxima.
+    </span>
   </div>
 
-  <!-- FEED DE TELEMETRIA AO VIVO -->
-  <div class="panel">
-    <div class="panel-heading">
-      <h2>Ocorrências da Central</h2>
-      <i class="fa-solid fa-tower-broadcast" style="color: var(--primary);"></i>
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <div style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 5px 10px; border-radius: 6px; font-size: 11.5px;">
+      <span style="color: #047857; font-weight: 700;">Em Dia:</span> <strong>{{ pmp.em_dia }} ({{ pmp.em_dia_perc }}%)</strong>
     </div>
-    <div class="activity-list">
-      <div class="activity-item">
-        <span class="event-icon success"><i class="fa-solid fa-check"></i></span>
-        <div>
-          <strong>Linha 801 - Regularizada</strong>
-          <span>Intervalo mantido em 4 minutos</span>
-        </div>
-      </div>
-      <div class="activity-item">
-        <span class="event-icon warning"><i class="fa-solid fa-triangle-exclamation"></i></span>
-        <div>
-          <strong>Linha 703 - Tráfego Intenso</strong>
-          <span>Reserva 5045 acionado para reforço</span>
-        </div>
-      </div>
-      <div class="activity-item">
-        <span class="event-icon info"><i class="fa-solid fa-gas-pump"></i></span>
-        <div>
-          <strong>Comboio de Abastecimento</strong>
-          <span>Garagem Sul com fluxo normal de diesel</span>
-        </div>
-      </div>
-      <div class="activity-item">
-        <span class="event-icon success"><i class="fa-solid fa-shield-halved"></i></span>
-        <div>
-          <strong>Fiscalização SPTrans</strong>
-          <span>100% de conformidade de frota</span>
-        </div>
-      </div>
+    <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 5px 10px; border-radius: 6px; font-size: 11.5px;">
+      <span style="color: #b45309; font-weight: 700;">Atenção (&lt;1000km):</span> <strong>{{ pmp.atencao_proxima }}</strong>
+    </div>
+    <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 5px 10px; border-radius: 6px; font-size: 11.5px;">
+      <span style="color: #dc2626; font-weight: 700;">Vencidas / Retidos:</span> <strong>{{ pmp.vencida_bloqueada }}</strong>
     </div>
   </div>
 </div>
+
+<div class="tabela-pmp-wrapper">
+  <table class="tabela-pmp">
+    <thead>
+      <tr>
+        <th style="width: 10%;">Veículo</th>
+        <th style="width: 18%;">Chassi & Modelo</th>
+        <th style="width: 16%;">Linha Escalada</th>
+        <th style="width: 22%;">Plano de Revisão / Escopo</th>
+        <th style="width: 10%;">Km Atual</th>
+        <th style="width: 10%;">Km Restante</th>
+        <th style="width: 14%;">Janela / Box Designado</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in proximas_revisoes %}
+      <tr>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-bus" style="color: #0284c7;"></i>
+            <strong style="font-size: 13.5px; color: #0f172a;">Carro {{ r.carro }}</strong>
+          </div>
+          <span style="font-size: 10px; color: #64748b;">Ano: {{ r.ano }}</span>
+        </td>
+        <td>
+          <strong style="color: #334155; font-size: 11.5px;">{{ r.chassi }}</strong>
+        </td>
+        <td>
+          <span style="color: #475569; font-weight: 600; font-size: 11.5px;">{{ r.linha }}</span>
+        </td>
+        <td>
+          <div style="font-weight: 700; color: #0f172a; font-size: 11.5px;">{{ r.tipo_revisao }}</div>
+          <span style="font-size: 10.5px; color: #64748b;">Meta de hodômetro: {{ r.km_revisao }} km</span>
+        </td>
+        <td>
+          <strong style="color: #0f172a; font-size: 12px;">{{ r.km_atual }} km</strong>
+        </td>
+        <td>
+          {% if r.status == 'Vencida' %}
+          <span class="badge-status-vencida">
+            <i class="fa-solid fa-triangle-exclamation"></i> {{ r.km_restante }} km (Vencida)
+          </span>
+          {% elif r.status == 'Urgente' %}
+          <span class="badge-status-urgente">
+            <i class="fa-solid fa-clock"></i> Faltam {{ r.km_restante }} km
+          </span>
+          {% else %}
+          <span class="badge-status-planejada">
+            <i class="fa-solid fa-check"></i> Faltam {{ r.km_restante }} km
+          </span>
+          {% endif %}
+        </td>
+        <td>
+          <div style="font-weight: 700; color: #0f172a; font-size: 11.5px;">{{ r.previsao_parada }}</div>
+          <span style="font-size: 10.5px; color: #0369a1;"><i class="fa-solid fa-location-dot"></i> {{ r.box_designado }}</span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- ============================================================== -->
+<!-- 4. BOTTOM GRID: CORREDORES EM TEMPO REAL & TELEMETRIA CAN J1939 -->
+<!-- ============================================================== -->
+<div class="bottom-sections-grid">
+
+  <!-- CORREDORES & LINHAS DE TRANSPORTE -->
+  <div>
+    <div class="section-heading" style="margin-bottom: 12px;">
+      <div>
+        <h2 style="font-size: 16px; margin: 0;"><i class="fa-solid fa-route" style="color: #0284c7;"></i> Linhas & Corredores Monitorados</h2>
+        <span style="font-size: 11.5px; color: #64748b;">Headway (intervalo), velocidade operacional e pontualidade por itinerário</span>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+      {% for l in linhas %}
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+          <div>
+            <strong style="font-size: 14px; color: #0f172a; display: block;">{{ l.linha }}</strong>
+            <span style="font-size: 11px; color: #64748b;">{{ l.nome }}</span>
+          </div>
+          <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background: {% if l.pontualidade >= 98 %}#ecfdf5; color: #047857;{% elif l.pontualidade >= 95 %}#f0f9ff; color: #0369a1;{% else %}#fffbeb; color: #b45309;{% endif %}">
+            {{ l.pontualidade }}% Pontual
+          </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; background: #f8fafc; padding: 8px; border-radius: 6px; margin-bottom: 8px; text-align: center;">
+          <div>
+            <span style="font-size: 9.5px; color: #64748b; font-weight: 700; display: block;">FROTA</span>
+            <strong style="font-size: 12.5px; color: #0f172a;">{{ l.frota }} carros</strong>
+          </div>
+          <div>
+            <span style="font-size: 9.5px; color: #64748b; font-weight: 700; display: block;">INTERVALO</span>
+            <strong style="font-size: 12.5px; color: #0284c7;">{{ l.intervalo }}</strong>
+          </div>
+          <div>
+            <span style="font-size: 9.5px; color: #64748b; font-weight: 700; display: block;">VEL. COMERC.</span>
+            <strong style="font-size: 12.5px; color: #10b981;">{{ l.velocidade }}</strong>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 10.5px; color: #64748b;">
+          <span>Corredor: <strong>{{ l.corredor }}</strong></span>
+          <span>ICV: <strong style="color: #0f172a;">{{ l.icv }}%</strong></span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- PAINEL DE TELEMETRIA CAN J1939 & HEALTH SCORE DA FROTA -->
+  <div>
+    <div class="section-heading" style="margin-bottom: 12px;">
+      <div>
+        <h2 style="font-size: 16px; margin: 0;"><i class="fa-solid fa-microchip" style="color: #8b5cf6;"></i> Health Score da Frota & CAN Bus</h2>
+        <span style="font-size: 11.5px; color: #64748b;">Sensores críticos em tempo real (J1939)</span>
+      </div>
+    </div>
+
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+      
+      <!-- HEALTH SCORE GAUGE DISPLAY -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; margin-bottom: 12px;">
+        <div>
+          <span style="font-size: 10.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Índice Global de Saúde Mecânica</span>
+          <div style="font-size: 26px; font-weight: 900; color: #047857; margin-top: 2px;">{{ telemetria_can.score_medio }}%</div>
+          <span style="font-size: 10.5px; color: #10b981; font-weight: 600;"><i class="fa-solid fa-shield-halved"></i> Frota com Baixo Risco de Falha</span>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 11px; color: #047857; font-weight: 700;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> {{ telemetria_can.frota_saudavel }} Saudáveis</div>
+          <div style="font-size: 11px; color: #d97706; font-weight: 700;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> {{ telemetria_can.frota_alerta_amarelo }} Atenção</div>
+          <div style="font-size: 11px; color: #dc2626; font-weight: 700;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> {{ telemetria_can.frota_alerta_vermelho }} Intervenção</div>
+        </div>
+      </div>
+
+      <!-- ALERTAS PREDITIVOS ATIVOS -->
+      <div style="font-size: 11px; font-weight: 700; color: #334155; text-transform: uppercase; margin-bottom: 8px;">
+        <i class="fa-solid fa-bell" style="color: #f59e0b;"></i> Alertas Preditivos de Vala
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        {% for a in telemetria_can.alertas_ativos %}
+        <div style="padding: 10px; border-radius: 6px; border: 1px solid {% if a.gravidade == 'vermelho' %}#fecaca; background: #fef2f2;{% else %}#fde68a; background: #fffbeb;{% endif %}">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+            <strong style="font-size: 12px; color: {% if a.gravidade == 'vermelho' %}#991b1b;{% else %}#92400e;{% endif %}">
+              <i class="fa-solid fa-bus"></i> Carro {{ a.carro }}
+            </strong>
+            <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: {% if a.gravidade == 'vermelho' %}#ef4444; color: #fff;{% else %}#f59e0b; color: #fff;{% endif %}">
+              {{ a.gravidade }}
+            </span>
+          </div>
+          <div style="font-size: 11px; color: #334155;">{{ a.sensor }}</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 10.5px; margin-top: 4px;">
+            <strong style="color: #475569;">{{ a.valor }}</strong>
+            <span style="color: #0369a1; font-weight: 700;">{{ a.acao }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+  // 1. DADOS E CONFIGURAÇÃO DO GRÁFICO: DISPONIBILIDADE X INDISPONIBILIDADE POR DIA DA SEMANA
+  const ctxSemana = document.getElementById('chartDisponibilidadeSemana').getContext('2d');
+  
+  const diasLabels = {{ dados_semana | map(attribute='dia_abrev') | list | tojson }};
+  const dispData = {{ dados_semana | map(attribute='disp_perc') | list | tojson }};
+  const indispData = {{ dados_semana | map(attribute='indisp_perc') | list | tojson }};
+  const veiculosDisp = {{ dados_semana | map(attribute='operando') | list | tojson }};
+
+  new Chart(ctxSemana, {
+    type: 'bar',
+    data: {
+      labels: diasLabels,
+      datasets: [
+        {
+          label: 'Disponibilidade (%)',
+          data: dispData,
+          backgroundColor: '#0284c7',
+          borderRadius: 6,
+          barPercentage: 0.55,
+          order: 2
+        },
+        {
+          label: 'Indisponibilidade (%)',
+          data: indispData,
+          backgroundColor: '#ef4444',
+          borderRadius: 6,
+          barPercentage: 0.55,
+          order: 3
+        },
+        {
+          label: 'Meta Concessão (95%)',
+          data: [95, 95, 95, 95, 95, 95, 95],
+          type: 'line',
+          borderColor: '#10b981',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          pointRadius: 0,
+          fill: false,
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            boxWidth: 12,
+            font: { family: 'Inter', size: 11, weight: '600' }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const idx = context.dataIndex;
+              if (context.dataset.type === 'line') {
+                return 'Meta Contratual: 95%';
+              }
+              if (context.dataset.label.includes('Disponibilidade')) {
+                return `Disponibilidade: ${context.parsed.y}% (${veiculosDisp[idx]} ônibus)`;
+              }
+              return `Indisponibilidade: ${context.parsed.y}% (${150 - veiculosDisp[idx]} na oficina)`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          min: 0,
+          max: 100,
+          ticks: {
+            callback: function(value) { return value + '%'; },
+            font: { family: 'Inter', size: 10 }
+          },
+          grid: { color: '#f1f5f9' }
+        },
+        x: {
+          ticks: { font: { family: 'Inter', size: 11, weight: '600' } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  // 2. DADOS E CONFIGURAÇÃO DO GRÁFICO: IDADE DA FROTA & TECNOLOGIA
+  const ctxIdade = document.getElementById('chartIdadeFrota').getContext('2d');
+  
+  const faixasLabels = {{ idade_distribuicao | map(attribute='faixa') | list | tojson }};
+  const faixasQtd = {{ idade_distribuicao | map(attribute='qtd') | list | tojson }};
+  const faixasCores = {{ idade_distribuicao | map(attribute='cor') | list | tojson }};
+
+  new Chart(ctxIdade, {
+    type: 'doughnut',
+    data: {
+      labels: faixasLabels,
+      datasets: [{
+        data: faixasQtd,
+        backgroundColor: faixasCores,
+        borderWidth: 2,
+        borderColor: '#ffffff',
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const total = 150;
+              const val = context.parsed;
+              const perc = ((val / total) * 100).toFixed(1);
+              return `${context.label}: ${val} ônibus (${perc}%)`;
+            }
+          }
+        }
+      },
+      cutout: '68%'
+    }
+  });
+
+});
+</script>
 {% endblock %}
